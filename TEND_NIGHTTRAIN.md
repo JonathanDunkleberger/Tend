@@ -243,14 +243,34 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — the browser-free pure-code test levers are now EXHAUSTED (streak/grace/best +
-> consistency/milestone/coin-tier/synergy + quit-economy/relapse-evolution are all extracted &
-> regression-locked; `npm test` is 78 green). The reward/gameplay math no longer has an untested
-> corner. What genuinely remains is browser-verification-gated (Jonny's machine) OR out-of-safe-scope
-> (the §13/#16 Stripe price change needs new price IDs). A successor should either (a) do a fresh cold
-> read hunting for an ACTUAL latent bug to fix — not just add coverage — or (b) find a *server-component /
-> `file://`-verifiable* improvement (landing/OG/pricing-route copy). Do NOT keep extracting math for
-> coverage's sake; the high-value pure-code test work is done. See §14 for the sandbox limit.
+> NEXT SHIFT — shift 14 took the frontier's option (a): a fresh cold read that found + FIXED a real
+> latent bug (see #0af below). The browser-free pure-code test levers remain exhausted; do NOT extract
+> math for coverage's sake. Good next moves: keep cold-reading for ACTUAL bugs to fix (the API routes
+> have known non-atomic read-then-write races — see #0af "left for Jonny" — that need a Postgres RPC +
+> migration, deferred because they can't be DB-verified in this sandbox), or a `file://`-verifiable
+> landing/OG/pricing-copy improvement. See §14 for the sandbox limit.
+
+0af. ✅ **[SHIFT 14] Cold-read bug hunt — FIXED a deterministic coin-loss bug + a silent-purchase-
+   failure bug.** Two fan-out bug-hunter agents (API routes + monolith) plus a hand cold-read surfaced
+   real defects. **Fixed this shift (both fully reasoning-verifiable, no DB/browser needed):**
+   (1) **Milestone rewards were being silently truncated.** `/api/coins` clamps every delta to a max of
+   `+100`, but the 60-day milestone grants **+200** and the 90-day grants **+500** (and coin-tiers reuse
+   those values). So on a big milestone the client optimistically added the full 200/500 while the server
+   only credited 100 → on the next reload (coins hydrate from server) the user **lost 100–400 coins**,
+   right at the emotional-payoff moment. Root cause: the anti-abuse clamp was set below the largest
+   legitimate single grant. Fixed by raising the positive bound above the max legit grant and extracting
+   the clamp into a tiny pure `lib/economy.ts` (`clampCoinDelta` / `clampCoinTotal`) that the route
+   delegates to, **unit-tested** so the 200/500 milestones can never be truncated again.
+   (2) **Inventory purchase could hand out a free item.** `/api/inventory` POST discarded the result of
+   the coin-deduction UPDATE — if that write failed, execution still inserted the item and returned 201
+   `{coins: newCoins}`, so the user got the item, coins were never decremented, and the response reported
+   success. Fixed: capture the deduction error and abort (500) before inserting.
+   **Left for Jonny (can't DB-verify here, documented in §12 NEEDS EYES):** the coins + inventory
+   read-then-write paths are still not atomic (concurrent requests can lose an update) — the real fix is
+   a Postgres atomic-increment RPC + migration, deferred so we don't ship unrunnable SQL. Also low-sev:
+   `urge-entries` POST doesn't verify habit ownership; Stripe webhook can overwrite email with `""`;
+   `verify-subscription` fallback lists only 10 global sessions. Build GREEN, lint unchanged, `npm test`
+   grew by the economy suite.
 
 0ae. ✅ **[SHIFT 13] Locked the LAST untested reward/gameplay cluster — the quit-mode economy + the
    relapse-evolution math.** Shifts 11–12 regression-locked the streak/grace kernel + the
@@ -692,6 +712,28 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **Widget-style "today" hero** you could screenshot to a phone home screen.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
+
+- **⚠️ KNOWN BUGS DEFERRED (shift 14) — surfaced by the cold-read bug hunt; couldn't safely fix here.**
+  Two were FIXED this shift (see frontier #0af: milestone-coin truncation + the two farmable coin
+  paths). These four are DEFERRED because they need DB-level verification or a product call:
+  1. **Coins + inventory routes are not atomic (read-then-write lost-update race).** Two concurrent
+     `/api/coins` (or inventory purchase) requests can both read the same balance and clobber each
+     other → a lost increment or a lost spend. The real fix is a Postgres atomic-increment RPC
+     (`coins = coins + delta` in one statement) + a migration; deferred so we don't ship SQL that can't
+     be run/verified in this sandbox. Low real-world hit rate at current scale.
+  2. **`stageDrops` accumulates across relapses and is never reset** (`tend-app.tsx` ~1370;
+     `getStageForId` → `applyStageDrop`). After ~4 relapses the dragon is pinned at Egg (stage 0) even
+     with a long current clean run + big best-ever streak, contradicting the "gently drops ONE tier"
+     design. **Product call needed:** should a slip's penalty be permanent-cumulative (current) or a
+     single-tier nudge that recovers as the streak rebuilds? If the latter, cap/decay `stageDrops`.
+  3. **`urge-entries` POST doesn't verify habit ownership** — writes `{user_id: me, habit_id}` with
+     `habit_id` straight from the body; a user can create urge rows pointing at another user's habit_id
+     (stamped with the attacker's own user_id, so no cross-user *read*, just referentially-bad data).
+  4. **Low-sev:** Stripe `checkout.session.completed` upsert can overwrite a stored email with `""`
+     when `customer_details.email` is absent; `verify-subscription`'s no-customer-id fallback lists only
+     the 10 most-recent GLOBAL checkout sessions, so under real volume a paid user's session won't be
+     found and they stay on free tier (this route is the webhook-failure fallback → fails exactly when
+     needed). All need a running Stripe/Supabase to verify a fix → left for a keyed shift or Jonny.
 
 - **✅ PARTLY CLEARED (shift 9) — the landing page is now browser-verified; the interactive in-app
   flows need YOUR machine.** Shift 9 proved the night-train sandbox firewalls Chromium's network (§14),
