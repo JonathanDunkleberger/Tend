@@ -222,8 +222,11 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       "showcased with animation" clause is now BUILT** — `components/ceremony.tsx` plays a full-screen
       hatch (egg cracks → dragon emerges) + evolution ceremony on every stage-up, browser-verified
       light+dark via file:// (`scripts/shots/preview-{hatch,evolve}-fold.png`); plus a habit-colored
-      check-off ring burst on the daily tap. Left: the live-motion + real-phone eyeball (Jonny's, as
-      always — interaction/animation can't be file://-verified).)*
+      check-off ring burst on the daily tap. **run-2 shift 4: the habit-detail surface is now
+      `/preview`-mounted + file://-verified (evolution filmstrip Egg→Elder + hero + egg-warming + grace
+      shield) and a StreakFlame flourish now marks the streak on the build-habit detail hero.** Left: the
+      live-motion + real-phone eyeball (Jonny's, as always — interaction/animation can't be
+      file://-verified).)*
 - [x] A **deep analytics** screen that genuinely helps + a shareable **Wrapped**. *(shift 3: Insights
       page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
       synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
@@ -319,9 +322,15 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    pipeline can capture any surface/theme without tab-switching JS.)* *(run-shift-3: the **hatch +
    evolution ceremonies** are now mounted (`?view=hatch` / `?view=evolve`) — each renders the reveal
    money-shot for file:// (proof: `scripts/shots/preview-{hatch,evolve}-fold.png`, light+dark) and
-   replays the full sequence in a live browser via the Continue button.)* **Still to mount:** a **habit
-   detail** (dragon hero at each stage + egg-warming + grace shield). Detail needs a small extraction
-   from the monolith (the detail view is inline ~line 2320); scope it as its own step.
+   replays the full sequence in a live browser via the Continue button.)* *(run-shift-4: the **habit
+   detail** is now mounted (`?view=detail`) — browser-verified light+dark
+   (`scripts/shots/preview-detail-{full,fold}.png`). Rather than extract the monolith's ~200-line,
+   deeply-coupled inline detail view (too risky in one shift), built a FAITHFUL approximation whose
+   payoff is an **evolution filmstrip**: all 5 stages Egg→Elder shown at once (future stages greyed) so
+   the dragon-art growth — the #1 pillar — is visible in ONE file:// snapshot, tap any stage → big hero,
+   plus egg-warming toward next stage + the grace-shield card + a StreakFlame flourish. Default stage =
+   Drake so the SSR snapshot lands on a real dragon.)* **This queue item is DONE** — all core surfaces
+   (garden, detail, insights, hatch, evolve) are now `/preview`-mounted + file://-verified.
 
 2. **PREMIUM MOTION + MICRO-INTERACTION PASS** (the "cool as f***" mandate — the biggest gap vs §2).
    *(run-shift-3 SHIPPED the two biggest beats: `components/ceremony.tsx` — a shared full-screen
@@ -335,10 +344,16 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    IMPORTANT ART CONSTRAINT discovered: there is ONE dragon sprite per species — stages 1–4 SHARE it, only
    SIZE differs (`getDragonSprite` returns `dragon_NN.png` for all stages≥1). So evolution "growth" is
    conveyed by `heroSize(stage)` scaling, not new art. Don't expect distinct per-stage dragon art.)*
-   Still to build: a **soft chime** on check/hatch (sound-optional, off by default), a **streak-flame**
-   flourish, a **coin-counter roll**, and smooth **page/tab transitions**. Use CSS/Web-Animations, keep
-   60fps, gate ALL of it behind `useReducedMotion`. Compile- + composition-verify via `/preview`; flag the
-   live-motion eyeball for Jonny (interaction-triggered motion can't be file://-verified).
+   *(run-shift-4 SHIPPED the **streak-flame flourish** — `components/streak-flame.tsx`, a living CSS
+   flame that GROWS + HEATS with the streak (amber→orange→white-hot core, up to +30% taller past 30
+   days), reduced-motion-gated (static shape, no flicker), unlit grey ember at streak 0. Reusable/pure
+   over a `streak` number. Wired into the REAL app: the build-habit detail hero now shows a "N day
+   streak" flame pill (was name+stage only) + it anchors the /preview detail surface — both
+   composition-verified light+dark via file://.)* Still to build: a **soft chime** on check/hatch
+   (sound-optional, off by default), a **coin-counter roll**, and smooth **page/tab transitions**. Use
+   CSS/Web-Animations, keep 60fps, gate ALL of it behind `useReducedMotion`. Compile- + composition-verify
+   via `/preview`; flag the live-motion eyeball for Jonny (interaction-triggered motion can't be
+   file://-verified).
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
@@ -722,6 +737,29 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   future "show the dragon evolving through forms" idea must reckon with this (it's a size/effect story,
   not a new-silhouette story) unless more art is commissioned. Build/lint/test green (124), light+dark
   file:// proof committed.
+
+- *(run-2 shift 4)* **Mounted the habit-detail preview as a FAITHFUL APPROXIMATION, not a monolith
+  extraction — the same call GardenPreview made, and the right one.** The detail view is ~200 lines of
+  inline JSX in the 3200-line monolith, wired to editMode/editName/editColor, quit data + urges,
+  naming, paywall, re-pick-egg, and the grace/shield state. Extracting it cleanly in one unattended
+  shift is high-risk for near-zero added verification value (the risk is a subtle regression in the most
+  feature-dense screen). So `/preview?view=detail` re-implements the *presentational shell* over mock
+  props (hero + identity + stage caption + grace card), and adds the one thing the real detail lacks and
+  that best showcases the #1 pillar: an **evolution filmstrip** — all 5 stages rendered side-by-side
+  (future stages greyed) so the dragon's growth is legible in a single file:// snapshot, tap-to-preview
+  any stage as a big hero. The honest cost: the preview can drift from the real detail (it's a copy). To
+  bound that, the StreakFlame pill added to the real detail hero this shift is byte-identical to the
+  preview's, so at least that new element is verified-by-proxy, and the note here + the on-screen
+  "Preview approximation… rendered from the monolith" caption keep a reviewer from mistaking it for the
+  live view. If a future shift decomposes the monolith, replace the approximation with the real component.
+- *(run-2 shift 4)* **StreakFlame heat/size is a pure function of the streak, mixed in hex — no per-tier
+  config, no theme coupling.** The flame's colour ramps amber→orange (body) with a yellow→near-white
+  core and a hotter glow tint via a linear hex `mix()` keyed off `min(1, streak/30)`, and its height
+  scales up to +30% over the same ramp — so a 3-day flame and a 90-day flame read as visibly different
+  "heat" with zero lookup tables. Kept it theme-agnostic (its own colours are self-lit oranges that work
+  on any bg); only the surrounding pill uses theme tokens. Reduced-motion users get the exact same shape,
+  just frozen (no flicker keyframes) — the flame still communicates, nothing jitters. Unlit at streak 0
+  is a deliberate grey ember (not hidden) so the element's slot is stable as a streak starts/breaks.
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
