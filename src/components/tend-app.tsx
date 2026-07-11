@@ -36,6 +36,7 @@ import { MilestoneCelebration, CoinBadge, CoinRow, MILESTONE_COINS } from "@/com
 import type { CoinTier } from "@/components/milestone-coin";
 import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
+import { Ceremony } from "@/components/ceremony";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
@@ -177,6 +178,11 @@ export function TendApp({
 
   // ── Creature naming state ──
   const [namingHabit, setNamingHabit] = useState<{ id: string; name: string; stage: number; color: string; creatureType?: number | null } | null>(null);
+  // ── Hatch / evolution ceremony state (the full-screen dragon-art payoff) ──
+  const [ceremony, setCeremony] = useState<{
+    kind: "hatch" | "evolve"; id: string; name: string; stage: number; color: string;
+    creatureType?: number | null; creatureName?: string | null; thenName?: boolean;
+  } | null>(null);
   const prevStagesRef = useRef<Record<string, number>>({});
   // Habit ids already offered the naming ceremony this session — so a hatch that's
   // skipped isn't re-offered when the build total dips back below the stage-1
@@ -1105,27 +1111,49 @@ export function TendApp({
     syncCoins(5);
   }, [syncCoins]);
 
-  // ── Creature stage-change detection: trigger naming on hatch ──
+  // ── Creature stage-change detection: play the hatch / evolution ceremony ──
   useEffect(() => {
     if (!mounted) return;
     const currentStages: Record<string, number> = {};
     habits.forEach((h) => {
       currentStages[h.id] = getStageForId(h.id);
     });
-    // Compare with previous stages
+    // One ceremony at a time — the first upward transition we see this render.
+    // A downward move (a slip de-evolving the dragon) is deliberately silent.
     for (const h of habits) {
       const prev = prevStagesRef.current[h.id];
       const curr = currentStages[h.id];
-      // Trigger naming when creature hatches (0 → 1), has no name yet, and we
-      // haven't already offered the ceremony for this habit this session.
-      if (prev !== undefined && prev === 0 && curr >= 1 && !h.creature_name && !namingOfferedRef.current.has(h.id)) {
-        namingOfferedRef.current.add(h.id);
-        setNamingHabit({ id: h.id, name: h.name, stage: curr, color: h.color, creatureType: h.creature_type });
-        break; // only one naming at a time
+      if (prev === undefined || curr <= prev) continue;
+      if (prev === 0) {
+        // HATCH (0 → 1+): spectacle first, then the naming bond if still unnamed.
+        const needName = !h.creature_name && !namingOfferedRef.current.has(h.id);
+        if (needName) namingOfferedRef.current.add(h.id);
+        setCeremony({
+          kind: "hatch", id: h.id, name: h.name, stage: curr, color: h.color,
+          creatureType: h.creature_type, creatureName: h.creature_name, thenName: needName,
+        });
+      } else {
+        // EVOLUTION (stage up): the dragon grows into its next form.
+        setCeremony({
+          kind: "evolve", id: h.id, name: h.name, stage: curr, color: h.color,
+          creatureType: h.creature_type, creatureName: h.creature_name,
+        });
       }
+      haptic("success");
+      break;
     }
     prevStagesRef.current = currentStages;
   }, [mounted, habits, getStageForId]);
+
+  // Dismissing the ceremony chains into the naming bond for a fresh hatch.
+  const dismissCeremony = useCallback(() => {
+    setCeremony((c) => {
+      if (c?.thenName) {
+        setNamingHabit({ id: c.id, name: c.name, stage: c.stage, color: c.color, creatureType: c.creatureType });
+      }
+      return null;
+    });
+  }, []);
 
   // ── Share card launcher ──
   const openShareCard = useCallback((h: HabitWithStats) => {
@@ -1466,6 +1494,20 @@ export function TendApp({
           onComplete={() => { setBreathingHabit(null); setShowBreathe(false); setCoinToast({ msg: breathingHabit ? "Urge surfed!" : "Centered. +2 coins.", icon: Wind }); const amt = breathingHabit ? 0 : 2; if (amt > 0) { setCoins((p) => p + amt); syncCoins(amt); } }}
           onClose={() => { setBreathingHabit(null); setShowBreathe(false); }}
           th={th}
+        />
+      )}
+
+      {/* Hatch / evolution ceremony — the dragon-art payoff, shown before naming */}
+      {ceremony && (
+        <Ceremony
+          kind={ceremony.kind}
+          stage={ceremony.stage}
+          color={ceremony.color}
+          creatureType={ceremony.creatureType}
+          habitId={ceremony.id}
+          habitName={ceremony.name}
+          creatureName={ceremony.creatureName}
+          onDone={dismissCeremony}
         />
       )}
 

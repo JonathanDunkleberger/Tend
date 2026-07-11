@@ -121,7 +121,7 @@ export function CreatureNamingModal({
         marginBottom: 4,
         animation: entered ? "fadeUp 0.5s ease 0.2s both" : "none",
       }}>
-        Your {STAGE_NAMES[stage] || "dragon"} hatched! 🐉
+        Meet your {STAGE_NAMES[stage] || "dragon"} 🐉
       </div>
 
       <div style={{
