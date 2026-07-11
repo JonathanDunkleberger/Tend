@@ -36,7 +36,7 @@ function getCreatureMood(isHappy: boolean, streak: number): CreatureMood {
 
 export function TerrariumScene({
   habits, getStage, isHappy, getStreak, pct, bouncingId,
-  season = "summer", darkMode = false, ownedItems = [],
+  season = "summer", ownedItems = [],
   onCreatureTap,
 }: TerrariumSceneProps) {
   const allDone = pct >= 1 && habits.length > 0;
@@ -65,7 +65,6 @@ export function TerrariumScene({
   //   6-9: wide arc (±100°)
   //  10-12: full upper hemisphere (±120°)
   // Only first 12 habits appear on planet. Beyond that, they're in the list only.
-  const N = habits.length;
   const maxOnPlanet = 12;
   const planetHabits = habits.slice(0, maxOnPlanet);
   const Np = planetHabits.length;

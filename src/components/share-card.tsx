@@ -2,7 +2,7 @@
 
 import { useRef, useCallback, useState } from "react";
 import { Creature } from "@/components/creature";
-import { Share2, Download, X } from "lucide-react";
+import { Share2, X } from "lucide-react";
 import { STAGE_LABELS } from "@/lib/constants";
 
 interface ShareCardProps {

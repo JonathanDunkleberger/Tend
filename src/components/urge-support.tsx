@@ -32,9 +32,8 @@ interface UrgeSupportProps {
 type Screen = "menu" | "breathe" | "write" | "redirect" | "reward";
 
 /* ═══════════ Main component ═══════════ */
-export function UrgeSupport({ habit, urgesToday, onComplete, onClose, th }: UrgeSupportProps) {
+export function UrgeSupport({ habit, urgesToday, onComplete, onClose }: UrgeSupportProps) {
   const [screen, setScreen] = useState<Screen>("menu");
-  const [method, setMethod] = useState<"breathe" | "write" | "redirect">("breathe");
 
   /* ── Breathe state ── */
   const [bPhase, setBPhase] = useState<"ready" | "inhale" | "hold" | "exhale" | "done">("ready");
@@ -73,7 +72,6 @@ export function UrgeSupport({ habit, urgesToday, onComplete, onClose, th }: Urge
 
   const finishMethod = useCallback((m: "breathe" | "write" | "redirect") => {
     setCompletedMethod(m);
-    setMethod(m);
     setScreen("reward");
   }, []);
 

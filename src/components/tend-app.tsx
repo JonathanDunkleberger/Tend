@@ -32,7 +32,7 @@ import { WellnessHub } from "@/components/wellness-hub";
 import { YouScreen } from "@/components/you-screen";
 import { MultiHabitHeatmap } from "@/components/multi-habit-heatmap";
 import { TendWrapped } from "@/components/tend-wrapped";
-import { MilestoneCoin, MilestoneCelebration, CoinBadge, CoinRow, MILESTONE_COINS } from "@/components/milestone-coin";
+import { MilestoneCelebration, CoinBadge, CoinRow, MILESTONE_COINS } from "@/components/milestone-coin";
 import type { CoinTier } from "@/components/milestone-coin";
 import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
@@ -42,7 +42,7 @@ import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, 
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
-  SEASONS, getSeason, THEME, BOUNCE_BACK,
+  getSeason, THEME, BOUNCE_BACK,
   QUIT_PRESETS, SHOP_ITEMS,
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
@@ -192,11 +192,9 @@ export function TendApp({
 
   // ── All-done celebration state ──
   const [showAurora, setShowAurora] = useState(false);
-  const [celebrationActive, setCelebrationActive] = useState(false);
   const [celebrationBanner, setCelebrationBanner] = useState(false);
   const [celebrationBannerFading, setCelebrationBannerFading] = useState(false);
   const [shootingStar, setShootingStar] = useState(false);
-  const [creatureBounce, setCreatureBounce] = useState(false);
   const prevAllDoneRef = useRef(false);
 
   // ── Coin sync helper — uses delta-based API to prevent race conditions ──
@@ -516,7 +514,6 @@ export function TendApp({
 
   const isComplete = useCallback(
     (hId: string, date: string) => !!completions[`${hId}:${date}`],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [completions]
   );
 
@@ -641,7 +638,6 @@ export function TendApp({
   );
 
   const buildHabits = habits.filter((h) => h.category !== "quit");
-  const quitHabits = habits.filter((h) => h.category === "quit");
   const activeHabits = habits.filter((h) => !pausedHabits[h.id]);
   const totalToday = activeHabits.filter((h) => isHappy(h.id)).length;
   const todayPct = activeHabits.length ? totalToday / activeHabits.length : 0;
@@ -663,8 +659,6 @@ export function TendApp({
       haptic("success");
       setConfetti(true);
       setTimeout(() => setConfetti(false), 3000);
-      // Creature bounce at 300ms
-      setTimeout(() => { setCreatureBounce(true); setTimeout(() => setCreatureBounce(false), 500); }, 300);
       // Shooting star at 500ms
       setTimeout(() => { setShootingStar(true); setTimeout(() => setShootingStar(false), 900); }, 500);
       // Banner at 800ms
@@ -1022,7 +1016,6 @@ export function TendApp({
       }
     }
     prevStagesRef.current = currentStages;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, habits, getStageForId]);
 
   // ── Share card launcher ──

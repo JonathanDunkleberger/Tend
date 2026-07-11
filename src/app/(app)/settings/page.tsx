@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
 import Link from "next/link";
-import { Crown, ExternalLink, ChevronLeft } from "lucide-react";
+import { Crown, ChevronLeft } from "lucide-react";
 import { SettingsClient } from "./settings-client";
 
 export default async function SettingsPage() {

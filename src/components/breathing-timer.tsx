@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Wind } from "lucide-react";
 import { Creature } from "@/components/creature";
 import type { ThemeColors } from "@/lib/constants";
 

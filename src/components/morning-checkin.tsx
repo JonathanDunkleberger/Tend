@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { Sunrise, ArrowRight, ChevronUp, Sparkles, DollarSign } from "lucide-react";
 import { Creature } from "@/components/creature";
 import { HEAL, getHealKey } from "@/lib/constants";
-import { fmtDuration, fmtMoney } from "@/lib/utils";
+import { fmtMoney } from "@/lib/utils";
 import type { HabitWithStats, QuitData } from "@/types";
 import type { ThemeColors } from "@/lib/constants";
 
@@ -58,7 +58,7 @@ const MORNING_MESSAGES = [
 
 export function MorningCheckin({
   habits, quitDataMap, getCleanDays, getStreak,
-  isComplete, todayStr, yesterdayStr, onDismiss, th,
+  isComplete, todayStr, yesterdayStr, onDismiss,
 }: MorningCheckinProps) {
   const [dismissing, setDismissing] = useState(false);
   const touchStartY = useRef(0);

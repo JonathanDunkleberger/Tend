@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { X, Crown, Lock, Sparkles } from "lucide-react";
 import {
-  DRAGON_SPECIES, DRAGON_COUNT, ELEMENT_COLORS, RARITY_COLORS,
+  DRAGON_SPECIES, ELEMENT_COLORS, RARITY_COLORS,
   getDragonSprite, getDragonSpecies,
 } from "@/lib/sprites";
-import type { DragonElement, DragonRarity } from "@/lib/sprites";
+import type { DragonElement } from "@/lib/sprites";
 import type { ThemeColors } from "@/lib/constants";
 
 interface EggPickerProps {
@@ -42,7 +42,7 @@ const FREE_EGG_COUNT = 6;
 /** Which species ids are free (first N common ones spread across elements) */
 const FREE_SPECIES_IDS = [1, 6, 11, 17, 23, 29]; // one common from each major element
 
-export function EggPicker({ selected, isPro, th, onPick, onSelect, onClose, onProTap }: EggPickerProps) {
+export function EggPicker({ selected, isPro, onPick, onSelect, onClose, onProTap }: EggPickerProps) {
   const [filter, setFilter] = useState<DragonElement | "all">("all");
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   // Internal selection state so grid taps don't immediately confirm

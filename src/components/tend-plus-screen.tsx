@@ -267,7 +267,6 @@ export function TendPlusMiniPrompt({
 
 /** 7-day milestone celebration with gentle Tend+ nudge */
 export function SevenDayCelebration({
-  habitName,
   moneySaved,
   urgeCount,
   onTryTendPlus,

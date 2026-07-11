@@ -110,7 +110,6 @@ export function fmtQuitDate(isoStr: string): string {
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffHrs = diffMs / (1000 * 60 * 60);
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
   const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
