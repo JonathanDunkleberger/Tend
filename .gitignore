@@ -47,3 +47,9 @@ DEBUG_DUMP.txt
 FULL_CODE_REVIEW_DUMP.txt
 generate_review_dump.sh
 next-env.d.ts
+
+# shift-9 QA harness generated output (keep only committed *-fold.png proof shots)
+/scripts/rendered/
+/scripts/shots/*
+!/scripts/shots/landing-fold.png
+!/scripts/shots/preview-fold.png

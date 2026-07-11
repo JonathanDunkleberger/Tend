@@ -191,7 +191,12 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - [x] `npm run build` + `npm run lint` pass clean on the `night-train` branch. *(green every shift;
       re-verified shift 6 — build ✅, lint 0 errors / **5 warnings** (down from 27, all intentional).)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
-      new `app/page.tsx`, on-brand, verified 200. Not yet browser-eyeballed but content/sprites serve.)*
+      new `app/page.tsx`, on-brand, verified 200. **shift 9: BROWSER-VERIFIED** — rendered the real
+      page in headless Chromium at a 390px phone viewport and eyeballed it end-to-end (Fraunces serif
+      hero + green-gradient headline, dragon+eggs hero art, "assumes the best" pill, readable subtitle
+      [shift-7 contrast holds], daily-loop steps, feature bento, dark collection strip, never-shaming
+      quote, $0/$4.99 pricing, sticky mobile CTA). CSS/fonts/sprites all resolved, **zero failed
+      requests**. Proof: `scripts/shots/landing-fold.png`. See §14 for how [file:// pipeline].)*
 - [x] A delightful **onboarding** that hatches the first egg in under a minute. *(shift 1: rebuilt
       grow-first twilight-garden flow. NOT yet browser-verified — auth-gated.)*
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
@@ -226,7 +231,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-0. ✅ **[SHIFT 8] Public `/preview` showcase route — the browser-verification blocker now has a path.**
+0. ✅ **[SHIFT 9] Actually BROWSER-VERIFIED the app via a headless-Chromium `file://` pipeline —
+   and pinned down the hard limit of what can be verified in this sandbox.** The prize this shift:
+   **the real landing page has now been rendered in a browser and eyeballed** (see DoD "landing" ✅
+   above + `scripts/shots/landing-fold.png`) — a DoD gate open since shift 1. **HARD FINDING (see §14 +
+   §10): Chromium in this sandbox has ZERO HTTP egress** — loopback *and* external navigations fail
+   (`ERR_NAME_NOT_RESOLVED`), though Bash/PowerShell can `curl`/`Invoke-WebRequest` the local server
+   fine. So `next start` + Playwright-screenshot-the-live-site **is impossible here**; only `data:` /
+   `file://` render. Workaround built (`scripts/`): fetch a route's SSR HTML via host `Invoke-WebRequest`,
+   inline CSS + rewrite `/_next`+`/sprites` to `file://`, strip JS, screenshot offline. **Server
+   components (the landing) reproduce FAITHFULLY** → landing signed off. **Client components render
+   only pre-hydration markup** → verified `/preview`'s default **dragon gallery** (all 36 species, real
+   sprites, `Creature` hero — the #1 pillar — `scripts/shots/preview-fold.png`), but tab-switching /
+   animations / the other showcases need hydration JS → still need a networked browser (Jonny's machine).
+   Also **verified all 72 dragon/egg sprite files exist** on disk (0 missing). Committed a reusable
+   harness: `scripts/build-static-html.ps1` + `scripts/render-shot.mjs` + `scripts/README.md`.
+
+0b. ✅ **[SHIFT 8] Public `/preview` showcase route — the browser-verification blocker now has a path.**
    DONE (commit `60923d9`). A **public, auth-free `/preview` page** mounts the real feature components
    with mock props + THEME so Jonny (or any successor, no Clerk keys needed) can eyeball the whole UI in
    a browser at `/preview` and finally sign off the 3 remaining DoD items. Showcases (a top tab switcher
@@ -466,6 +487,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   `/preview` to its public matcher), **deleted `src/middleware.ts`**. **Corollary for NEEDS EYES:**
   production auth was NEVER broken for lack of middleware — the root middleware shipped in commit 1 and
   is almost certainly what `origin/main`/Vercel runs. The shift-1 alarm can be stood down.
+- *(shift 9)* **Browser verification is possible here ONLY via `file://` for server-rendered
+  surfaces; the live interactive app cannot be auto-screenshotted in this sandbox.** Established
+  empirically (§14): headless Chromium has no HTTP egress in the night-train environment — every
+  `http(s)://` navigation fails (`ERR_NAME_NOT_RESOLVED`), including `127.0.0.1`, even though the shell
+  tools reach the local server fine; only `data:`/`file://` render. So the shift-8 plan ("open `/preview`
+  in a browser to sign off") can't be executed *inside a shift* — but a successor need not keep trying:
+  the correct move is (a) verify server-component surfaces (the landing) via the committed `file://`
+  pipeline, done this shift, and (b) leave the interactive in-app eyeball to Jonny on a networked machine.
+  Rationale for keeping the harness anyway: it's the honest, reproducible way to verify what CAN be
+  verified offline, and it runs the *simple* way (point Playwright at the live URL) on any normal machine.
 - *(shift 8)* **`/preview` is a QA harness, not a product surface.** Built it as a single client page
   that switches between showcases with mock props rather than threading real app state, so it stays
   decoupled from the monolith and can't leak data. It's public (in the middleware matcher) purely so it
@@ -491,6 +522,15 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
 
+- **✅ PARTLY CLEARED (shift 9) — the landing page is now browser-verified; the interactive in-app
+  flows need YOUR machine.** Shift 9 proved the night-train sandbox firewalls Chromium's network (§14),
+  so the auto-screenshot-the-live-app path is dead *here* — no future shift can eyeball the hydrated app
+  in this env. What shift 9 DID verify offline via `file://`: the **real landing page** (full mobile
+  render, looks great — `scripts/shots/landing-fold.png`) and the **dragon gallery** (36 species). What
+  still wants your eyes on a normal machine: the hydrated `/preview` tabs (onboarding, wellness, Wrapped,
+  You, nav) and the auth-gated real app (streaks/coins, grace badge, one-tap, egg-warming, gratitude
+  card). Easiest path on your box: `npm run build && npx next start`, open `localhost:3000/preview`,
+  tap each tab at a phone width. (Or just merge and click around the live site.)
 - **Run `migration-008-gratitude-entries.sql` in Supabase (shift 6).** Adds the `gratitude_entries`
   JSONB column to `user_preferences` so the Wellness "three good things" ritual persists server-side +
   shows in Insights. Until it's run, gratitude falls back to localStorage gracefully (no crash), but
@@ -582,3 +622,37 @@ trial period on the annual price, plus a `lifetime` entitlement branch alongside
 Parked as an optional follow-up in the frontier; **not required** for the DoD, which asks for the model
 to be *modeled + documented*, done here. Sources captured in shift-4 research (RevenueCat/Business of
 Apps benchmarks; Vercel/Clerk/Supabase/Stripe pricing pages).
+
+---
+
+## 14. BROWSER-VERIFICATION HARNESS (shift 9 — how to actually *see* the UI)
+
+> Purpose: the DoD's last items were gated on eyeballing the UI in a browser. Shift 9 made that
+> possible for what's verifiable in this sandbox, and documented the hard limit for the rest.
+
+### 14a. The hard constraint (verified empirically)
+Headless **Chromium in the night-train sandbox has no HTTP egress.** Every `http(s)://` navigation
+fails (`ERR_NAME_NOT_RESOLVED`), including `http://127.0.0.1:3200`, even though Bash `curl` and
+PowerShell `Invoke-WebRequest` reach the local `next start` server fine. `data:` and `file://` URLs
+render normally (confirmed by rasterizing a dragon sprite). There is **no system proxy** (checked the
+registry); the block is at the browser's network layer. **Conclusion: `next start` + Playwright
+screenshot-the-live-site cannot work here.** Don't burn a future shift re-attempting it in this env.
+
+### 14b. What that means for verification
+- **Server components render faithfully offline** → the **landing** (`app/page.tsx`, zero client JS)
+  was fully reproduced and eyeballed at a 390px phone viewport. Signed off (§8).
+- **Client components render only their pre-hydration markup** → `/preview`'s default **dragon gallery**
+  verified (36 species, real sprites, `Creature` hero); tab-switching / animations / the other
+  showcases (onboarding, wellness, Wrapped, You, nav) need hydration JS → need a **networked browser**
+  (Jonny's machine, or any normal box: just point Playwright at `localhost:3200/preview` — the easy way).
+
+### 14c. The pipeline (committed under `scripts/`)
+1. `npm run build` then, **in the host PowerShell** (not the Bash sandbox — the server must be on the
+   host loopback), `npx next start -p 3200`.
+2. `pwsh scripts/build-static-html.ps1` → fetches each route's SSR HTML via `Invoke-WebRequest`, inlines
+   the CSS, rewrites `/_next`+`/sprites` to `file://`, strips JS → `scripts/rendered/<name>.html`.
+3. `node scripts/render-shot.mjs` → screenshots those files in headless Chromium at 390px →
+   `scripts/shots/<name>-{fold,full}.png`, reporting console errors + failed requests.
+Proof shots committed: `scripts/shots/landing-fold.png`, `scripts/shots/preview-fold.png` (rest is
+gitignored). `scripts/README.md` has the full write-up. Requires a one-time `npx playwright install
+chromium` (browser binary lives in the user cache, not the repo).
