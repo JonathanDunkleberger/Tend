@@ -12,9 +12,18 @@
 #         then: node scripts/render-shot.mjs            # screenshots -> scripts/shots/
 # Prereq: a `next build` then `next start -p 3200` running in the HOST context (not the
 #         Bash sandbox — the server must share the host loopback the fetch below uses).
+# Routes may be a plain path ("pricing") or a "name|path" pair when the path has
+# query params or you want a custom output filename (e.g. "preview-insights|preview?view=insights").
 param(
   [string]$BaseUrl = "http://127.0.0.1:3200",
-  [string[]]$Routes = @("", "pricing", "preview")
+  [string[]]$Routes = @(
+    "",
+    "pricing",
+    "preview-garden|preview?view=garden",
+    "preview-insights|preview?view=insights",
+    "preview-insights-dark|preview?view=insights&dark=1",
+    "preview-garden-dark|preview?view=garden&dark=1"
+  )
 )
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path "$PSScriptRoot\..").Path
@@ -29,9 +38,10 @@ $css = ""
 if ($cssRef) { $css = (Invoke-WebRequest -Uri "$BaseUrl$cssRef" -UseBasicParsing -TimeoutSec 15).Content -replace '/_next/', "$root/.next/" }
 
 foreach ($route in $Routes) {
-  $name = if ($route -eq "") { "landing" } else { $route }
+  if ($route -match '\|') { $name, $path = $route -split '\|', 2 }
+  else { $path = $route; $name = if ($route -eq "") { "landing" } else { $route } }
   try {
-    $html = (Invoke-WebRequest -Uri "$BaseUrl/$route" -UseBasicParsing -TimeoutSec 15).Content
+    $html = (Invoke-WebRequest -Uri "$BaseUrl/$path" -UseBasicParsing -TimeoutSec 15).Content
   } catch { Write-Host "$name : SKIP ($($_.Exception.Message))"; continue }
   $html = [regex]::Replace($html, '<script[\s\S]*?</script>', '', 'IgnoreCase')
   $html = [regex]::Replace($html, '<link[^>]*stylesheet[^>]*>', '', 'IgnoreCase')

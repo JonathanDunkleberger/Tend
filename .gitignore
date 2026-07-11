@@ -56,4 +56,8 @@ next-env.d.ts
 !/scripts/shots/faq-open.png
 !/scripts/shots/og-card.png
 !/scripts/shots/evo-journey.png
+!/scripts/shots/preview-garden-full.png
+!/scripts/shots/preview-insights-full.png
+!/scripts/shots/preview-insights-dark-fold.png
 /scripts/srv.log
+/scripts/nextstart*
