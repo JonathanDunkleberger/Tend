@@ -30,8 +30,17 @@ describe("computeCleanDays", () => {
   });
 
   it("handles an ISO timestamp quit date (relapse stores exact time)", () => {
-    // Quit at 6:04pm on the 1st, 'today' is the 11th → ~9 full days elapsed.
+    // Quit at 6:04pm on the 1st, 'today' is the 11th → ~9-10 full days elapsed.
     expect(computeCleanDays("2026-07-01T18:04:00.000Z", "2026-07-11")).toBeGreaterThanOrEqual(9);
+  });
+
+  it("counts an EVENING ISO quit by its local calendar date, not the exact instant", () => {
+    // Regression: an evening quitter used to lag a full day because the raw quit
+    // instant was compared against today-at-noon. Anchoring to the quit's local
+    // date, quitting the night of the 10th reads 1 clean day on the 11th (not 0).
+    const late = "2026-07-10T21:30:00"; // 9:30pm local on the 10th
+    expect(computeCleanDays(late, "2026-07-11")).toBe(1);
+    expect(computeCleanDays(late, "2026-07-10")).toBe(0); // same calendar day → 0
   });
 });
 

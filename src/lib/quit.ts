@@ -9,10 +9,28 @@
 
 import { daysBetween, getStage } from "./utils";
 
-/** Whole clean days for a quit habit — days since the quit timestamp (0 if never started). */
+/**
+ * Normalize a quit date to its LOCAL calendar date (YYYY-MM-DD).
+ *
+ * A relapse stores the exact instant via `new Date().toISOString()` (UTC), but the
+ * whole app keys days by the LOCAL date (`today()`/`daysAgo()`). Counting clean days
+ * by comparing that raw UTC instant against today-at-noon under-counted anyone who
+ * quit in the evening — e.g. a 6pm quitter read 0 clean days for ~two calendar days.
+ * Anchoring both endpoints to the local calendar date (like the `isStarted` slice in
+ * tend-app already does) makes clean-days consistent for morning AND evening quitters
+ * and matches the rest of the app's date-keying. Date-only inputs are anchored to
+ * noon so a UTC parse can't roll them to the previous day in a negative-offset zone.
+ */
+function quitLocalDate(quitDate: string): string {
+  const d = quitDate.includes("T") ? new Date(quitDate) : new Date(quitDate + "T12:00:00");
+  if (isNaN(d.getTime())) return quitDate;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Whole clean days for a quit habit — local calendar days since the quit date (0 if never started). */
 export function computeCleanDays(quitDate: string | undefined, today: string): number {
   if (!quitDate) return 0;
-  return daysBetween(quitDate, today);
+  return daysBetween(quitLocalDate(quitDate), today);
 }
 
 /** Money saved for ONE quit habit, rounded to whole cents (the figure shown in celebrations/subtitles). */
@@ -29,7 +47,7 @@ export interface QuitSavingEntry {
 export function computeTotalSaved(entries: QuitSavingEntry[], today: string): number {
   return entries.reduce((sum, q) => {
     if (!q.quitDate) return sum;
-    return sum + (q.dailyCost || 0) * daysBetween(q.quitDate, today);
+    return sum + (q.dailyCost || 0) * daysBetween(quitLocalDate(q.quitDate), today);
   }, 0);
 }
 
@@ -68,7 +86,7 @@ export function computeQuitStage(
   today: string,
 ): number {
   if (!quitDate) return 0;
-  const cleanDays = daysBetween(quitDate, today);
+  const cleanDays = daysBetween(quitLocalDate(quitDate), today);
   const currentStage = getStage(cleanDays);
   const best = computeQuitBest(cleanDays, priorBest);
   const floor = applyStageDrop(getStage(best), 1);
