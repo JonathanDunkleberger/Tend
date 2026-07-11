@@ -338,31 +338,42 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 21.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
+> only on a real miss, else confirm green + stop) — held clean, no miss (9th consecutive clean shift).
+> (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
+> `npm test` **129/129**; branch is **165 commits** ahead of `main`. (b) Re-ran the git-tracked audit —
+> read all 14 `VIEW_KEYS` from `preview/page.tsx` (garden/today/insights/detail/hatch/evolve/gallery/
+> onboarding/wellness/wrapped/you/breathe/nav/loading) and matched each against `git ls-files
+> scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery=`preview-fold`,
+> garden=`preview-garden-full`, the rest by name, most light+dark). No untracked/gitignore gap. (c)
+> Applied "verify, don't assert" to FRESH evidence not spot-checked in recent shift notes (20 eyeballed
+> detail/onboarding/loading, 19 evolve/wellness/breathe, 18 today/you/nav, 17 insights/wrapped) —
+> independently eyeballed three not-recently-checked surfaces: `preview-fold` (the dragon-art gallery —
+> "The 36 dragons" Inferno Fang Elder legendary hero in a soft glow + the species grid with fire/water
+> elements + Common/Rare/Legendary rarity badges, the #1 pillar showcased in full), `preview-garden-full`
+> (the daily-tend home — the real starlit terrarium scene with 5 dragons perched on the green world + a
+> moon + starfield, "Today 3/4", green "All good today" one-tap, habit rows with 41d/12d/7d streaks +
+> evolution stages + habit-colored egg-warming bars + the "23d clean" quit habit + "evolves in 3d"), and
+> `preview-hatch-fold` (the hatch ceremony money-shot — a happy green hatchling in a warm orange radial
+> glow + Fraunces "Your dragon hatched!" + "A brand-new hatchling, born from your habit." + "+25 coins" +
+> Continue) — **all three render genuinely and gorgeously, not blank frames.** The review-evidence trail
+> is real AND complete across the gallery, garden-home, and hatch-ceremony surfaces too — every core AND
+> showcase surface has now been independently eyeballed across shifts 16–21. Nothing sandbox-buildable/
+> verifiable remains that isn't the churn the frontier forbids → confirmed green, closed clean. Did NOT
+> reopen a bug hunt, re-extract math, or re-beautify handsome surfaces. Mission's remaining value is
+> unchanged: Jonny's real-device eyeball + the merge. Successor: SAME discipline — audit
+> git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop. Do NOT write
+> NIGHT-TRAIN COMPLETE (§8's real-device gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 20.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
 > only on a real miss, else confirm green + stop) — held clean, no miss (8th consecutive clean shift).
 > (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
 > `npm test` **129/129**; branch is **164 commits** ahead of `main`. (b) Re-ran the git-tracked audit —
-> read all 14 `VIEW_KEYS` from `preview/{page,preview-client}.tsx` (garden/today/insights/detail/hatch/
-> evolve/gallery/onboarding/wellness/wrapped/you/breathe/nav/loading) and matched each against `git
-> ls-files scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery=`preview-fold`,
-> garden=`preview-garden-full`, the rest by name, most light+dark). No untracked/gitignore gap. (c)
-> Applied "verify, don't assert" to FRESH evidence not spot-checked in recent shift notes (19 eyeballed
-> evolve/wellness/breathe, 18 today/you/nav, 17 insights/wrapped) — independently eyeballed three
-> not-recently-checked surfaces: `preview-detail-fold` (Ember the green Drake in a soft glow + 41-day
-> streak flame + the full Egg→Hatchling→Whelp→Drake→Elder evolution filmstrip with day markers +
-> "20d to Elder Dragon" progress bar + the "2 grace days banked — one slip won't break your streak"
-> shield card — the #1 dragon-art pillar showcased), `preview-onboarding-fold` (dark twilight step-1 —
-> glowing golden egg + "tend." Fraunces wordmark + "each habit grows into a dragon you tend" lede +
-> green "Plant your first egg" CTA, the shift-11 pure-CSS entrance holding), and `preview-loading-fold`
-> (the garden skeleton mirroring the loaded shape — persistent "tend." wordmark + shimmer data-pills +
-> terrarium hero with a soft egg silhouette + habit rows + static BottomNav Garden-green) — **all three
-> render genuinely and gorgeously, not blank frames.** The review-evidence trail is real AND complete
-> across the detail, onboarding, and loading surfaces too. Nothing sandbox-buildable/verifiable remains
-> that isn't the churn the frontier forbids → confirmed green, closed clean. Did NOT reopen a bug hunt,
-> re-extract math, or re-beautify handsome surfaces. Mission's remaining value is unchanged: Jonny's
-> real-device eyeball + the merge. Successor: SAME discipline — audit git-tracked-vs-claimed FIRST, act
-> only on a real miss, else confirm green + stop. Do NOT write NIGHT-TRAIN COMPLETE (§8's real-device
-> gates are only Jonny's to close).
+> read all 14 `VIEW_KEYS` from `preview/{page,preview-client}.tsx` and matched each against `git
+> ls-files scripts/shots/`: every core surface has a git-tracked proof shot. No untracked/gitignore gap.
+> (c) Independently eyeballed `preview-detail-fold`, `preview-onboarding-fold`, `preview-loading-fold` —
+> all three render genuinely and gorgeously. Confirmed green, closed clean.
 >
 > --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 19.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
