@@ -214,7 +214,10 @@ export function Ceremony({
           />
         )}
 
-        {/* The creature — rocks before the break, springs in on reveal */}
+        {/* The creature — rocks before the break, springs in on reveal.
+            NOTE: the art system has ONE dragon sprite per species (stages 1–4
+            share it); size is the only per-stage lever, so we scale the hero by
+            stage — an evolution visibly GROWS even though the sprite is the same. */}
         <div
           style={{
             position: "relative",
@@ -230,7 +233,7 @@ export function Ceremony({
             stage={shownStage}
             color={color}
             happy={revealed}
-            size={168}
+            size={heroSize(shownStage)}
             creatureType={creatureType}
             habitId={habitId}
           />
@@ -372,6 +375,13 @@ export function Ceremony({
       `}</style>
     </div>
   );
+}
+
+/* Hero size scales with stage so an evolution reads as visible GROWTH (the art
+   system reuses one sprite per species across stages — size is the only lever).
+   Egg 132 → Elder 180. */
+function heroSize(stage: number): number {
+  return 128 + Math.max(0, Math.min(4, stage)) * 13;
 }
 
 /* Deterministic shard directions (no Math.random → SSR-stable snapshot). */
