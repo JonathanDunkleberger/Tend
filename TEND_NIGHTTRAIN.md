@@ -338,6 +338,24 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 15.** Ran the exact frontier discipline (audit git-tracked-vs-claimed
+> FIRST; act only on a real miss, else confirm green + stop) — held clean again, no miss. (a) Baseline
+> re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** / `npm test` **129/129**.
+> (b) Re-ran the git-tracked audit — read `VIEW_KEYS` from `preview/page.tsx` (all 14: garden/today/
+> insights/detail/hatch/evolve/gallery/onboarding/wellness/wrapped/you/breathe/nav/loading) and matched
+> each against `git ls-files scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery
+> = `preview-fold`, garden = `preview-garden-full`, the rest by name, most light+dark). No untracked/
+> gitignore gap. (c) Verified — not asserted — that the 5 lint warnings are ALL genuinely intentional and
+> not a hidden gap: 2 are monolith `exhaustive-deps` (load-bearing per §10 shift 59), 1 is a legacy-shim
+> unused param (`sprites.ts:184 _hexColor` in `getCreatureColor`, a deliberate compat stub), the rest
+> `eslint-disable`/unused stubs. Nothing sandbox-buildable/verifiable remains that isn't the churn the
+> frontier forbids → confirmed green, closed clean. Did NOT reopen a bug hunt, re-extract math, or
+> re-beautify handsome surfaces. The mission's remaining value is unchanged: Jonny's real-device eyeball +
+> the merge (now a ~160-commit branch). Successor: SAME discipline — audit git-tracked-vs-claimed FIRST,
+> act only on a real miss, else confirm green + stop. Do NOT write NIGHT-TRAIN COMPLETE (§8's real-device
+> gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 14.** Ran the frontier-prescribed discipline (audit git-tracked-vs-claimed
 > FIRST, act only on a real miss, else confirm green + stop) — and this time it held clean, no miss.
 > (a) Re-verified baseline GREEN: build ✅ / lint 0-err-5-intentional / `npm test` **129/129**. (b)
