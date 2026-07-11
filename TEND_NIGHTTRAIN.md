@@ -368,10 +368,16 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    clean-streak shield); a **best-day polar rose** (day-of-week bars → a nightingale-rose radial, single-
    hue sequential, best-day brightest + Best/Toughest callout). All pure SVG + HTML-overlay labels →
    SSR-stable. `smoothPath` + the SSR-safe SVG recipe (viewBox 0..100 + preserveAspectRatio="none" +
-   non-scaling stroke + HTML overlay markers) reused.)* **Still to beautify (lower value now):** the
-   **synergy constellation** (works but could be lovelier) and a **streak timeline** (needs per-day
-   streak history derived from isDone). Keep loading `dataviz` before chart code. Insights is now
-   genuinely handsome — consider this item ~80% done; a successor may prefer #1/#2 over the last polish.
+   non-scaling stroke + HTML overlay markers) reused.)* *(run-2 shift 6: the **streak timeline** is
+   DONE — a FREE "Streak journey" card (after Momentum) plots the flagship build habit's running streak
+   LENGTH day-by-day over 30 days via the new tested `computeStreakSeries` kernel (lib/progress.ts,
+   5 cases, 129 green). Flagship-colored area sparkline with a "best Nd" pill + a live end marker; shows
+   the climb-and-reset story that momentum's completion-% smooths away. Browser-verified light+dark via
+   file://; also pinned the preview mock's streak block to exactly `_streak` so the journey number
+   agrees with the scoreboard.)* **Still to beautify (lowest value now):** only the **synergy
+   constellation** (works but could be lovelier). Keep loading `dataviz` before chart code. Insights is
+   now genuinely handsome — consider this item ~90% done; a successor should prefer #2 (motion) over the
+   last synergy polish.
 
 4. **Promote the best parked ideas into real features** (§11), lightest-risk / highest-delight first.
    *(run-shift-2: **dragon species-by-habit-type** SHIPPED — `suggestElementForHabit` /
@@ -793,6 +799,26 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   to the habit name). Split into `TodayCardVisual` (pure, file://-verifiable) + `TodayCard` (overlay +
   Web Share) for the same reason the ceremony has a `previewPhase` — the pure piece is what the offline
   pipeline can screenshot.
+
+- *(run-2 shift 6)* **The streak timeline plots ONE flagship habit's streak LENGTH, not an aggregate —
+  and a clean upward line is the honest, motivating common case, not a bug.** Design calls worth
+  recording. (1) **Length, not rate.** Momentum already shows completion *rate* (0–100%, bounded, and it
+  smooths over a slip). The streak journey deliberately shows the raw streak *count* (unbounded, resets
+  hard to 0 on a slip) — a genuinely different analytic (§2's "streak histories") whose whole point is the
+  cliff-and-climb drama a rate chart hides. (2) **Single flagship, not a stacked aggregate** — the habit
+  on the longest current run — because a per-habit streak number is legible and personal ("your Morning
+  run is on a 41-day climb"), whereas summing streak lengths across habits produces a meaningless number.
+  (3) **A straight diagonal for a consistent flagship is CORRECT, not plain.** In the thriving preview
+  mock the flagship has never slipped inside the 30-day window, so the line is a clean ramp — that reads
+  as "look how far you've climbed," which is the motivating story for a star performer; the reset sawtooth
+  is a real-data feature that a slipping habit exercises, not something to fake in the mock. (4) **Pure +
+  tested, like every other reward/analytics kernel** — `computeStreakSeries(isDoneAgo, windowDays)` walks
+  an offset predicate (never Date/timezones), so it's unit-locked (5 cases) and the card is purely
+  presentational over trusted numbers, carrying zero correctness risk (the shift-2 "swap the mark, keep
+  the tested math" rule). Fixed a preview-fidelity nit in passing: `mockIsDone` let one hash-lucky day
+  extend the streak past `_streak`, so the journey read 42d while the scoreboard read 41d for the same
+  habit — pinned the mock's run to exactly `_streak` (real app: both derive from the same logs, so they
+  always agree; the mock had two independent sources).
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
