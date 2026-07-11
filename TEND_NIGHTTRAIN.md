@@ -338,6 +338,24 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 13.** Shift 13 did the frontier-prescribed audit (test the "exhausted"
+> claim, don't rubber-stamp) and it caught ONE real miss — not code, an EVIDENCE gap: shift 12's
+> view-keys-vs-shots audit said "every core surface is committed," but it compared against `ls`
+> (on-disk), not `git ls-files` (tracked). Cross-checking view-keys vs **git-tracked** shots showed
+> `preview-{detail,hatch,evolve}-*.png` — generated + eyeballed run-2 shift 3/4, and cited in those
+> notes as committed proof — were never whitelisted in `.gitignore`, so they were untracked and ABSENT
+> from what Jonny reviews. These are core surfaces (the hatch + evolution ceremony money-shots — the
+> biggest premium-motion beat — and the habit-detail evolution filmstrip, the #1 pillar). Shift 13
+> eyeballed all three at 390px (genuinely gorgeous, valid), whitelisted + committed the fold shots
+> (+ dark where one exists), and added hatch/evolve to the pipeline default routes. **Now ALL 14
+> `/preview` core surfaces have a git-tracked proof shot** — the review-evidence trail is complete.
+> Baseline re-verified GREEN (build ✅ / lint 0-err-5-intentional / `npm test` 129/129). No other gap
+> found; the mission's remaining value is Jonny's real-device eyeball + merge, NOT more code. LESSON:
+> "committed" audits must check `git ls-files`, not the working tree — a claim can be true on disk and
+> false in the repo. Successor: do NOT reopen a bug hunt or re-beautify handsome surfaces; if you
+> suspect a gap, audit git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop.
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 12 — READ THIS FIRST.** All five queue items below are DONE and the
 > sandbox-verifiable feature/polish vein is genuinely exhausted (audited, not asserted — see the
 > per-shift notes). **Shift 12 ran three fresh honest audits to test the "exhausted" claim rather than
@@ -994,6 +1012,17 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   healthy client byte-identical. LESSON worth keeping: "can't verify it here → leave it alone" can mask a
   real defect; the honest move on an unverifiable surface is to ask WHY it's unverifiable, because the
   answer here (content hidden until JS runs) WAS the bug.
+- *(run-2 shift 13)* **A "committed proof" audit must check `git ls-files`, not the working tree.**
+  Shift 12's view-keys-vs-shots audit concluded "every core surface is committed," but it compared the
+  `/preview` view list against on-disk `ls` output — and three surfaces' shots (`preview-{detail,hatch,
+  evolve}-*.png`, generated run-2 shift 3/4 and cited there as committed) existed on disk yet were never
+  whitelisted in `.gitignore`, so they were untracked and absent from the repo Jonny reviews. Re-running
+  the audit against `git ls-files` caught it; committed the fold shots (the ceremony money-shots + the
+  detail evolution filmstrip — the highest-value proof in the run). The lesson generalises past shots:
+  any claim of the form "X is committed/in the repo" should be verified with `git ls-files`/`git show`,
+  because the working tree can satisfy it while the tracked tree doesn't (gitignore, forgotten `git add`).
+  This was the honest close-out move (evidence-completion, not churn); with it, all 14 core surfaces are
+  git-tracked-verified and the branch's review trail is complete.
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
