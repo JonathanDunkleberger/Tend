@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
-import { applyCoinDelta, clampCoinTotal } from "@/lib/economy";
+import { applyCoinDelta, clampCoinDelta, clampCoinTotal } from "@/lib/economy";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -17,13 +17,36 @@ export async function POST(request: Request) {
   const existingProfile = await ensureProfile(supabase, userId);
 
   // ── Delta-based path (preferred) ──
-  // NOTE: this is a read-then-write, NOT atomic — concurrent requests can lose an
-  // update. The real fix is a Postgres atomic-increment RPC (deferred; see the
-  // night-train NEEDS EYES). The delta bound MUST stay above the largest
-  // legitimate single grant (the 90-day milestone is +500) or big rewards get
-  // silently truncated and the user loses coins on reload — see lib/economy.ts.
+  // The delta bound MUST stay above the largest legitimate single grant (the
+  // 90-day milestone is +500) or big rewards get silently truncated and the user
+  // loses coins on reload — see lib/economy.ts.
   if (typeof delta === "number") {
-    const newCoins = applyCoinDelta(existingProfile?.coins ?? 250, delta);
+    const clampedDelta = clampCoinDelta(delta);
+
+    // Atomic path (migration-009): a single UPDATE `coins = coins + delta` runs
+    // under a row lock, so two concurrent requests can no longer read the same
+    // balance and clobber each other (the old read-then-write lost-update race).
+    // Falls back to read-then-write below if the RPC isn't present yet (migration
+    // not run), so the route keeps working before/without migration-009.
+    const { data: rpcCoins, error: rpcError } = await supabase.rpc("tend_increment_coins", {
+      p_clerk_id: userId,
+      p_delta: clampedDelta,
+    });
+
+    if (!rpcError && typeof rpcCoins === "number") {
+      // streak_freezes is a whole-object replace (not an increment) so it has no
+      // race to guard; write it separately when provided.
+      if (streakFreezes !== undefined) {
+        await supabase
+          .from("profiles")
+          .update({ streak_freezes: streakFreezes })
+          .eq("clerk_id", userId);
+      }
+      return NextResponse.json({ coins: rpcCoins, streak_freezes: streakFreezes ?? null });
+    }
+
+    // Fallback: non-atomic read-then-write (pre-migration-009).
+    const newCoins = applyCoinDelta(existingProfile?.coins ?? 250, clampedDelta);
     const updatePayload: Record<string, unknown> = { coins: newCoins };
     if (streakFreezes !== undefined) {
       updatePayload.streak_freezes = streakFreezes;

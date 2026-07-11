@@ -54,22 +54,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Already owned" }, { status: 409 });
   }
 
-  // Validate coins — server is the source of truth
+  // Validate coins — server is the source of truth. ensureProfile guarantees the
+  // row exists so the atomic deduct below can only return NULL for "can't afford".
   const profile = await ensureProfile(supabase, userId);
   const currentCoins = profile?.coins ?? 0;
-  if (currentCoins < shopItem.price) {
-    return NextResponse.json({ error: "Not enough coins", need: shopItem.price, have: currentCoins }, { status: 402 });
-  }
 
-  // Deduct coins. If this write fails we must NOT grant the item — otherwise the
-  // user gets it free and the response still reports success (shift 14 fix).
-  const newCoins = currentCoins - shopItem.price;
-  const { error: deductError } = await supabase
-    .from("profiles")
-    .update({ coins: newCoins })
-    .eq("clerk_id", userId);
-  if (deductError) {
-    return NextResponse.json({ error: deductError.message }, { status: 500 });
+  // Deduct coins atomically (migration-009): a single conditional UPDATE
+  // (`coins = coins - price WHERE coins >= price`) means two concurrent purchases
+  // can't both pass the affordability check and overdraw the balance. Returns the
+  // new balance, or NULL when unaffordable. Falls back to a read-then-write check
+  // if the RPC isn't present yet (migration not run). Either way: if the deduction
+  // doesn't succeed we must NOT grant the item — otherwise it's free and the
+  // response still reports success (shift 14 fix).
+  let newCoins: number;
+  const { data: rpcCoins, error: rpcError } = await supabase.rpc("tend_deduct_coins_if_afford", {
+    p_clerk_id: userId,
+    p_price: shopItem.price,
+  });
+
+  if (!rpcError) {
+    if (typeof rpcCoins !== "number") {
+      // No row updated → the atomic affordability check failed.
+      return NextResponse.json({ error: "Not enough coins", need: shopItem.price, have: currentCoins }, { status: 402 });
+    }
+    newCoins = rpcCoins;
+  } else {
+    // Fallback: non-atomic read-then-write (pre-migration-009).
+    if (currentCoins < shopItem.price) {
+      return NextResponse.json({ error: "Not enough coins", need: shopItem.price, have: currentCoins }, { status: 402 });
+    }
+    newCoins = currentCoins - shopItem.price;
+    const { error: deductError } = await supabase
+      .from("profiles")
+      .update({ coins: newCoins })
+      .eq("clerk_id", userId);
+    if (deductError) {
+      return NextResponse.json({ error: deductError.message }, { status: 500 });
+    }
   }
 
   // Add to inventory
