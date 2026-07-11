@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Wind, Sparkles, Waves, Heart, ChevronLeft, Check } from "lucide-react";
+import { Wind, Sparkles, Waves, Heart, ChevronLeft, Check, Moon, X } from "lucide-react";
 import type { ThemeColors } from "@/lib/constants";
 import { haptic } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ interface WellnessHubProps {
   onSaveGratitude?: (entry: { date: string; items: string[] }) => void;
 }
 
-type Tool = "grounding" | "urgesurf" | "gratitude";
+type Tool = "grounding" | "urgesurf" | "gratitude" | "calm";
 
 const AFFIRMATIONS = [
   "You are allowed to grow slowly.",
@@ -41,6 +41,7 @@ export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: Wellne
   if (tool === "grounding") return <Grounding th={th} onBack={() => setTool(null)} />;
   if (tool === "urgesurf") return <UrgeSurf th={th} darkMode={darkMode} onBack={() => setTool(null)} />;
   if (tool === "gratitude") return <Gratitude th={th} onBack={() => setTool(null)} onSave={onSaveGratitude} />;
+  if (tool === "calm") return <CalmMode onBack={() => setTool(null)} />;
 
   const cards: {
     key: Tool | "breathe";
@@ -54,6 +55,7 @@ export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: Wellne
     { key: "urgesurf", title: "Ride the wave", sub: "Let an urge crest and pass", Icon: Waves, color: "#6366f1", onTap: () => setTool("urgesurf") },
     { key: "grounding", title: "Ground yourself", sub: "5-4-3-2-1 senses", Icon: Sparkles, color: "#8B5CF6", onTap: () => setTool("grounding") },
     { key: "gratitude", title: "Three good things", sub: "A tiny gratitude ritual", Icon: Heart, color: "#4caf50", onTap: () => setTool("gratitude") },
+    { key: "calm", title: "Wind down", sub: "A starlit calm for evening", Icon: Moon, color: "#a78bfa", onTap: () => setTool("calm") },
   ];
 
   return (
@@ -427,6 +429,136 @@ function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ───────────────────────── Calm / night mode: wind down ───────────────────────── */
+// Deterministic starfield (no Math.random — SSR-safe, stable across renders).
+const CALM_STARS = [
+  { top: 8, left: 12, size: 2, delay: 0 }, { top: 14, left: 78, size: 3, delay: 1.2 },
+  { top: 22, left: 33, size: 2, delay: 2.4 }, { top: 18, left: 55, size: 2, delay: 0.6 },
+  { top: 30, left: 88, size: 3, delay: 1.8 }, { top: 27, left: 8, size: 2, delay: 3.1 },
+  { top: 40, left: 68, size: 2, delay: 0.9 }, { top: 44, left: 22, size: 3, delay: 2.0 },
+  { top: 52, left: 90, size: 2, delay: 1.4 }, { top: 58, left: 44, size: 2, delay: 3.4 },
+  { top: 63, left: 15, size: 3, delay: 0.4 }, { top: 70, left: 72, size: 2, delay: 2.7 },
+  { top: 76, left: 30, size: 2, delay: 1.1 }, { top: 82, left: 85, size: 2, delay: 3.0 },
+  { top: 88, left: 52, size: 3, delay: 1.6 }, { top: 12, left: 45, size: 2, delay: 2.2 },
+  { top: 35, left: 50, size: 2, delay: 0.7 }, { top: 66, left: 60, size: 2, delay: 2.9 },
+  { top: 48, left: 6, size: 2, delay: 1.9 }, { top: 6, left: 92, size: 2, delay: 3.3 },
+];
+
+// One breath cycle: in (4s) · hold (2s) · out (5s) · rest (1s) = 12s.
+const CALM_LINES = [
+  "Let the day settle.",
+  "You did enough today.",
+  "Nothing is required of you right now.",
+  "Rest is part of tending, too.",
+  "Tomorrow can wait for tomorrow.",
+];
+
+function CalmMode({ onBack }: { onBack: () => void }) {
+  const [elapsed, setElapsed] = useState(0); // seconds, fractional
+  const raf = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    raf.current = setInterval(() => setElapsed((e) => e + 0.1), 100);
+    return () => { if (raf.current) clearInterval(raf.current); };
+  }, []);
+
+  const CYCLE = 12;
+  const t = elapsed % CYCLE;
+  let phase: string;
+  let scale: number;
+  if (t < 4) { phase = "Breathe in"; scale = 0.72 + (t / 4) * 0.4; }
+  else if (t < 6) { phase = "Hold"; scale = 1.12; }
+  else if (t < 11) { phase = "Breathe out"; scale = 1.12 - ((t - 6) / 5) * 0.4; }
+  else { phase = "Rest"; scale = 0.72; }
+
+  const line = CALM_LINES[Math.floor(elapsed / CYCLE) % CALM_LINES.length];
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 200, overflow: "hidden",
+        background: "radial-gradient(140% 100% at 50% 0%, #1a1740 0%, #0d0b26 45%, #060514 100%)",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        animation: "fadeIn 0.6s ease",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+      role="dialog"
+      aria-label="Wind down — a calm evening space"
+    >
+      {/* Starfield */}
+      {CALM_STARS.map((s, i) => (
+        <span
+          key={i}
+          style={{
+            position: "absolute", top: `${s.top}%`, left: `${s.left}%`,
+            width: s.size, height: s.size, borderRadius: "50%", background: "#fff",
+            opacity: 0.6, animation: `pulse ${3 + (i % 3)}s ease-in-out ${s.delay}s infinite`,
+          }}
+        />
+      ))}
+
+      {/* Exit */}
+      <button
+        onClick={() => { haptic("light"); onBack(); }}
+        aria-label="Leave wind-down mode"
+        style={{
+          position: "absolute", top: "calc(env(safe-area-inset-top, 0px) + 16px)", right: 16,
+          width: 40, height: 40, borderRadius: 20, border: "1px solid rgba(255,255,255,0.15)",
+          background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
+          display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+        }}
+      >
+        <X size={18} />
+      </button>
+
+      {/* Breathing moon-orb */}
+      <div style={{ position: "relative", width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            position: "absolute", width: 200, height: 200, borderRadius: "50%",
+            background: "radial-gradient(circle at 38% 32%, rgba(199,190,255,0.55), rgba(124,110,220,0.22) 55%, transparent 72%)",
+            transform: `scale(${scale})`, transition: "transform 0.12s linear",
+            filter: "blur(2px)",
+          }}
+        />
+        <div
+          style={{
+            position: "relative", width: 120, height: 120, borderRadius: "50%",
+            background: "radial-gradient(circle at 38% 32%, #f4f1ff, #c9c0f5 60%, #9d90e0)",
+            transform: `scale(${scale})`, transition: "transform 0.12s linear",
+            boxShadow: "0 0 60px rgba(199,190,255,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <Moon size={40} color="#5b4fa8" strokeWidth={1.6} />
+        </div>
+      </div>
+
+      {/* Breath phase */}
+      <div style={{ marginTop: 40, fontFamily: "'Fraunces',serif", fontSize: 26, fontWeight: 500, color: "#efeaff", letterSpacing: "0.5px", minHeight: 34 }}>
+        {phase}
+      </div>
+
+      {/* Rotating gentle line */}
+      <div key={line} style={{ marginTop: 14, fontSize: 14, color: "rgba(230,225,255,0.6)", textAlign: "center", maxWidth: 280, lineHeight: 1.6, animation: "fadeIn 1.2s ease" }}>
+        {line}
+      </div>
+
+      <button
+        onClick={() => { haptic("light"); onBack(); }}
+        style={{
+          position: "absolute", bottom: "calc(env(safe-area-inset-bottom, 0px) + 40px)",
+          padding: "12px 30px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)",
+          background: "rgba(255,255,255,0.05)", color: "rgba(239,234,255,0.85)",
+          fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+        }}
+      >
+        Rest well
+      </button>
     </div>
   );
 }
