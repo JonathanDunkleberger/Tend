@@ -338,6 +338,30 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 19.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
+> only on a real miss, else confirm green + stop) — held clean, no miss (7th consecutive clean shift).
+> (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
+> `npm test` **129/129**; branch is **163 commits** ahead of `main`. (b) Re-ran the git-tracked audit —
+> read all 14 `VIEW_KEYS` from `preview/page.tsx` (garden/today/insights/detail/hatch/evolve/gallery/
+> onboarding/wellness/wrapped/you/breathe/nav/loading) and matched each against `git ls-files
+> scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery=`preview-fold`,
+> garden=`preview-garden-full`, the rest by name, most light+dark). No untracked/gitignore gap. (c)
+> Applied "verify, don't assert" to FRESH evidence not spot-checked in recent shift notes (18 eyeballed
+> today/you/nav, 17 insights/wrapped, 16 hatch/garden) — independently eyeballed three not-recently-checked
+> surfaces: `preview-evolve-fold` (the evolution ceremony money-shot — "Ember evolved! Now a Drake — you
+> tended it here." happy dragon in a warm orange radial glow + "+50 coins" + Continue), `preview-wellness-
+> full` (the full wellness hub — "A gentle reminder" quote card + the 5-tool grid Breathe/Ride-the-wave/
+> Ground-yourself/Three-good-things/Wind-down with tasteful icons), and `preview-breathe-fold` (fire-dragon
+> in a ring on the dark night surface + "Cravings peak and pass in about 3 minutes… let's breathe through
+> this one together." + Start breathing) — **all three render genuinely and gorgeously, not blank frames.**
+> The review-evidence trail is real AND complete across the ceremony, wellness-hub, and breathe surfaces
+> too. Nothing sandbox-buildable/verifiable remains that isn't the churn the frontier forbids → confirmed
+> green, closed clean. Did NOT reopen a bug hunt, re-extract math, or re-beautify handsome surfaces.
+> Mission's remaining value is unchanged: Jonny's real-device eyeball + the merge. Successor: SAME
+> discipline — audit git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop. Do
+> NOT write NIGHT-TRAIN COMPLETE (§8's real-device gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 18.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
 > only on a real miss, else confirm green + stop) — held clean, no miss (6th consecutive clean shift).
 > (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
@@ -418,45 +442,6 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 > the merge (now a ~160-commit branch). Successor: SAME discipline — audit git-tracked-vs-claimed FIRST,
 > act only on a real miss, else confirm green + stop. Do NOT write NIGHT-TRAIN COMPLETE (§8's real-device
 > gates are only Jonny's to close).
->
-> --- prior state (kept for context) ---
-> **STATE AS OF run-2 shift 14.** Ran the frontier-prescribed discipline (audit git-tracked-vs-claimed
-> FIRST, act only on a real miss, else confirm green + stop) — and this time it held clean, no miss.
-> (a) Re-verified baseline GREEN: build ✅ / lint 0-err-5-intentional / `npm test` **129/129**. (b)
-> Re-ran shift-13's git-tracked audit: enumerated all 14 `/preview` `VIEW_KEYS` (garden/today/insights/
-> detail/hatch/evolve/gallery/onboarding/wellness/wrapped/you/breathe/nav/loading) against `git ls-files
-> scripts/shots/` — **every one has a git-tracked proof shot** (most light+dark); the four un-shot views
-> (grounding/urge-surf/gratitude/wind-down) are correctly out of file:// scope (interactive tools, no
-> static verification value). No new gitignore/untracked gap. (c) Applied "verify, don't assert" to the
-> EVIDENCE itself (not just its existence): independently eyeballed the two highest-value money-shots
-> shift 13 committed — `preview-hatch-fold` ("Your dragon hatched!" green hatchling in a warm radial
-> glow + "+25 coins" + Continue) and `preview-detail-fold` (Ember/Drake + 41-day streak flame + the full
-> Egg→Hatchling→Whelp→Drake→Elder filmstrip + "20d to Elder Dragon" progress + streak-shield card) —
-> **both render genuinely and gorgeously, not blank frames.** So the review-evidence trail is real AND
-> complete. No sandbox-buildable/verifiable gap remains that isn't the churn the frontier forbids →
-> confirmed green and closed cleanly (the honest disciplined shift). Did NOT reopen a bug hunt or
-> re-beautify handsome surfaces. Mission's remaining value is unchanged: Jonny's real-device eyeball +
-> the merge of a now-159-commit branch. Successor: same discipline — audit git-tracked-vs-claimed FIRST,
-> act only on a real miss, else confirm green + stop. Do NOT write NIGHT-TRAIN COMPLETE (§8's real-device
-> gates are only Jonny's to close).
->
-> --- prior state (kept for context) ---
-> **STATE AS OF run-2 shift 13.** Shift 13 did the frontier-prescribed audit (test the "exhausted"
-> claim, don't rubber-stamp) and it caught ONE real miss — not code, an EVIDENCE gap: shift 12's
-> view-keys-vs-shots audit said "every core surface is committed," but it compared against `ls`
-> (on-disk), not `git ls-files` (tracked). Cross-checking view-keys vs **git-tracked** shots showed
-> `preview-{detail,hatch,evolve}-*.png` — generated + eyeballed run-2 shift 3/4, and cited in those
-> notes as committed proof — were never whitelisted in `.gitignore`, so they were untracked and ABSENT
-> from what Jonny reviews. These are core surfaces (the hatch + evolution ceremony money-shots — the
-> biggest premium-motion beat — and the habit-detail evolution filmstrip, the #1 pillar). Shift 13
-> eyeballed all three at 390px (genuinely gorgeous, valid), whitelisted + committed the fold shots
-> (+ dark where one exists), and added hatch/evolve to the pipeline default routes. **Now ALL 14
-> `/preview` core surfaces have a git-tracked proof shot** — the review-evidence trail is complete.
-> Baseline re-verified GREEN (build ✅ / lint 0-err-5-intentional / `npm test` 129/129). No other gap
-> found; the mission's remaining value is Jonny's real-device eyeball + merge, NOT more code. LESSON:
-> "committed" audits must check `git ls-files`, not the working tree — a claim can be true on disk and
-> false in the repo. Successor: do NOT reopen a bug hunt or re-beautify handsome surfaces; if you
-> suspect a gap, audit git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop.
 >
 > --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 12 — READ THIS FIRST.** All five queue items below are DONE and the
