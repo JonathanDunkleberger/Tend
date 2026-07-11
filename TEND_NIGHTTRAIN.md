@@ -243,13 +243,48 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 15 fixed a real SOUL-violating bug (see #0ag below): the relapse penalty pinned the
-> dragon at an egg forever after ~4 slips (accumulating `stageDrops`). Now it's a gentle, self-healing
-> one-tier dip. Good next moves for a successor: keep cold-reading for ACTUAL bugs to fix; the remaining
-> DEFERRED bugs in §12 (non-atomic coins/inventory race → needs a Postgres RPC + migration; urge-entries
-> ownership; Stripe email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe
-> or a keyed shift, so they're for Jonny — don't ship unrunnable SQL. Otherwise a `file://`-verifiable
-> landing/OG/pricing-copy improvement. Do NOT extract math for coverage's sake. See §14 for the sandbox limit.
+> NEXT SHIFT — shift 49 banked shift 16's orphaned timezone fix (see #0ai) + FIXED 4 fresh cold-read bugs
+> (see #0ah): a bounce-back coin faucet, a quit-habit start-day happiness bug, wasted grace gifts to quit
+> habits, and a quit-dampened heatmap. (Context: shifts 17–48 all FAST-FAILED on a monthly spend limit;
+> shift 16 died mid-work leaving 4 uncommitted files — shift 49 recovered + committed them.) Good next
+> moves for a successor: the cold-read bug-hunt vein is still productive — keep hunting ACTUAL client-side
+> bugs to FIX (reasoning-verifiable, no DB/browser). The remaining DEFERRED bugs in §12 (non-atomic
+> coins/inventory race → Postgres RPC + migration; urge-entries ownership; Stripe email-clobber;
+> verify-subscription 10-session fallback) all need a running DB/Stripe or a keyed shift → for Jonny;
+> don't ship unrunnable SQL. Also open: the bounce-back ramp now fires for ALL users, not just after a
+> real lapse (no lapse-detection wiring exists) — a product call for Jonny (see §12). Otherwise a
+> `file://`-verifiable landing/OG/pricing-copy improvement. Do NOT extract math for coverage's sake.
+> See §14 for the sandbox limit.
+
+0ai. ✅ **[SHIFT 49] Recovered + banked shift 16's orphaned timezone fix.** Shift 16 ran 8 min, made 4
+   uncommitted edits, then died (0 commits); shifts 17–48 then all fast-failed on a monthly spend limit,
+   so the work sat in the working tree. It's a real, complete bug fix: several client surfaces derived
+   "today" from `new Date().toISOString().slice(0,10)` (a UTC date) while the whole app keys completions
+   by the LOCAL date via `today()`/`daysAgo()`. West of UTC, the UTC key rolls to tomorrow every evening,
+   so the app looked up a day with no completions — constellation's "on track today" count (0-of-N false
+   negative), the morning check-in (re-showed the same evening; its dismiss persists last_checkin_date as
+   the LOCAL date, which the UTC key never matched), and gratitude entries (stamped tomorrow). All now use
+   `today()`; the server log route already accepts the client's local date (verified). Also a
+   tap-to-dismiss backdrop + re-entrancy guard on the morning check-in. I restored the wellness affirmation
+   to its lint-clean lazy initializer (shift 16's effect rewrite tripped `react-hooks/set-state-in-effect`
+   to guard a hydration mismatch that can't occur — the hub only mounts client-side, never in SSR; that
+   lint error is almost certainly why shift 16 never committed). build GREEN, lint 0/5, test 94/94.
+
+0ah. ✅ **[SHIFT 49] Cold-read bug hunt — FIXED 4 real client-side bugs (no DB/browser needed).**
+   (1) **Bounce-back coin faucet.** `bounceBackDay` was session React state (never persisted) while its
+   date-gate `bb_date` was persistent → every reload reset the counter to 0 and the day-1 (+3) reward
+   re-granted EVERY day forever (unbounded faucet), while the day-3 (+10)/day-7 (+25) tiers (needing one
+   session alive across midnights) were unreachable. Persisted the counter + a "-1 = done, never again"
+   sentinel in localStorage (same durable-reward-gate pattern shift 14 used) → advances once/day, pays out
+   once ever. (2) **Quit habit read "not done" on its start/reset day.** `isHappy` compared the quitDate
+   ISO timestamp to date-only `todayStr` with `quitDate <= todayStr`; an ISO string is lexically > its own
+   date prefix, so the start day was excluded from the header count, blocked the all-done celebration, and
+   rendered an unhappy creature on a clean day. Now compares date-only. (3) **Grace tokens gifted to quit
+   habits** (7/21/60) were invisible + unusable (quit streaks never consume freezes; shield UI is
+   build-only) → `checkMilestones` now takes `giftGrace`, false for quit. (4) **"All activity" heatmap**
+   counted quit habits in its denominator, but they never log completions → intensity was permanently
+   capped <100% for anyone with a quit habit; now build-habits only. build GREEN, lint 0/5, test 94/94,
+   1 commit.
 
 0ag. ✅ **[SHIFT 15] Cold-read bug hunt — FIXED the anti-soul relapse-penalty bug (§12 #2).** The quit
    dragon's stage was `getStage(best-ever) − stageDrops`, where `stageDrops` incremented on every relapse
@@ -738,6 +773,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **Widget-style "today" hero** you could screenshot to a phone home screen.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
+
+- **PRODUCT CALL (shift 49) — the bounce-back "recovery" ramp fires for ALL users, not just after a
+  real lapse.** Shift 49 fixed the *exploit* (it was an unbounded +3-coins/day faucet — see frontier
+  #0ah); it's now a bounded, once-ever 7-day ramp (+3 day 1, +10 day 3, +25 day 7). BUT there is no
+  lapse-detection wiring anywhere — nothing starts the ramp based on a user actually missing days and
+  coming back, so every new user gets a 7-day "you showed up / bounce-back / back in the groove" ramp
+  from their first active day. That's harmless + bounded now (reads as a warm first-week welcome), but
+  the copy is comeback-framed. If you want true comeback-only semantics, add lapse detection (e.g. start
+  the ramp only when a habit is completed after a gap ≥1 day in an existing streak) — needs a real-device
+  eyeball to tune, so left as a product decision, not shipped blind.
 
 - **⚠️ KNOWN BUGS DEFERRED (shift 14) — surfaced by the cold-read bug hunt; couldn't safely fix here.**
   Two were FIXED this shift (see frontier #0af: milestone-coin truncation + the two farmable coin
