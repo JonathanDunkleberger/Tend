@@ -26,6 +26,24 @@ export default async function GardenPage() {
     ? await supabase.from("habit_logs").select("*").in("habit_id", habitIds).gte("log_date", logWindow)
     : { data: [] };
 
+  // True LIFETIME completion count per habit. The 90-day window above is only for
+  // heatmaps/streaks, but the client derives a build habit's "total days" AND its
+  // dragon evolution stage from the total — which is cumulative and must NOT shrink
+  // when old logs age out of the window (otherwise a returning user's grown dragon
+  // reverts to an egg). An exact count per habit avoids Supabase's 1000-row select
+  // cap; on a transient error we omit the entry and fall back to the windowed count
+  // below, so a total is never spuriously 0.
+  const totalDaysByHabit: Record<string, number> = {};
+  await Promise.all(
+    habitIds.map(async (id: string) => {
+      const { count, error } = await supabase
+        .from("habit_logs")
+        .select("*", { count: "exact", head: true })
+        .eq("habit_id", id);
+      if (!error && typeof count === "number") totalDaysByHabit[id] = count;
+    })
+  );
+
   // Ensure profile exists (auto-creates if Clerk webhook didn't fire)
   const profile = await ensureProfile(supabase, userId);
 
@@ -129,7 +147,9 @@ export default async function GardenPage() {
       d++;
     }
 
-    const totalDays = habitLogs.length;
+    // Lifetime total (never below the windowed count we actually shipped, so the
+    // client's pre-window offset can't go negative).
+    const totalDays = Math.max(totalDaysByHabit[habit.id] ?? 0, habitLogs.length);
 
     return {
       ...habit,

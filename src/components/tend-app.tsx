@@ -591,6 +591,19 @@ export function TendApp({
     [habits, quitDataMap, getCleanDays, getStreak]
   );
 
+  // Per-build-habit count of completions OLDER than the 90-day window the server
+  // ships in `logs`. Server sends the true lifetime `totalDays`; the difference is the
+  // immutable pre-window remainder (old logs never change in-session). getTotal adds it
+  // to the live windowed `logs.length` so lifetime totals + dragon stage are correct AND
+  // still track today's optimistic check/uncheck. Computed once from the mount snapshot.
+  const preWindowTotals = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const h of initialHabits) {
+      if (h.category !== "quit") m[h.id] = Math.max(0, (h.totalDays ?? 0) - (h.logs?.length ?? 0));
+    }
+    return m;
+  }, [initialHabits]);
+
   const getTotal = useCallback(
     (hId: string) => {
       // Quit habits: total = clean days (same as streak)
@@ -598,9 +611,9 @@ export function TendApp({
       if (h?.category === "quit") {
         return getCleanDays(hId);
       }
-      return h?.logs.length ?? 0;
+      return (h?.logs.length ?? 0) + (preWindowTotals[hId] ?? 0);
     },
-    [habits, getCleanDays]
+    [habits, getCleanDays, preWindowTotals]
   );
 
   const isHappy = useCallback(
