@@ -230,9 +230,11 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
       *(shift 4: PWA install prompt + on-brand manifest. shift 5: reduced-motion guard, `:focus-visible`
       ring, accessible role="checkbox" check-off, warm empty-garden state, `syncError` save-fail toasts,
-      egg-warming viz. shift 6: `clickable()` a11y helper made the garden's primary tap targets
-      keyboard-operable (roles + Enter/Space + aria-labels). shift 7: **WCAG contrast pass across all
-      three surfaces** (THEME map both themes + landing + /pricing), each pair verified via computed
+      egg-warming viz. **shift 61: a real error boundary** — `(app)/garden/error.tsx` turns a transient
+      Supabase read failure from a false-empty/streaks-0 garden into a warm, reassuring, one-tap-retry
+      state (the app had NO error boundary anywhere before). shift 6: `clickable()` a11y helper made the
+      garden's primary tap targets keyboard-operable (roles + Enter/Space + aria-labels). shift 7:
+      **WCAG contrast pass across all three surfaces** (THEME map both themes + landing + /pricing), each pair verified via computed
       luminance ratios — no browser needed; light-theme subtext went from ~1.5–2:1 (near-invisible) to
       ≥4.5:1 AA. Remaining: optional per-view skeletons + service worker (SW deliberately skipped until
       browser-verifiable) — all minor. The real gate here is a real-device eyeball.)*
@@ -252,7 +254,35 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 60 stopped reflexively re-hunting the client/API surfaces (11 shifts deep, thin)
+> NEXT SHIFT — shift 61 aimed hunters at the surfaces shift 60 named as still-unswept (settings-client,
+> onboarding→save handoff, webhook edge cases) AND fixed the shift-60-documented garden error-swallowing
+> with a real error boundary. It PAID OFF: **6 genuine reasoning-verified bugs FIXED (#0av, 5 fix
+> commits), several on the money/auth path.** (1) **garden had NO error boundary anywhere** — a transient
+> Supabase read failure silently rendered a false-empty garden / streaks-0; now the critical reads throw
+> to a new warm `garden/error.tsx` ("Your garden needs a moment", reassures data is safe, one-tap retry).
+> (2) **both webhooks swallowed every DB error + always 200** → Stripe/svix never retried → a transient
+> blip on checkout stranded a paying user on free forever; now a failed write throws → 500 → provider
+> retries (guarded against the profiles.email NOT-NULL poison-retry via UPDATE-first/INSERT-with-""-
+> fallback, without reintroducing the shift-53 email-clobber). (3) **Stripe subscription.updated
+> downgraded to free on the first `past_due`** (mid-dunning, still recoverable) → now keeps Pro through
+> dunning, only terminal states drop to free. (4) **Clerk stored email_addresses[0], not the primary** →
+> now resolves via primary_email_address_id. (5) **onboarding committed its done-flag even when the
+> starter-habit POSTs failed** → empty garden + onboarding permanently suppressed + silent data loss; now
+> gates the flag on real success (addHabit returns ok), adds a re-entrancy guard + disabled button
+> (double-tap duplicates), drops the destructive absolute {coins:250} POST. (6) **preferences PUT
+> blind-replaced append-only jsonb** (earned_milestone_coins/gratitude) → a stale 2nd-device snapshot
+> wiped entries; now server-side merges (union). build GREEN, lint 0/5, **test 107/107**. **The honest
+> read for the successor:** shifts 57/60/61 each proved "cold-read vein exhausted" was SURFACE-scoped —
+> every freshly-enumerated unswept file set has held real bugs. But the webhook + server-hydration +
+> onboarding + settings + preferences surfaces are NOW swept. Genuinely-unswept territory left is thin:
+> the deeper tend-app monolith effect wiring beyond what shift 59 touched, the quit/relapse/urge client
+> internals, or the remaining API routes (coins/inventory internals already atomic). Expect thin returns.
+> **Still Jonny-only (unchanged):** run `migration-009` + `-008` in Supabase; §13/#16 Stripe price change
+> (keyed); verify-subscription 10-session fallback (real Stripe volume); bounce-back ramp fires for ALL
+> users not just after a lapse (product call); the real-device eyeball of the auth-gated app (§14). The
+> meaningful un-checked DoD items still hinge on Jonny's browser, not new code.
+
+> PRIOR POINTER — shift 60 stopped reflexively re-hunting the client/API surfaces (11 shifts deep, thin)
 > and instead aimed a fresh hunter at the ONE genuinely-never-swept surface: the SERVER data-hydration
 > path (garden/page.tsx → props → TendApp). It PAID OFF with a real, high-value CONFIRMED bug plus a
 > branding sweep (#0au, 5 commits). **THE BIG ONE — build dragons silently de-evolved to eggs.**
@@ -344,6 +374,46 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0av. ✅ **[SHIFT 61] Swept the surfaces shift 60 named as unswept (settings-client, onboarding→save,
+   webhook edge cases) + fixed the documented garden error-swallowing — 6 real bugs FIXED, several on
+   the money/auth path (reasoning-verified, no DB/browser).** Two fan-out hunters + a direct fix of the
+   §12-documented issue. **(1) [garden] NO error boundary existed anywhere in the app.** garden/page.tsx
+   destructured only `{data}` on every Supabase read, so a transient failure on the habits query rendered
+   a false "zero habits" garden and a failure on logs rendered every streak at 0 — the emotional core
+   looking wiped. Now the two critical reads THROW on error, caught by a new `(app)/garden/error.tsx`
+   boundary: a warm, on-brand "Your garden needs a moment" screen that reassures dragons/streaks/coins are
+   safe and offers a one-tap retry (`reset()` re-runs the server component, self-healing the transient
+   failure). Advances the "premium polish: error states" DoD sub-item. **(2) [webhooks] Both Stripe +
+   Clerk webhooks swallowed every DB write error and always returned 200** → Stripe/svix marked the event
+   delivered and NEVER retried, so a transient blip during `checkout.session.completed` permanently
+   stranded a paying user on `tier:free`. Now a failed write throws → 500 → the provider retries. Making
+   writes fail-loud exposed the `profiles.email NOT NULL` trap (a fresh INSERT lacking email would
+   poison-retry against the constraint forever) → handled with UPDATE-first (email omitted → never
+   clobbers a real address, preserving the shift-53 fix), INSERT only if missing with `email || ""` (the
+   ensureProfile placeholder); Clerk falls back to "" only on `user.created`, still omits on `user.updated`.
+   **(3) [stripe] `subscription.updated` downgraded to free on the first `past_due`** — mid-dunning, while
+   Stripe is still retrying a recoverable renewal charge; now keeps Pro through active/trialing/past_due,
+   only terminal states (+ subscription.deleted) drop to free. **(4) [clerk] stored `email_addresses[0]`,
+   not the primary** (array order isn't guaranteed) → now resolves via `primary_email_address_id`, so
+   receipts/billing go to the right address. **(5) [onboarding] committed the done-flag even when the
+   starter-habit POSTs failed.** `handleOnboardingComplete` awaited `addHabit` (which toasts + returns,
+   never throws) then UNCONDITIONALLY set `tend_onboarding_complete` + closed the overlay → a transient
+   failure left an empty garden AND permanently suppressed onboarding (flag re-reads true forever), losing
+   the chosen starter habit silently. Now `addHabit` returns `result.ok`; the flag/prefs-PUT/close only run
+   on real success (else returns false so the user can retry); a re-entrancy ref + disabled "Entering…"
+   button kill double-tap duplicates (the habits route has no dedup); dropped the destructive absolute
+   `{coins:250}` POST (coins already default to 250 via ensureProfile — no-op on happy path, a reset on
+   re-entry). **(6) [preferences] PUT blind-replaced the append-only jsonb** (`earned_milestone_coins`,
+   `gratitude_entries`) → a stale second-device snapshot would WIPE entries this device never saw; now the
+   route reads + MERGES (coins: union arrays per key; gratitude: union by date, newest 60), so a write can
+   at worst momentarily miss a concurrent add (self-heals) rather than delete. Also fixed the GET default's
+   hardcoded `season:"summer"` → `getSeason()` (same class shift 60 fixed). build GREEN, lint 0/5, **test
+   107/107**, 5 fix commits. **Hunter CONFIRMED clean (traced, not skipped):** `settings-client.tsx` (a
+   24-line portal button, no data/dates); the onboarding field-mapping, buildPick-always-present invariant,
+   quit dailyCost persistence, and quitDate UTC-timestamp (fine — quit math uses timestamp diffs, not
+   local-date keying); preferences auth checks + partial-upsert-preserves-unlisted-columns + column names +
+   checkout↔webhook metadata key match + both signature verifications.
 
 0au. ✅ **[SHIFT 60] Hunted the never-swept SERVER data-hydration path — FIXED a high-value dragon
    de-evolution bug + a branding sweep (reasoning-verified, no DB/browser).** Prior hunts (49–59) swept
@@ -1193,6 +1263,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   documented, not churned. Lesson reaffirmed (shift 57/58 line): a hunter finding ≠ an automatic fix —
   weigh whether the "fix" regresses a working behaviour.
 
+- *(shift 61)* **Webhooks now fail LOUD (return 5xx) so the provider retries; error-swallowing was the
+  real bug, not the writes.** The shift-53/57 lessons converge here: the fix for a payment/auth-path
+  reliability bug was reasoning-verifiable without a live Stripe/Clerk. Two calls worth recording. (1)
+  **Return non-2xx on any webhook DB-write failure.** Both webhooks `await`ed their upserts but ignored
+  `{error}` and unconditionally returned 200 → Stripe/svix consider the event delivered and never retry,
+  so a transient blip during `checkout.session.completed` permanently strands a paying user on free. This
+  is a one-line-per-write guard (throw on error → catch → 500) but it's the single highest-value fix on
+  the money path. Its corollary FORCED handling the `profiles.email NOT NULL` insert trap (a fail-loud
+  webhook would poison-retry forever on a genuinely email-less event): UPDATE-first (email omitted → no
+  clobber, preserving shift-53) then INSERT-if-missing with `email || ""` (the ensureProfile placeholder).
+  (2) **Don't downgrade to free on `past_due`.** Immediately yanking Pro on the first failed renewal
+  charge — while Stripe is still retrying during dunning and may recover — is both a bug and anti-soul
+  (punishing a recoverable blip). Keep Pro through active/trialing/past_due; only terminal states (and the
+  explicit subscription.deleted) drop to free. (3) **Onboarding: gate the done-flag on real success.** A
+  side-effecting completion (create habits) that commits its "done" flag before confirming the side effect
+  succeeded is a data-loss pattern — the flag then permanently hides the retry path. addHabit already
+  returned its ok-ness implicitly; surfacing it + gating the flag is the fix, plus a re-entrancy guard for
+  the non-idempotent create. **Meta-lesson reaffirmed (shift 57/60):** "cold-read vein exhausted" is
+  ALWAYS surface-scoped — shift 60 named these exact surfaces as unswept and each held a real bug.
 - *(shift 60)* **Lifetime total = server exact-count + client pre-window offset, not a wider log ship.**
   The 90-day `logs` window was serving double duty: heatmap/streak (needs recent dated rows) AND the
   client's lifetime `getTotal`/dragon-stage (needs the full cumulative count). Three fixes were possible:
@@ -1228,15 +1317,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
 
-- **DOCUMENTED, NOT FIXED (shift 60) — `garden/page.tsx` swallows every Supabase query error.** All six
-  data-fetch calls destructure only `{ data }` (habits :14, logs :~40, milestones, quit, inventory, prefs),
-  so a TRANSIENT failure yields `null` → `(x || [])` → empty. A blip on the **habits** query renders a
-  false "you have zero habits" garden; a blip on **logs** renders every habit at streak 0 / (pre-fix) an
-  egg. No bad data is written (writes are client-driven; coins are atomic) so it self-heals on reload — but
-  the momentary "my habits vanished / streaks reset" is alarming. `ensureProfile` is the only query that
-  correctly distinguishes a transient error from genuine "no rows." The right fix is an error-state UX
-  (retry affordance), which needs a real-device design pass — left per the don't-half-fix discipline rather
-  than swallow the error differently. Low priority: transient + self-healing + no data loss.
+- **✅ FIXED (shift 61) — `garden/page.tsx` critical read errors now surface a retryable error state.**
+  Was: all six data-fetch calls destructured only `{ data }`, so a TRANSIENT failure on **habits**
+  rendered a false "you have zero habits" garden and on **logs** rendered every streak at 0 — alarming
+  ("my habits vanished / streaks reset") though self-healing. Now the two CRITICAL reads (habits, logs)
+  throw on error, caught by a new `(app)/garden/error.tsx` boundary — a warm "Your garden needs a moment"
+  screen that reassures the user their data is safe and offers a one-tap retry (`reset()` re-runs the
+  server component, which self-heals the transient failure). The remaining four reads (milestones/quit/
+  inventory/prefs) degrade acceptably on a blip (missing celebrations badges / cosmetics), so they're left
+  soft rather than turning every minor blip into a full-page error — the two that render *alarmingly wrong*
+  core data are the ones that now fail loud + recoverable.
 
 - **✅ FIXED (shift 58) — DEFERRED BUG #5, the log-route milestone keying.** Was: the `habits/[id]/log`
   route inserted a `milestone_type:"streak", value: totalDays` row where `totalDays = count(habit_logs)`
