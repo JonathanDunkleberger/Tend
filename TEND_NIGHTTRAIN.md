@@ -244,7 +244,21 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    statement**: `/pricing` card said "Save $20/year" while its toggle already said "Save 33%" (redundant
    + drifting phrasing) → card now shows the effective monthly "Just $3.33/mo, billed yearly" (a stronger
    annual nudge, no redundancy). Numbers left at $4.99/$39.99 (Stripe-tied; §13's $5.99 change still
-   needs new Stripe price IDs → out of safe scope). Build GREEN.
+   needs new Stripe price IDs → out of safe scope). Build GREEN, **browser-verified via the shift-9
+   `file://` harness** (FAQ renders faithfully closed + expanded at 390px, animated +/− marks, zero
+   console errors / zero failed requests — `scripts/shots/faq-open.png`).
+
+0ab. ✅ **[SHIFT 10] OpenGraph/Twitter share card — the link now previews richly everywhere.** Sharing
+   `tendhabit.com` in iMessage/Slack/Twitter/WhatsApp produced **no rich preview at all** (no OG tags) —
+   a free sharing/conversion lever left on the floor. Fixed: (a) `layout.tsx` now exports `openGraph` +
+   `twitter` (`summary_large_image`) metadata w/ `metadataBase`/siteName/locale + a shared TITLE/DESC;
+   (b) new `app/opengraph-image.tsx` — a **dynamic 1200×630 card rendered by `next/og` (satori)**, which
+   needs NO browser so it generates in this sandbox; runs on the Node runtime to read the hero dragon
+   sprite (`dragon_33.png`) off disk + inline it as a data URI (warm cream garden, wordmark, "Grow
+   habits. Hatch dragons." headline, tagline, never-shaming pill, dragon hero); (c) `middleware.ts` —
+   added `/opengraph-image` to the PUBLIC route matcher (social crawlers fetch it unauthenticated → it
+   was 404ing under Clerk's `auth.protect()`). **Browser-verified**: fetched the generated PNG from
+   `next start` (200, image/png, 262KB) + eyeballed it — renders faithfully (`scripts/shots/og-card.png`).
 
 0. ✅ **[SHIFT 9] Actually BROWSER-VERIFIED the app via a headless-Chromium `file://` pipeline —
    and pinned down the hard limit of what can be verified in this sandbox.** The prize this shift:
@@ -403,6 +417,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > before gratitude persists (localStorage fallback until then). Remaining pure-code levers are all
 > minor/optional (per-view skeletons, a service worker [skip until browser-verifiable], the §13 price
 > change). Read §6b audit + §10 decisions + §13 pricing first. `.env.local` note in NEEDS EYES still stands.
+> **NEW in shift 10 (#0aa/#0ab): landing conversion polish, both browser-verified via the file:// harness.**
+> (1) An **objection-handling FAQ** on the landing (6 warm Q&As: miss-a-day→grace tokens, really-free?,
+> phone feel, why-different, data, cancel) built as a **pure-CSS `<details>` accordion** (zero JS → stays
+> a static server component AND stays `file://`-verifiable). (2) **OpenGraph/Twitter share card** — the
+> link had NO rich preview anywhere; now `layout.tsx` has full OG/twitter metadata + a **dynamic 1200×630
+> `app/opengraph-image.tsx`** (next/og, renders with no browser, hero dragon inlined from disk), and
+> `/opengraph-image` was added to the **public middleware matcher** (crawlers fetch it unauthenticated).
+> (3) Fixed `/pricing` savings double-statement → effective-monthly nudge. Proof shots:
+> `scripts/shots/faq-open.png` + `scripts/shots/og-card.png`. The landing (the one sandbox-verifiable
+> surface) is now conversion-complete; remaining DoD gates are still the auth-gated in-app eyeball on
+> Jonny's machine. Note: shift 10 `npm install playwright --no-save`'d to screenshot — it's NOT in
+> package.json (browser binary is cached from shift 9's `npx playwright install chromium`).
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -521,6 +547,24 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   down" is a full-screen overlay launched from the Wellness hub — a breathing moon-orb + starfield +
   gentle lines, all client-only/CSS/JS-timer, no DB, no theme surgery. Delivers the calm-evening
   feeling with near-zero blast radius. A future shift can still theme the garden itself if desired.
+- *(shift 10)* **The landing FAQ is a pure-CSS `<details>` accordion, not a JS component.** The landing
+  is deliberately a zero-client-JS server component (fast LCP + `file://`-verifiable in this sandbox).
+  A normal React accordion would break both, so the FAQ uses native `<details>`/`<summary>` with a
+  CSS-animated +/− mark — accessible + keyboard-operable by default, no hydration. Keeps the whole
+  landing static and lets shift 10 actually *see* it render offline (both closed and expanded states).
+- *(shift 10)* **OG share card is a dynamic `next/og` (satori) image, rendered server-side — chosen
+  precisely because it needs NO browser** (so it generates fine in this HTTP-egress-firewalled sandbox,
+  unlike a screenshot-based card). It runs on the **Node runtime** so it can `fs.readFile` the hero
+  dragon sprite and inline it as a base64 data URI (satori can't fetch `/public` over HTTP). Uses
+  satori's default font (no custom-font fetch → no network dependency → robust). Verified by fetching
+  the generated PNG from `next start` and eyeballing it. **Corollary:** `/opengraph-image` had to be
+  added to the **public** middleware matcher — social crawlers (Twitter/Facebook/Slack bots) fetch OG
+  images unauthenticated, so leaving it under `auth.protect()` 404'd the card (confirmed empirically).
+- *(shift 10)* **Displayed prices left at $4.99/$39.99 (NOT bumped to §13's $5.99).** The numbers are
+  tied to real Stripe price IDs; changing the copy ahead of creating new Stripe prices would mislead
+  buyers and break checkout parity. §13's price change stays an explicit Stripe-config follow-up (#16).
+  Shift 10 only removed the *drift* (the `/pricing` card double-stated "Save 33%" + "Save $20/year" →
+  now shows the effective monthly "$3.33/mo, billed yearly", a stronger, non-redundant annual nudge).
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
