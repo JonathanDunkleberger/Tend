@@ -246,8 +246,13 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       garden's primary tap targets keyboard-operable (roles + Enter/Space + aria-labels). shift 7:
       **WCAG contrast pass across all three surfaces** (THEME map both themes + landing + /pricing), each pair verified via computed
       luminance ratios — no browser needed; light-theme subtext went from ~1.5–2:1 (near-invisible) to
-      ≥4.5:1 AA. Remaining: optional per-view skeletons + service worker (SW deliberately skipped until
-      browser-verifiable) — all minor. The real gate here is a real-device eyeball.)*
+      ≥4.5:1 AA. **run-2 shift 7: the micro-interaction clause is now genuinely rich** — hatch/evolution
+      ceremonies, the check-off ring burst, the streak flame, the coin-counter roll, direction-aware page
+      transitions, AND a new sound-optional soft-chime layer (`lib/sound.ts`, off by default, You-tab
+      toggle) — all reduced-motion/opt-in gated + composition-verified via file://. Remaining: optional
+      per-view skeletons + service worker (SW deliberately skipped until browser-verifiable) — all minor.
+      The real gate here is a real-device eyeball (the live audio + hydrated motion can't be
+      file://-verified).)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
       rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
       Landing/onboarding/manifest already on-brand. **shift 60 swept the remaining recovery-first drift**:
@@ -314,6 +319,19 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 7 — READ THIS.** Queue items **#1–#4 are all DONE**: the `/preview` harness
+> covers every core surface; the premium-motion pass is complete (ceremonies + ring burst + streak flame
+> + coin roll + page transitions + soft chime); the deep-analytics beautification is complete (momentum,
+> headline hero, consistency rings, best-day rose, streak journey, synergy constellation); and the parked
+> SURPRISE-ME ideas are all shipped or pruned. **The sandbox-verifiable feature vein is genuinely mined
+> out this run** — every buildable, file://-verifiable design item the frontier scoped is banked.
+> **What remains is NOT more building — it's #5 (a DoD re-audit) and then Jonny's real-device eyeball +
+> merge (§9.3).** A successor should NOT manufacture churn (no reflexive bug-hunts — the cold-read vein
+> is well-swept, see §10; no re-beautifying already-handsome surfaces). If you genuinely spot a real gap
+> or a fresh product insight, act on it and verify via `/preview`; otherwise the honest move is to keep
+> the build green, tidy the docs, and leave the merge call to Jonny. Don't declare COMPLETE (§8 has
+> real-device gates only Jonny can close).
+
 1. **Expand the `/preview` harness to the remaining CORE surfaces.** *(run-shift-1: DONE for the two
    biggest — the **Garden daily-tend home** (real TerrariumScene + faithful today's-tend rows w/
    egg-warming + one-tap check) and the full **Insights** analytics screen (real heatmap + Constellation
@@ -352,11 +370,19 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    composition-verified light+dark via file://. ALSO shipped the **coin-counter roll** —
    `components/animated-number.tsx`, a rAF easeOutCubic counter that rolls old→new with an upward pop on
    an increase, first-mount-tween-skipped, reduced-motion-safe; wired into the real header coin pill +
-   the /preview garden pill, composition-verified it renders the value static via file://.)* Still to
-   build: a **soft chime** on check/hatch (sound-optional, off by default) + smooth **page/tab
-   transitions**. Use CSS/Web-Animations, keep 60fps, gate ALL of it behind `useReducedMotion`. Compile- +
-   composition-verify via `/preview`; flag the live-motion eyeball for Jonny (interaction-triggered
-   motion can't be file://-verified).
+   the /preview garden pill, composition-verified it renders the value static via file://.)*
+   *(run-2 shift 7: **SOFT CHIME SHIPPED → this item is DONE.** New `lib/sound.ts` synthesizes gentle
+   chimes with the Web Audio API (no assets, no network): a warm rising fifth on a check-off, a bright
+   coin blip on a reward, an ascending major arpeggio on hatch, a shimmering rise on evolution. OFF by
+   default; opt-in lives in localStorage (`tend_sound`, a per-device pref → no migration) via a new
+   "Sound effects" toggle in the You tab (uses `useSyncExternalStore` → no hydration mismatch / no
+   setState-in-effect). Fully guarded (no window / no AudioContext / autoplay-blocked → silent no-op).
+   Wired into the existing haptic() call sites: check chime on tending (not un-checking), coin on
+   milestone-coin grants + all-done +10, hatch/evolve alongside the ceremony. **The other leftover
+   (page/tab transitions) was ALREADY BUILT** — `setPage` sets a `pageAnim` (slide-in-left/right/up by
+   direction) applied to the content wrapper (tend-app L1745), keyframes in globals.css, respects the
+   global reduced-motion rule. So **frontier #2 is COMPLETE**; the only unverifiable-here piece is the
+   live audio/motion eyeball, which is Jonny's, as always.)*
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
@@ -374,10 +400,14 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    5 cases, 129 green). Flagship-colored area sparkline with a "best Nd" pill + a live end marker; shows
    the climb-and-reset story that momentum's completion-% smooths away. Browser-verified light+dark via
    file://; also pinned the preview mock's streak block to exactly `_streak` so the journey number
-   agrees with the scoreboard.)* **Still to beautify (lowest value now):** only the **synergy
-   constellation** (works but could be lovelier). Keep loading `dataviz` before chart code. Insights is
-   now genuinely handsome — consider this item ~90% done; a successor should prefer #2 (motion) over the
-   last synergy polish.
+   agrees with the scoreboard.)* *(run-2 shift 7: the **synergy constellation** — the last item — is
+   DONE, so **frontier #3 is COMPLETE.** Its connecting lines were a single faint off-brand purple
+   (opacity as low as strength×0.15 → weak pairings vanished); now each line is a per-line linearGradient
+   from habit-A's color to habit-B's, so the thread shows WHICH two habits it links — lovelier, more
+   meaningful, and back on the green system; floored the glow/core opacity so faint pairings still read;
+   Pro rows got matching gradient dots. Presentational only (computeSynergies untouched → zero
+   correctness risk). Browser-verified light+dark via file:// — glows beautifully on the dark card.)*
+   Insights is now genuinely handsome across every card. Keep loading `dataviz` before any future chart.
 
 4. **Promote the best parked ideas into real features** (§11), lightest-risk / highest-delight first.
    *(run-shift-2: **dragon species-by-habit-type** SHIPPED — `suggestElementForHabit` /
@@ -390,9 +420,16 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    flame + dragons-hatched + a warm one-liner + the Tend wordmark. Always-dark "garden at night"
    surface by design (share cards read best dark); Web Share API + clipboard fallback. Wired into the
    garden header (a share button on `page===main` w/ active habits) and mounted at `/preview?view=today`,
-   browser-verified light+dark via file:// — `scripts/shots/preview-today{,-dark}-fold.png`.)* **Still
-   parked:** a **garden-wide night re-theme** (CSS, `file://`-verifiable). Prune any idea that doesn't
-   earn its complexity.
+   browser-verified light+dark via file:// — `scripts/shots/preview-today{,-dark}-fold.png`.)*
+   *(run-2 shift 7: **PRUNED the last parked idea — the "garden-wide night re-theme" doesn't earn its
+   complexity.** On inspection the `TerrariumScene` is ALREADY a starlit night/space scene in BOTH
+   themes — season-based dark sky gradient + a twinkling starfield + a floating moon + nebula + shooting
+   stars on all-done (terrarium-scene.tsx L130–220). Light mode is intentionally a light PAGE framing
+   that dark "window into the dragon's world," so there is no daytime garden to re-theme into night; a
+   time-of-day sky shift would be speculative + risky in the monolith scene for near-zero gain. So §11's
+   remaining SURPRISE-ME ideas are all either shipped or pruned — **this queue item is DONE.**)* No
+   parked ideas remain worth building; any future feature should come from a fresh product insight, not
+   this list.
 
 5. **Re-audit the DoD (§8)** and only tick the core-loop / premium-polish / analytics items once their
    surfaces are **visually verified via `/preview`**. Keep this queue tight (3–6 items) — when you
