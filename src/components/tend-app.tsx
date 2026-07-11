@@ -54,6 +54,7 @@ import {
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
 import { getDragonSprite, suggestSpeciesForHabit } from "@/lib/sprites";
+import { playChime } from "@/lib/sound";
 import { migrateLocalStorageToServer } from "@/lib/migrate-local-data";
 import { apiCall, apiSync } from "@/lib/api";
 import type { LucideIcon } from "lucide-react";
@@ -783,6 +784,7 @@ export function TendApp({
           try { localStorage.setItem("tend_alldone_date", todayStr); } catch { /* noop */ }
           setCoins((p) => p + 10);
           syncCoins(10);
+          playChime("coin");
           setCoinToast({ msg: "+10 all habits done!", icon: Sparkles });
         }
       }, 1200);
@@ -835,6 +837,7 @@ export function TendApp({
         try { localStorage.setItem("tend_granted_milestones", JSON.stringify(granted)); } catch { /* noop */ }
       }
       haptic("medium");
+      playChime("coin");
       setCoins((prev) => prev + nc);
       // Gift grace token(s) alongside coins, capped — persist together.
       const held = streakFreezesRef.current[habitId] || 0;
@@ -880,6 +883,7 @@ export function TendApp({
           coinReward: matchingMilestone?.coins || 0,
         });
         haptic("success");
+        playChime("coin");
       }
     }
   }, [earnedMilestoneCoins]);
@@ -961,6 +965,7 @@ export function TendApp({
     const wasComplete = isHappy(hId);
 
     haptic("light");
+    if (!wasComplete) playChime("check"); // gentle note only when tending, not un-checking
     setBouncingId(hId);
     setTimeout(() => setBouncingId(null), 600);
 
@@ -1166,6 +1171,7 @@ export function TendApp({
         });
       }
       haptic("success");
+      playChime(prev === 0 ? "hatch" : "evolve");
       break;
     }
     prevStagesRef.current = currentStages;

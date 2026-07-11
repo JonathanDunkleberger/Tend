@@ -1,12 +1,14 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import {
   Crown, LayoutGrid, Store, Settings, Sun, Moon, LogOut, ExternalLink,
-  Coins, Flame, ChevronRight, Sparkles,
+  Coins, Flame, ChevronRight, Sparkles, Volume2, VolumeX,
 } from "lucide-react";
 import type { ThemeColors, SeasonKey } from "@/lib/constants";
 import { SEASONS } from "@/lib/constants";
 import { haptic } from "@/lib/utils";
+import { isSoundEnabled, setSoundEnabled, playChime, subscribeSound, soundServerSnapshot } from "@/lib/sound";
 import { InstallPromptCard } from "./install-prompt";
 
 interface YouScreenProps {
@@ -38,6 +40,17 @@ export function YouScreen({
   onManageSubscription, onUpgrade, onSignOut,
 }: YouScreenProps) {
   const initial = (profile.firstName || profile.email || "?").charAt(0).toUpperCase();
+
+  // Sound is a per-DEVICE preference (localStorage), not account data. useSyncExternalStore
+  // reads it without a hydration mismatch (server snapshot is always off) and reflects the
+  // toggle instantly.
+  const soundOn = useSyncExternalStore(subscribeSound, isSoundEnabled, soundServerSnapshot);
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundEnabled(next);
+    haptic("light");
+    if (next) playChime("check"); // let them hear it the moment they turn it on
+  };
 
   const stats: { label: string; value: string; Icon: typeof Coins; color: string }[] = [
     { label: "Coins", value: `${coins}`, Icon: Coins, color: "#f59e0b" },
@@ -175,6 +188,27 @@ export function YouScreen({
           }}>
             <span style={{
               position: "absolute", top: 2, left: darkMode ? 20 : 2, width: 20, height: 20, borderRadius: "50%",
+              background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.25)", transition: "left .2s cubic-bezier(.34,1.56,.64,1)",
+            }} />
+          </span>
+        </button>
+
+        <button onClick={toggleSound} aria-pressed={soundOn} style={{
+          display: "flex", alignItems: "center", gap: 12, width: "100%",
+          background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+          marginBottom: 14,
+        }}>
+          {soundOn ? <Volume2 size={19} color="#4ade80" /> : <VolumeX size={19} color={th.textSub} />}
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: th.text }}>Sound effects</span>
+            <span style={{ display: "block", fontSize: 12, color: th.textMuted }}>Soft chimes when you tend & hatch</span>
+          </span>
+          <span style={{
+            width: 42, height: 24, borderRadius: 100, position: "relative", transition: "background .2s", flexShrink: 0,
+            background: soundOn ? "#4ade80" : th.progressBg,
+          }}>
+            <span style={{
+              position: "absolute", top: 2, left: soundOn ? 20 : 2, width: 20, height: 20, borderRadius: "50%",
               background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.25)", transition: "left .2s cubic-bezier(.34,1.56,.64,1)",
             }} />
           </span>
