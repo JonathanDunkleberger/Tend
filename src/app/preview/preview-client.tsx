@@ -38,6 +38,7 @@ import { Creature } from "@/components/creature";
 import { MultiHabitHeatmap } from "@/components/multi-habit-heatmap";
 import { Constellation } from "@/components/constellation";
 import { TerrariumScene } from "@/components/terrarium-scene";
+import { Ceremony } from "@/components/ceremony";
 
 /* ───────────────────────── mock data ───────────────────────── */
 
@@ -126,11 +127,14 @@ const wrappedProps = {
 };
 
 export type View =
-  | "garden" | "insights" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav";
+  | "garden" | "insights" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
+  | "hatch" | "evolve";
 
 const VIEWS: { key: View; label: string }[] = [
   { key: "garden", label: "🌱 Garden" },
   { key: "insights", label: "📊 Insights" },
+  { key: "hatch", label: "🥚 Hatch" },
+  { key: "evolve", label: "🐉 Evolve" },
   { key: "gallery", label: "🐉 Dragon art" },
   { key: "onboarding", label: "🥚 Onboarding" },
   { key: "wellness", label: "🧘 Wellness" },
@@ -218,6 +222,8 @@ export function PreviewClient({ initialView = "garden", initialDark = false }: {
       </main>
 
       {/* Full-screen overlays render outside the phone stage */}
+      {view === "hatch" && <CeremonyPreview kind="hatch" />}
+      {view === "evolve" && <CeremonyPreview kind="evolve" />}
       {view === "wrapped" && <TendWrapped {...wrappedProps} onClose={() => setView("gallery")} />}
       {view === "breathe" && (
         <BreathingTimer
@@ -238,6 +244,28 @@ export function PreviewClient({ initialView = "garden", initialDark = false }: {
         </>
       )}
     </div>
+  );
+}
+
+/* Hatch / evolution ceremony preview. Renders the "reveal" money-shot frame on
+   first mount (so the offline file:// SSR snapshot captures the finished
+   composition); tapping Continue remounts WITHOUT previewPhase so a live browser
+   replays the full egg-rock → crack → emerge sequence. */
+function CeremonyPreview({ kind }: { kind: "hatch" | "evolve" }) {
+  const [nonce, setNonce] = useState(0);
+  return (
+    <Ceremony
+      key={nonce}
+      kind={kind}
+      stage={kind === "hatch" ? 1 : 3}
+      color="#ef7d3a"
+      creatureType={5}
+      habitName="Morning run"
+      creatureName={kind === "evolve" ? "Ember" : null}
+      coinReward={kind === "hatch" ? 25 : 50}
+      previewPhase={nonce === 0 ? "reveal" : undefined}
+      onDone={() => setNonce((n) => n + 1)}
+    />
   );
 }
 

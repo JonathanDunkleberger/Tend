@@ -317,13 +317,18 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    small extraction from the monolith (the detail view is inline ~line 2310); scope it as its own step.
 
 2. **PREMIUM MOTION + MICRO-INTERACTION PASS** (the "cool as f***" mandate — the biggest gap vs §2).
-   On the now-previewable surfaces, design and build: the **hatch ceremony** (egg rocks → cracks →
-   dragon emerges with a coin burst + confetti), the **evolution transition** between stages, a
-   **satisfying one-tap check-off** (spring/scale + optional haptic via `navigator.vibrate` + a soft
-   chime, sound-optional), a **streak-flame** flourish, a **coin-counter roll**, and smooth **page/tab
-   transitions**. Use CSS/Web-Animations, keep 60fps, gate ALL of it behind `useReducedMotion` (the
-   pattern already exists). Compile- + composition-verify via `/preview`; flag the live-motion eyeball
-   for Jonny. Showcase the purchased dragon art as the emotional payoff it's meant to be.
+   *(run-shift-3 IN PROGRESS: building `components/ceremony.tsx` — a shared full-screen **HatchCeremony**
+   (egg rocks → cracks with a light-flash + shard burst → dragon springs in with light rays + confetti +
+   coin burst) and **EvolutionCeremony** (old stage dissolves → new stage springs up through a ray burst).
+   Reduced-motion gated (skips straight to the revealed frame, no rocking/crack). Takes a `previewPhase`
+   prop so the file:// SSR snapshot can render the money-shot "reveal" frame for composition verification.
+   Then wire into the monolith: play HatchCeremony before the naming ceremony on 0→1, EvolutionCeremony on
+   each stage-up. New /preview views `hatch` + `evolve` render the reveal frame.)*
+   Still to build after: a **satisfying one-tap check-off** (spring/scale + optional haptic via
+   `navigator.vibrate` + a soft chime, sound-optional), a **streak-flame** flourish, a **coin-counter
+   roll**, and smooth **page/tab transitions**. Use CSS/Web-Animations, keep 60fps, gate ALL of it behind
+   `useReducedMotion` (the pattern already exists). Compile- + composition-verify via `/preview`; flag the
+   live-motion eyeball for Jonny. Showcase the purchased dragon art as the emotional payoff it's meant to be.
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
