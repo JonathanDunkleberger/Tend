@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { KeyboardEvent } from "react";
 import {
   Brain, Dumbbell, BookOpen, Droplets, Moon, Footprints, Utensils,
   Palette, Target, Smartphone, Wine, Cigarette, Coffee, Eye, Clock,
@@ -149,6 +150,42 @@ export function haptic(pattern: "light" | "medium" | "success") {
     case "medium": navigator.vibrate(20); break;
     case "success": navigator.vibrate([10, 50, 10]); break;
   }
+}
+
+/* ═══════════ A11Y: make a click-only div keyboard-operable ═══════════ */
+/**
+ * Returns props that give a non-button clickable element (div/span) proper
+ * keyboard + screen-reader semantics: a role, focusability, an accessible
+ * label, and Enter/Space activation. Spread alongside the existing
+ * `onClick` handler — this does NOT set onClick, so mouse behaviour is
+ * untouched. Use for the many inline-styled tap targets in the app that
+ * can't easily become real <button>s without losing their layout.
+ */
+export function clickable(
+  onActivate: () => void,
+  opts?: {
+    label?: string;
+    role?: "button" | "checkbox" | "radio";
+    checked?: boolean;
+    disabled?: boolean;
+  }
+): Record<string, unknown> {
+  const role = opts?.role ?? "button";
+  const isToggle = role === "checkbox" || role === "radio";
+  return {
+    role,
+    tabIndex: opts?.disabled ? -1 : 0,
+    "aria-label": opts?.label,
+    "aria-checked": isToggle ? !!opts?.checked : undefined,
+    "aria-disabled": opts?.disabled || undefined,
+    onKeyDown: (e: KeyboardEvent) => {
+      if (opts?.disabled) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate();
+      }
+    },
+  };
 }
 
 /* ═══════════ TIME-AWARE GREETINGS ═══════════ */

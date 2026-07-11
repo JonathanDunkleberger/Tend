@@ -38,7 +38,7 @@ import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
-import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer } from "@/lib/utils";
+import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
@@ -1526,6 +1526,7 @@ export function TendApp({
             )}
             <div
               onClick={() => { setPage("shop"); }}
+              {...clickable(() => setPage("shop"), { label: `${coins} coins — open shop` })}
               style={{
               display: "inline-flex", alignItems: "center", gap: 3,
               padding: "3px 10px", borderRadius: 100,
@@ -1663,6 +1664,7 @@ export function TendApp({
                   animation: "tooltipPulse 3s ease-in-out infinite",
                 }}
                   onClick={() => setShowEggCallout(false)}
+                  {...clickable(() => setShowEggCallout(false), { label: "Dismiss tip" })}
                 >
                   <span style={{ fontSize: 22 }}>🥚</span>
                   <div>
@@ -1939,6 +1941,7 @@ export function TendApp({
                         )}
                         <div
                           style={{ flex: 1, cursor: "pointer", minWidth: 0 }}
+                          {...clickable(() => { if (renamingId !== h.id) { setDetailId(h.id); setPage("detail"); } }, { label: `Open ${h.name}` })}
                           onClick={() => { if (renamingId !== h.id) { setDetailId(h.id); setPage("detail"); } }}
                           onTouchStart={() => { longPressTimer.current = setTimeout(() => { setRenamingId(h.id); setRenameValue(h.name); }, 500); }}
                           onTouchEnd={() => { if (longPressTimer.current) clearTimeout(longPressTimer.current); }}
@@ -2093,7 +2096,9 @@ export function TendApp({
               return atRisk.length > 0 ? (
                 <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
                   {atRisk.slice(0, 2).map((h) => (
-                    <div key={h.id} onClick={() => toggleCompletion(h.id)} style={{
+                    <div key={h.id} onClick={() => toggleCompletion(h.id)}
+                      {...clickable(() => toggleCompletion(h.id), { label: `Mark ${h.name} done to protect your ${getStreak(h.id)} day streak` })}
+                      style={{
                       padding: "8px 12px", borderRadius: 10, cursor: "pointer",
                       background: `linear-gradient(90deg,${h.color}08,${h.color}03)`,
                       border: `1px solid ${h.color}18`,
@@ -2169,7 +2174,7 @@ export function TendApp({
                   />
                   <div style={{ display: "flex", gap: 4, justifyContent: "center", marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
                     {HABIT_COLORS.map((c) => (
-                      <div key={c} className={`ct ${editColor === c ? "sl" : ""}`} style={{ background: c }} onClick={() => setEditColor(c)} />
+                      <div key={c} className={`ct ${editColor === c ? "sl" : ""}`} style={{ background: c }} onClick={() => setEditColor(c)} {...clickable(() => setEditColor(c), { role: "radio", checked: editColor === c, label: `Colour ${c}` })} />
                     ))}
                     {isTendPlus() ? (
                       <label style={{ position: "relative", cursor: "pointer" }}>
@@ -2183,6 +2188,7 @@ export function TendApp({
                     ) : (
                       <div
                         onClick={() => setShowPaywall(true)}
+                        {...clickable(() => setShowPaywall(true), { label: "Custom colours with Tend+" })}
                         className="ct"
                         title="Custom colors with Tend+"
                         style={{ background: "conic-gradient(red,yellow,lime,aqua,blue,magenta,red)", opacity: 0.4, cursor: "pointer", position: "relative" }}
@@ -2888,7 +2894,7 @@ export function TendApp({
               <div className="lb" style={{ marginBottom: 5, color: th.label }}>Custom</div>
               <div style={{ display: "flex", gap: 5, marginBottom: 8, flexWrap: "wrap", alignItems: "center" }}>
                 {HABIT_COLORS.map((c) => (
-                  <div key={c} className={`ct ${cColor === c ? "sl" : ""}`} style={{ background: c }} onClick={() => setCColor(c)} />
+                  <div key={c} className={`ct ${cColor === c ? "sl" : ""}`} style={{ background: c }} onClick={() => setCColor(c)} {...clickable(() => setCColor(c), { role: "radio", checked: cColor === c, label: `Colour ${c}` })} />
                 ))}
                 {isTendPlus() ? (
                   <label style={{ position: "relative", cursor: "pointer" }}>
@@ -2902,6 +2908,7 @@ export function TendApp({
                 ) : (
                   <div
                     onClick={() => setShowPaywall(true)}
+                    {...clickable(() => setShowPaywall(true), { label: "Custom colours with Tend+" })}
                     className="ct"
                     title="Custom colors with Tend+"
                     style={{ background: "conic-gradient(red,yellow,lime,aqua,blue,magenta,red)", opacity: 0.4, cursor: "pointer", position: "relative" }}
