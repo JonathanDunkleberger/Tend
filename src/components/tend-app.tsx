@@ -529,6 +529,21 @@ export function TendApp({
     [isComplete, streakFreezes, habits, getCleanDays]
   );
 
+  // Grace token — is a freeze currently bridging a gap and actively saving this streak?
+  // True when the streak-with-freezes exceeds the raw consecutive (no-freeze) streak.
+  const isGraceProtected = useCallback(
+    (hId: string) => {
+      const h = habits.find((x) => x.id === hId);
+      if (h?.category === "quit") return false;
+      if (!((streakFreezes[hId] || 0) > 0)) return false;
+      let raw = 0;
+      let d = isComplete(hId, daysAgo(0)) ? 0 : 1;
+      while (isComplete(hId, daysAgo(d))) { raw++; d++; }
+      return getStreak(hId) > raw;
+    },
+    [habits, streakFreezes, isComplete, getStreak]
+  );
+
   // Best streak — compute historical maximum consecutive run from logs
   const getBestStreak = useCallback(
     (hId: string) => {
@@ -1054,13 +1069,17 @@ export function TendApp({
     });
   };
 
+  const GRACE_COST = 50;
+  const MAX_GRACE = 3;
   const buyFreeze = async (hId: string) => {
-    if (coins < 50) return;
-    const newFreezes = { ...streakFreezes, [hId]: (streakFreezes[hId] || 0) + 1 };
+    const held = streakFreezes[hId] || 0;
+    if (coins < GRACE_COST || held >= MAX_GRACE) return;
+    const newFreezes = { ...streakFreezes, [hId]: held + 1 };
     setStreakFreezes(newFreezes);
-    setCoinToast({ msg: "Streak freeze activated!", icon: Shield });
-    setCoins((prev) => Math.max(0, prev - 50));
-    syncCoins(-50, { streakFreezes: newFreezes });
+    haptic("success");
+    setCoinToast({ msg: "Grace token earned 🛡️", icon: Shield });
+    setCoins((prev) => Math.max(0, prev - GRACE_COST));
+    syncCoins(-GRACE_COST, { streakFreezes: newFreezes });
   };
 
   const togglePause = (hId: string) => {
@@ -1780,7 +1799,8 @@ export function TendApp({
                   const isPaused = !!pausedHabits[h.id];
                   const done = !quit && !isPaused && isHappy(h.id);
                   const streak = quit ? 0 : getStreak(h.id);
-                  const hasFz = !quit && (streakFreezes[h.id] || 0) > 0;
+                  const graceTokens = !quit ? (streakFreezes[h.id] || 0) : 0;
+                  const graceOn = graceTokens > 0 && isGraceProtected(h.id);
                   const cleanDays = quit ? getCleanDays(h.id) : 0;
                   const qd = quit ? getQuitData(h.id) : undefined;
                   const moneySaved = quit && qd ? (qd.dailyCost || 0) * cleanDays : 0;
@@ -1937,6 +1957,19 @@ export function TendApp({
                             >
                               <Wind size={9} /> Urge
                             </button>
+                          )}
+                          {!isPaused && !quit && graceTokens > 0 && (
+                            <span
+                              title={graceOn ? "A grace day is protecting your streak" : `${graceTokens} grace ${graceTokens === 1 ? "day" : "days"} banked`}
+                              style={{
+                                fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 100,
+                                background: graceOn ? "rgba(74,222,128,0.16)" : "rgba(96,165,250,0.12)",
+                                color: graceOn ? "#4ade80" : "#60a5fa",
+                                display: "inline-flex", alignItems: "center", gap: 2,
+                                boxShadow: graceOn ? "0 0 8px rgba(74,222,128,0.35)" : "none",
+                              }}>
+                              <Shield size={9} fill={graceOn ? "#4ade80" : "none"} />{graceTokens}
+                            </span>
                           )}
                           {!isPaused && !quit && streak >= 7 && (
                             <span style={{
@@ -2305,6 +2338,64 @@ export function TendApp({
               {pausedHabits[detailHabit.id] ? <Play size={16} /> : <Pause size={16} />}
               {pausedHabits[detailHabit.id] ? "Resume this habit" : "Pause this habit"}
             </button>
+
+            {/* ── Streak shield / grace token — build habits only ── */}
+            {!dq && !editMode && (() => {
+              const tokens = streakFreezes[detailHabit.id] || 0;
+              const protectedNow = isGraceProtected(detailHabit.id);
+              const full = tokens >= MAX_GRACE;
+              const canAfford = coins >= GRACE_COST;
+              return (
+                <div className="cd" style={{
+                  padding: 14, marginBottom: 10,
+                  background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: tokens > 0 ? "rgba(74,222,128,0.14)" : "rgba(255,255,255,0.05)",
+                      boxShadow: protectedNow ? "0 0 12px rgba(74,222,128,0.4)" : "none",
+                    }}>
+                      <Shield size={20} color={tokens > 0 ? "#4ade80" : th.textMuted} fill={protectedNow ? "#4ade80" : "none"} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: th.text }}>Streak shield</div>
+                      <div style={{ fontSize: 11, color: th.textSub, marginTop: 2, lineHeight: 1.4 }}>
+                        {tokens > 0
+                          ? `${tokens} grace ${tokens === 1 ? "day" : "days"} banked — one slip won't break your streak`
+                          : "Bank a grace day so one slip never stings"}
+                      </div>
+                      {protectedNow && (
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#4ade80", marginTop: 4 }}>
+                          🛡️ A grace day is protecting your streak right now
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { if (!full && canAfford) buyFreeze(detailHabit.id); }}
+                    disabled={full || !canAfford}
+                    style={{
+                      width: "100%", padding: "11px 16px", borderRadius: 12, marginTop: 12,
+                      border: "none", fontFamily: "inherit", fontSize: 13, fontWeight: 600,
+                      cursor: full || !canAfford ? "default" : "pointer",
+                      opacity: full || !canAfford ? 0.5 : 1,
+                      background: "rgba(74,222,128,0.12)", color: "#4ade80",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    }}
+                  >
+                    {full ? (
+                      "Shield full — 3 grace days banked"
+                    ) : !canAfford ? (
+                      <>Need {GRACE_COST} <Coins size={13} /> to bank a grace day</>
+                    ) : (
+                      <>Bank a grace day · {GRACE_COST} <Coins size={13} /></>
+                    )}
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* ── Quit-specific sections ── */}
             {dq && (

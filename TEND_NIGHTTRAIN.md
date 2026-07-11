@@ -248,12 +248,15 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 9. **[PHASE 4] Wellness suite — mostly banked (shift 2).** Breathe + grounding + urge-surf + gratitude
    now live in `wellness-hub.tsx`. Remaining: persist gratitude server-side (currently localStorage
    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
-10. **[PHASE 5 — NEXT] Grace token / "one slip never stings"** is a PUBLIC promise (landing + onboarding)
-    but not yet real UX. `streak_freezes` (a `Record<habitId, number>`) is ALREADY wired into
-    `getStreak` in tend-app (it bridges up to N missed days) — so the streak-math half exists. What's
-    missing is the *UX*: a way to see/earn/spend a grace token (tie to coins in the shop), a gentle
-    "your streak was protected 🛡️" moment when a freeze is consumed, and surfacing remaining tokens on
-    the habit/garden. Make the public promise real so we're not over-promising. HIGH honesty value.
+10. 🔨 **[PHASE 5 — IN PROGRESS shift 4] Grace token / "one slip never stings" UX.** Found on cold
+    read: the streak-math exists (`getStreak` bridges gaps via `streakFreezes`) AND a `buyFreeze(hId)`
+    fn (50 coins) already existed — but `buyFreeze` was NEVER CALLED and the `hasFz` row var was
+    computed but NEVER RENDERED. So it was fully dead. Shift 4 wiring: (a) `isGraceProtected(hId)`
+    helper (streak-with-freeze > raw consecutive streak → a token is actively bridging a gap);
+    (b) shield badge w/ count on the garden habit row (glows green when protecting); (c) a "Streak
+    shield" card in the habit detail (see tokens, spend 50 coins, capped at 3, gentle protected
+    moment); (d) buyFreeze capped + success haptic + "Grace token earned 🛡️" copy. Makes the public
+    promise real. IN PROGRESS — verify build before banking.
 12. **[PHASE 5] Pricing/monetization model.** Stripe is wired (Free 3 habits / Tend+ $4.99mo·$39.99yr),
     but DoD wants costs *modeled* + a benchmarked free/Pro split documented. Research Finch/Forest/
     Fabulous/Duolingo price points + model Supabase/Clerk/Stripe/Vercel free-tier reality, then write
