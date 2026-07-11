@@ -133,10 +133,14 @@ export function TendApp({
   const [coinToast, setCoinToast] = useState<{ msg: string; icon: LucideIcon } | null>(null);
   const [undoToast, setUndoToast] = useState<{ msg: string; onUndo: () => void } | null>(null);
   // Gentle recovery when a save fails: tell the user, then re-sync from the server.
+  // NOTE: all server data is held in useState(initial…) seeded ONCE at mount and
+  // never reconciled from props, so router.refresh() (a soft server re-render) would
+  // silently drop the fresh props and leave the failed optimistic state on screen.
+  // A hard reload is the only thing that actually restores truth here.
   const syncError = useCallback(() => {
     setCoinToast({ msg: "Couldn't save — bringing you back in sync", icon: X });
-    router.refresh();
-  }, [router]);
+    if (typeof window !== "undefined") window.location.reload();
+  }, []);
   const [confetti, setConfetti] = useState(false);
   const [bouncingId, setBouncingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -174,6 +178,10 @@ export function TendApp({
   // ── Creature naming state ──
   const [namingHabit, setNamingHabit] = useState<{ id: string; name: string; stage: number; color: string; creatureType?: number | null } | null>(null);
   const prevStagesRef = useRef<Record<string, number>>({});
+  // Habit ids already offered the naming ceremony this session — so a hatch that's
+  // skipped isn't re-offered when the build total dips back below the stage-1
+  // threshold (uncheck) and re-crosses it (re-check).
+  const namingOfferedRef = useRef<Set<string>>(new Set());
 
   // ── Share card state ──
   const [shareCardData, setShareCardData] = useState<{
@@ -214,6 +222,10 @@ export function TendApp({
   // whose quit habits read "done" every day) doesn't replay the confetti/banner and
   // re-run the +10 grant on every reload as if the user just flipped everything done.
   const prevAllDoneRef = useRef<boolean | null>(null);
+  // Set when a pause/resume toggle is pending, so the all-done effect can adopt the
+  // new baseline WITHOUT celebrating — pausing the last undone habit shrinks the
+  // active set to all-done, which must not fire confetti or grant the daily +10.
+  const pauseToggledRef = useRef(false);
   // Pending habit-DELETE timers, keyed by habit id. removeHabit defers the
   // destructive server call by the undo window so "Undo" can actually cancel it.
   const pendingDeletesRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -638,6 +650,17 @@ export function TendApp({
     : page === "you" || page === "gallery" || page === "shop" ? "you"
     : null;
 
+  // A pause/resume can flip `allDone` by shrinking the active-habit set — that must
+  // NOT trigger the completion celebration or the once-daily reward. When a pause
+  // toggle is pending, adopt the new allDone as the baseline (consuming the flag)
+  // BEFORE the celebration effect below runs, so it sees no fresh false→true flip.
+  // Defined before the celebration effect so it runs first in the same commit.
+  useEffect(() => {
+    if (!pauseToggledRef.current) return;
+    pauseToggledRef.current = false;
+    prevAllDoneRef.current = allDone;
+  }, [pausedHabits, allDone]);
+
   // All-done celebration + aurora
   useEffect(() => {
     setShowAurora(allDone);
@@ -1030,8 +1053,10 @@ export function TendApp({
     for (const h of habits) {
       const prev = prevStagesRef.current[h.id];
       const curr = currentStages[h.id];
-      // Trigger naming when creature hatches (0 → 1) and has no name yet
-      if (prev !== undefined && prev === 0 && curr >= 1 && !h.creature_name) {
+      // Trigger naming when creature hatches (0 → 1), has no name yet, and we
+      // haven't already offered the ceremony for this habit this session.
+      if (prev !== undefined && prev === 0 && curr >= 1 && !h.creature_name && !namingOfferedRef.current.has(h.id)) {
+        namingOfferedRef.current.add(h.id);
         setNamingHabit({ id: h.id, name: h.name, stage: curr, color: h.color, creatureType: h.creature_type });
         break; // only one naming at a time
       }
@@ -1142,6 +1167,7 @@ export function TendApp({
 
   const togglePause = (hId: string) => {
     const wasPaused = !!pausedHabits[hId];
+    pauseToggledRef.current = true;
     setPausedHabits((prev) => ({ ...prev, [hId]: !wasPaused }));
     // Point-of-action server sync — only the toggled habit
     apiSync(`/api/habits/${hId}`, "PATCH", { is_paused: !wasPaused });
