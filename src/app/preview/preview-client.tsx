@@ -347,9 +347,8 @@ function GardenPreview({ th, dark }: { th: (typeof THEME)["light"]; dark: boolea
 function InsightsPreview({ th, dark }: { th: (typeof THEME)["light"]; dark: boolean }) {
   return (
     <div style={{ animation: "fadeUp .3s ease" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 14px", fontFamily: "'Fraunces',serif" }}>Insights</h1>
-
-      {/* Tend Wrapped launcher — mirrors the real Insights header */}
+      {/* Tend Wrapped launcher — mirrors the real Insights header (Constellation
+          below owns the "Insights" title, exactly as in the live app) */}
       <div style={{
         width: "100%", marginBottom: 12, padding: "16px 18px", borderRadius: 18,
         border: "1px solid rgba(139,92,246,0.3)",
