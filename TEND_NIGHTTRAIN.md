@@ -246,18 +246,39 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> SHIFT 59 IN PROGRESS — baseline re-verified GREEN (build ✅, test 107/107, lint 0/5). Independently
-> re-confirmed shift 58's terrarium reduced-motion fix is COMPLETE (every SMIL cluster in
-> terrarium-scene.tsx — shooting stars/creature-mood-fx/bounce-sparkles/seasonal/moon/planet-shadow — is
-> gated by a `tc.*` flag that is `false` in the `minimal`/reduced tier; `useReducedMotion` hook is clean).
-> Following shift-57's lesson (hunt EXPLICITLY-unswept files, don't rubber-stamp "mature"), launched two
-> focused cold-read hunters at the genuinely-untouched surfaces: (A) the tend-app monolith's DEEP effect
-> wiring (useEffect deps/cleanup/timers/listeners/hydration — never swept), and (B) the smaller
-> never-swept components (creature-naming-modal, egg-picker, relapse-modal, urge-support, reason-editor,
-> planet-items, share-card, milestone-coin, confetti, toast, tend-plus-screen, install-prompt, creature).
-> If they surface reasoning-verifiable bugs → fix + test. If clean → close honestly; branch is mature.
+> NEXT SHIFT — shift 59 applied shift-57's lesson to the two surfaces shift 58 flagged as still-unswept
+> and it PAID OFF: two fan-out hunters (A: the tend-app monolith's DEEP effect wiring; B: the 13 smaller
+> never-swept components) found + FIXED 6 genuine bugs, all reasoning-verified (#0at, 3 fix commits).
+> Monolith (A): (1) **syncError was a no-op** — it showed "bringing you back in sync" then called
+> `router.refresh()`, but ALL server data is `useState(initial…)` seeded once at mount and never
+> reconciled from props (no `setHabits(initialHabits)` anywhere; TendApp has no `key`), so a soft
+> re-render silently dropped the fresh props and left the FAILED optimistic state on screen (inflated
+> totals/streak, even a false all-done) until a manual reload → switched to `window.location.reload()`,
+> the only thing that truly resyncs. (2) **hatch-naming re-nag** — the 0→1 stage detector re-popped the
+> "Name your creature" modal every time a build total dipped below 3 (uncheck) + re-crossed it if naming
+> was SKIPPED → added a session `namingOfferedRef` so it's offered once/habit. (3) **pause fired the
+> all-done celebration** — `allDone` excludes paused habits, so pausing the last undone habit flipped it
+> true → confetti + the once-daily +10 grant (banking the reward without finishing) → added a
+> `pauseToggledRef` + a reconcile effect (runs before the celebration effect) that adopts the new
+> baseline without celebrating. Components (B): (4) **confetti rAF ignored reduced-motion** (canvas rAF
+> isn't stopped by the CSS media rule — same class as shift 58's SMIL) → gated on `useReducedMotion`.
+> (5) **urge-support "Breathe" card said "5-minute"** but the session is 5×14s = ~70s → "One minute of
+> guided breathing". (6) **the Tend+ "Restore purchase" button was inert** (no onClick/prop) → wired an
+> optional `onRestore` to re-run the existing idempotent `/api/verify-subscription`. build GREEN, lint
+> 0/5, **test 107/107**. Independently re-confirmed shift 58's terrarium reduced-motion fix is complete
+> (every SMIL cluster gated by a `tc.*` flag `false` in the minimal tier). **Remaining component findings
+> DELIBERATELY NOT fixed (benign / load-bearing):** milestone-coin + toast auto-dismiss timers reset on
+> every parent re-render (safe today because the only fast re-render source, the 10s `liveNow` tick, is
+> slower than the 2.5–5s timers; the agent warned the toast's unstable-callback identity is what keeps
+> rapid message-replace resetting correctly → touching it risks a truncated undo window). **Still
+> Jonny-only (unchanged):** run `migration-009` + `-008` in Supabase; §13/#16 Stripe price change (keyed);
+> verify-subscription 10-session fallback (needs real Stripe volume); bounce-back ramp fires for ALL users
+> not just after a lapse (product call); the real-device eyeball of the auth-gated app (§14). Honest read:
+> the two big never-swept surfaces (monolith effect wiring + the small components) are now swept and
+> productive-but-shrinking; a future hunter has genuinely thin territory left. Remaining un-checked DoD
+> items still hinge on Jonny's browser, not new code.
 
-> NEXT SHIFT — shift 58 CLOSED BOTH of shift 57's found-but-deferred bugs (they were more
+> PRIOR POINTER — shift 58 CLOSED BOTH of shift 57's found-but-deferred bugs (they were more
 > reasoning-verifiable than the deferral implied), then ran a fresh hunter on the least-swept surfaces
 > and fixed 2 more nits. Banked (#0as, 3 fix commits): (1) **log-route milestone keying** — now keys on
 > the RAW consecutive streak (`computeStreakForDate`, tested) instead of total-days-logged, killing the
@@ -315,6 +336,45 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0at. ✅ **[SHIFT 59] Swept the two surfaces shift 58 flagged as still-unswept — FIXED 6 real bugs
+   (reasoning-verified, no DB/browser).** Shift 58 said the monolith's deeper effect wiring + any
+   untouched components were the last productive vein; two fan-out hunters confirmed it. **Monolith
+   effect wiring (never swept):** (1) **`syncError` was a silent no-op.** It set a "Couldn't save —
+   bringing you back in sync" toast then called `router.refresh()`, but EVERY server value is held in
+   `useState(initial…)` seeded once at mount with no props→state reconciliation anywhere (grep-confirmed:
+   `initialHabits` is only read by the `useState` init + a `.length` mount check; there is no
+   `setHabits(initialHabits)`; TendApp is mounted with no `key`). A soft server re-render therefore
+   passes fresh props that React silently drops → the FAILED optimistic state stays on screen (inflated
+   totals/streak, a possible false all-done celebration) until a manual reload. Switched to
+   `window.location.reload()` — the only thing that actually restores truth, and it matches the toast's
+   own promise. (2) **Hatch-naming re-nag.** The stage 0→1 detector re-popped the "Name your creature"
+   modal every time a build habit's total dipped below the stage-1 threshold (uncheck → total 3→2) and
+   re-crossed it (re-check → 2→3) IF naming had been skipped (`onSkip` persists no name), so a dismissed
+   ceremony nagged on every uncheck/recheck cycle. Added a session-level `namingOfferedRef` set so the
+   ceremony is offered once per habit. (3) **Pausing an unfinished habit fired the all-done celebration
+   + banked the daily +10.** `allDone` excludes paused habits from the denominator, so pausing the last
+   undone habit flipped `allDone` false→true → confetti/shooting-star/banner + the once-daily +10 grant,
+   letting a user claim "all done" by pausing rather than finishing. Added a `pauseToggledRef` (set in
+   `togglePause`) + a small reconcile effect defined BEFORE the celebration effect that consumes the flag
+   and adopts the new `allDone` as baseline without celebrating (keyed on `[pausedHabits, allDone]` so
+   the flag is always consumed, never lingering to suppress a later genuine flip). **Smaller components
+   (never swept):** (4) **confetti ignored reduced-motion** — the celebration burst runs via canvas
+   `requestAnimationFrame`, which the global `prefers-reduced-motion` CSS rule does NOT stop (same class
+   as shift 58's SMIL gaps); now reads `useReducedMotion` and renders nothing / skips the rAF loop.
+   (5) **urge-support crisis copy was wrong** — the "Breathe" card promised "5-minute guided breathing"
+   but the session is 5 cycles × (4+4+6)=14s = ~70s; corrected to "One minute of guided breathing" so a
+   user in a rough spot isn't misled. (6) **the Tend+ "Restore purchase" button was completely inert**
+   (no `onClick`, no restore prop — also an App Store review requirement); wired an OPTIONAL `onRestore`
+   prop (optional so `/preview` + mock callers don't break) to re-run the app's existing idempotent
+   `/api/verify-subscription` regardless of current tier → restores Pro + closes the paywall on success,
+   or a gentle "No active subscription found" toast otherwise. build GREEN, lint 0/5, **test 107/107**,
+   3 fix commits. **Deliberately NOT fixed (benign / load-bearing):** the milestone-coin + toast
+   auto-dismiss timers reset on every parent re-render (safe today because the only fast re-render source
+   — the 10s `liveNow` tick — is slower than the 2.5–5s timers; the components hunter warned the toast's
+   unstable-callback identity is what keeps rapid message-replace resetting the timer correctly, so
+   touching it risks a truncated undo window). Also re-confirmed shift 58's terrarium reduced-motion fix
+   is complete (every SMIL cluster gated `false` in the minimal tier). See §10 shift-59 decision.
 
 0as. ✅ **[SHIFT 58] Closed BOTH shift-57 deferred bugs + 2 more nits (reasoning-verified, no DB/browser).**
    Shift 57 parked two bugs as "needs design/browser"; on a fresh read both were more cold-fixable than the
@@ -1072,6 +1132,24 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   tz-independent, unit-tested helper (`computeStreakForDate`), so the fix is fully reasoning-verifiable
   even though the DB round-trip can't be exercised in this sandbox — the insert/dedup path is structurally
   unchanged; only the `value` it computes changed from `count` to the consecutive streak.
+
+- *(shift 59)* **`syncError` = hard reload, not `router.refresh()`; and don't touch load-bearing timer
+  identity.** Two calls this shift. (1) The failed-save recovery path used `router.refresh()`, which in
+  this architecture is a no-op: TendApp holds every server value in `useState(initial…)` seeded once at
+  mount and never reconciles props→state, so a soft server re-render's fresh props are silently dropped
+  and the wrong optimistic state persists. The clean options were (a) revert the specific optimistic
+  mutation per-caller (invasive — 6 call sites, each with different rollback shape) or (b) a hard
+  `window.location.reload()`. Chose (b): it's the error path (rare), it genuinely restores server truth,
+  and it matches the toast's "bringing you back in sync" promise. A future monolith decomposition could
+  make (a) clean, but reload is correct and minimal today. (2) The components hunter flagged that the
+  toast + milestone-coin auto-dismiss `useEffect(…, [onDone])` timers reset on every parent re-render
+  because they're passed inline `() => setX(null)` callbacks (fresh identity each render). This is
+  BENIGN today (the only sub-dismiss-interval re-render source, the 10s `liveNow` tick, is slower than
+  the 2.5–5s timers) AND the toast's unstable identity is load-bearing — it's what makes a rapid message
+  REPLACE correctly restart the dismiss timer (the toasts have no `key`). Memoizing the callback to "fix"
+  the reset would truncate the undo window on rapid replacement. So this was deliberately left as-is and
+  documented, not churned. Lesson reaffirmed (shift 57/58 line): a hunter finding ≠ an automatic fix —
+  weigh whether the "fix" regresses a working behaviour.
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
