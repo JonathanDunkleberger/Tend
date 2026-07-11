@@ -46,6 +46,7 @@ import {
   QUIT_PRESETS, SHOP_ITEMS,
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
+import { getDragonSprite } from "@/lib/sprites";
 import { migrateLocalStorageToServer } from "@/lib/migrate-local-data";
 import { apiCall, apiSync } from "@/lib/api";
 import type { LucideIcon } from "lucide-react";
@@ -113,6 +114,11 @@ export function TendApp({
   const [detailId, setDetailId] = useState<string | null>(null);
   const [coinToast, setCoinToast] = useState<{ msg: string; icon: LucideIcon } | null>(null);
   const [undoToast, setUndoToast] = useState<{ msg: string; onUndo: () => void } | null>(null);
+  // Gentle recovery when a save fails: tell the user, then re-sync from the server.
+  const syncError = useCallback(() => {
+    setCoinToast({ msg: "Couldn't save — bringing you back in sync", icon: X });
+    router.refresh();
+  }, [router]);
   const [confetti, setConfetti] = useState(false);
   const [bouncingId, setBouncingId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -836,7 +842,7 @@ export function TendApp({
     const result = await apiCall<{ action: string }>(`/api/habits/${hId}/log`, {
       method: "POST",
       body: { date: todayStr },
-      onError: () => router.refresh(),
+      onError: syncError,
     });
     if (result.ok && !wasComplete && result.data?.action === "logged") {
       const streak = getStreak(hId) + 1;
@@ -882,7 +888,7 @@ export function TendApp({
         apiCall<{ action: string }>(`/api/habits/${h.id}/log`, {
           method: "POST",
           body: { date: todayStr },
-          onError: () => router.refresh(),
+          onError: syncError,
         }).then((result) => {
           if (result.ok && result.data?.action === "logged") {
             const streak = getStreak(h.id) + 1;
@@ -1053,7 +1059,7 @@ export function TendApp({
 
     await apiCall(`/api/habits/${id}`, {
       method: "DELETE",
-      onError: () => router.refresh(),
+      onError: syncError,
     });
   };
 
@@ -1067,7 +1073,7 @@ export function TendApp({
     await apiCall(`/api/habits/${detailId}`, {
       method: "PATCH",
       body: { name: trimmed, color: editColor },
-      onError: () => router.refresh(),
+      onError: syncError,
     });
   };
 
@@ -1080,7 +1086,7 @@ export function TendApp({
     await apiCall(`/api/habits/${hId}`, {
       method: "PATCH",
       body: { name: trimmed, color: h?.color || "#6366f1" },
-      onError: () => router.refresh(),
+      onError: syncError,
     });
   };
 
@@ -1805,8 +1811,38 @@ export function TendApp({
                   </div>
               )}
               {habits.length === 0 ? (
-                <div style={{ padding: "36px 20px", textAlign: "center" }}>
-                  <p style={{ fontSize: 13, color: th.textMuted }}>Tap + to add your first habit</p>
+                <div style={{ padding: "34px 24px 30px", textAlign: "center", animation: "fadeUp 0.4s ease" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getDragonSprite(0, 3)}
+                    alt="A dragon egg waiting to be tended"
+                    width={64}
+                    height={64}
+                    style={{
+                      imageRendering: "pixelated",
+                      animation: "float 6s ease-in-out infinite",
+                      filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.25))",
+                      marginBottom: 4,
+                    }}
+                  />
+                  <p style={{ fontSize: 15, fontWeight: 600, color: th.text, margin: "8px 0 4px" }}>
+                    Your garden is ready
+                  </p>
+                  <p style={{ fontSize: 12.5, color: th.textSub, lineHeight: 1.5, maxWidth: 240, margin: "0 auto 14px" }}>
+                    Add your first habit to plant an egg. Tend it each day and watch your dragon hatch and grow.
+                  </p>
+                  <button
+                    onClick={() => { haptic("light"); setPage("add"); }}
+                    style={{
+                      padding: "9px 20px", borderRadius: 100, border: "none",
+                      background: "linear-gradient(135deg,#4caf50,#2e7d32)", color: "#fff",
+                      fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      boxShadow: "0 4px 16px rgba(76,175,80,0.32)",
+                    }}
+                  >
+                    <Plus size={15} strokeWidth={2.5} /> Plant your first egg
+                  </button>
                 </div>
               ) : (
                 habits.map((h, idx) => {
