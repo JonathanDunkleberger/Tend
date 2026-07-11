@@ -61,9 +61,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not enough coins", need: shopItem.price, have: currentCoins }, { status: 402 });
   }
 
-  // Deduct coins
+  // Deduct coins. If this write fails we must NOT grant the item — otherwise the
+  // user gets it free and the response still reports success (shift 14 fix).
   const newCoins = currentCoins - shopItem.price;
-  await supabase.from("profiles").update({ coins: newCoins }).eq("clerk_id", userId);
+  const { error: deductError } = await supabase
+    .from("profiles")
+    .update({ coins: newCoins })
+    .eq("clerk_id", userId);
+  if (deductError) {
+    return NextResponse.json({ error: deductError.message }, { status: 500 });
+  }
 
   // Add to inventory
   const { data, error } = await supabase

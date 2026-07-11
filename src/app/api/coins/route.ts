@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
+import { applyCoinDelta, clampCoinTotal } from "@/lib/economy";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -15,12 +16,14 @@ export async function POST(request: Request) {
   // Ensure profile exists (auto-creates if missing)
   const existingProfile = await ensureProfile(supabase, userId);
 
-  // ── Delta-based path (preferred — race-condition safe) ──
+  // ── Delta-based path (preferred) ──
+  // NOTE: this is a read-then-write, NOT atomic — concurrent requests can lose an
+  // update. The real fix is a Postgres atomic-increment RPC (deferred; see the
+  // night-train NEEDS EYES). The delta bound MUST stay above the largest
+  // legitimate single grant (the 90-day milestone is +500) or big rewards get
+  // silently truncated and the user loses coins on reload — see lib/economy.ts.
   if (typeof delta === "number") {
-    // Clamp delta to reasonable bounds: -500 to +100 per request
-    const clampedDelta = Math.max(-500, Math.min(100, delta));
-
-    const newCoins = Math.max(0, (existingProfile?.coins ?? 250) + clampedDelta);
+    const newCoins = applyCoinDelta(existingProfile?.coins ?? 250, delta);
     const updatePayload: Record<string, unknown> = { coins: newCoins };
     if (streakFreezes !== undefined) {
       updatePayload.streak_freezes = streakFreezes;
@@ -42,8 +45,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "coins or delta must be a number" }, { status: 400 });
   }
 
-  // Clamp absolute value to 0–10000 to prevent abuse
-  const clampedCoins = Math.max(0, Math.min(10000, coins));
+  // Clamp absolute value to prevent abuse
+  const clampedCoins = clampCoinTotal(coins);
 
   const updatePayload: Record<string, unknown> = { coins: clampedCoins };
   if (streakFreezes !== undefined) {
