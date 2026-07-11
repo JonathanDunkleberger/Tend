@@ -63,6 +63,10 @@ next-env.d.ts
 !/scripts/shots/preview-wrapped-fold.png
 !/scripts/shots/preview-wellness-full.png
 !/scripts/shots/preview-wellness-dark-full.png
+!/scripts/shots/preview-you-full.png
+!/scripts/shots/preview-you-dark-full.png
+!/scripts/shots/preview-nav-fold.png
+!/scripts/shots/preview-breathe-fold.png
 /scripts/srv.log
 /scripts/nextstart*
 

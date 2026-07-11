@@ -27,7 +27,11 @@ param(
     "preview-garden-dark|preview?view=garden&dark=1",
     "preview-wrapped|preview?view=wrapped",
     "preview-wellness|preview?view=wellness",
-    "preview-wellness-dark|preview?view=wellness&dark=1"
+    "preview-wellness-dark|preview?view=wellness&dark=1",
+    "preview-you|preview?view=you",
+    "preview-you-dark|preview?view=you&dark=1",
+    "preview-nav|preview?view=nav",
+    "preview-breathe|preview?view=breathe"
   )
 )
 $ErrorActionPreference = "Stop"
