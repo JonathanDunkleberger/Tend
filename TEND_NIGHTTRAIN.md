@@ -304,12 +304,15 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
-1. **Expand the `/preview` harness to the CORE surfaces** so they become visually verifiable. Mount,
-   with rich mock data: the **Garden daily-tend home** (habit rows, egg-warming, streak flames, one-tap
-   "all good"), a **habit detail** (dragon hero at each stage + egg-warming + grace shield), the full
-   **Insights** analytics screen, the **Wrapped** reel, and the **hatch + evolution ceremonies**. Add a
-   light/dark toggle per surface (the harness already supports THEME). Then wire each into the `file://`
-   screenshot pipeline (§14c) and commit proof shots. This is the enabling step for everything below.
+1. **Expand the `/preview` harness to the remaining CORE surfaces.** *(run-shift-1: DONE for the two
+   biggest — the **Garden daily-tend home** (real TerrariumScene + faithful today's-tend rows w/
+   egg-warming + one-tap check) and the full **Insights** analytics screen (real heatmap + Constellation
+   on rich mock history). Both screenshotted light+dark via `file://`. The harness is now a thin
+   server wrapper (`page.tsx`, reads `?view=` / `?dark=`) + client module (`preview-client.tsx`) so the
+   pipeline can capture any surface/theme without tab-switching JS.)* **Still to mount:** a **habit
+   detail** (dragon hero at each stage + egg-warming + grace shield) and the **hatch + evolution
+   ceremonies** — those pair naturally with item #2 (they're mostly a motion surface). Detail needs a
+   small extraction from the monolith (the detail view is inline ~line 2310); scope it as its own step.
 
 2. **PREMIUM MOTION + MICRO-INTERACTION PASS** (the "cool as f***" mandate — the biggest gap vs §2).
    On the now-previewable surfaces, design and build: the **hatch ceremony** (egg rocks → cracks →
@@ -321,12 +324,14 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    for Jonny. Showcase the purchased dragon art as the emotional payoff it's meant to be.
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
-   there — redesign Insights into something gorgeous and motivating on a phone: a **momentum curve**,
-   **per-habit consistency rings**, a **best-day radial / day-of-week bars**, **correlation/synergy
-   callouts** in plain warm language ("you tend more on days you sleep well"), a **streak timeline**,
-   and a headline "here's how you're doing" summary. Mobile-first, on-brand palette, dark-mode parity.
-   Verify composition via `/preview` + `file://`. (Consider loading the `dataviz` skill for palette/
-   chart best-practices before writing chart code.)
+   there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
+   **momentum curve** is DONE — Weekly Trend's flat pale bars are now a smooth green area sparkline w/
+   delta pill + glowing latest marker, dataviz-skill-guided, verified light+dark. `smoothPath` helper +
+   the SSR-safe SVG technique (viewBox 0..100 + preserveAspectRatio="none" + non-scaling stroke + HTML
+   overlay markers) are reusable for the rest.)* **Still to beautify:** **per-habit consistency rings**
+   (the scoreboard is still flat progress bars), a **best-day radial** (day-of-week is plain bars), the
+   **synergy constellation** (works but could be lovelier), a **streak timeline**, and a headline
+   "here's how you're doing this week" summary line at the top. Keep loading `dataviz` before chart code.
 
 4. **Promote the best parked ideas into real features** (§11), lightest-risk / highest-delight first:
    **dragon species-by-habit-type** (pure mapping logic → unit-testable + more meaningful collection);
@@ -521,6 +526,24 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   correctness insurance. A future shift's better moves: a fresh cold read to find + FIX a real latent bug
   (not just cover one), or a server-component/`file://`-verifiable UX improvement. Recorded here so a
   successor doesn't reflexively continue the pattern past its point of value.
+- *(run-2 shift 1)* **`/preview` split into a server wrapper + client module so the file:// pipeline can
+  screenshot ANY surface/theme.** The harness was one big `"use client"` page, so the offline screenshot
+  pipeline (§14, no HTTP egress → file:// pre-hydration markup only) could capture just the DEFAULT view.
+  Split it: `preview/page.tsx` is now a tiny server component that reads `?view=` / `?dark=1` and passes
+  them as `initialView`/`initialDark` to `preview-client.tsx`. The pipeline (`build-static-html.ps1`,
+  now accepting `name|path` route specs) fetches `preview?view=insights&dark=1` etc. and each surface
+  SSR-renders in the requested view/theme with zero tab-switching JS. **GOTCHA banked:** a *runtime value*
+  imported from a `"use client"` module INTO a server component becomes a client-reference proxy, not the
+  real value — `VIEW_KEYS.includes()` threw `not a function` at SSR. Fix: keep the value list in the
+  server module; import only the `type` across the boundary (types are erased). Two core surfaces
+  (Garden + Insights) now mount real components with rich mock data and are proof-shotted light+dark.
+- *(run-2 shift 1)* **SSR-safe responsive SVG sparkline recipe (for the analytics beautification).**
+  The momentum curve draws in a normalized `viewBox="0 0 100 100"` with `preserveAspectRatio="none"` so
+  it fills any card width, `vectorEffect="non-scaling-stroke"` so the 2px line stays crisp under the
+  non-uniform scale, and the point MARKERS + value labels are HTML divs positioned by `left:${x}%` /
+  `top:${y}%` overlay (circles drawn in the SVG would distort to ellipses under the non-uniform scale).
+  `smoothPath()` (Catmull-Rom→bézier) is in `constellation.tsx` and is the reusable primitive for the
+  remaining curves. Renders identically at SSR (no browser-only APIs) so it's fully file://-verifiable.
 - *(shift 15)* **Relapse penalty = a gentle, self-healing one-tier dip, NOT an accumulating counter.**
   Made the product call that §12 bug #2 flagged (permanent-cumulative vs recovering). Chose recovering,
   because the soul is explicit: assumes-best, never-shaming, "gently delays the egg's hatch." The old

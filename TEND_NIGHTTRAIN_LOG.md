@@ -200,3 +200,10 @@ Night 1 = 63 real shifts, 111 commits on night-train ahead of main. Real work: s
 pivot to the under-delivered ambition — premium visual/motion polish + BEAUTIFUL analytics, made
 sandbox-verifiable by expanding the /preview harness. Sentinel deliberately NOT set — mission continues.
 Ready to relaunch.
+- run2 shift 1: banked the /preview enabling step (Garden + Insights core surfaces now mount real
+  components w/ rich mock data, screenshotted light+dark via file://) + first analytics beautification
+  (Weekly Trend flat bars -> smooth green momentum curve, dataviz-guided, delta pill + glowing marker).
+  Split /preview into server-wrapper + client module so the pipeline can capture any surface/theme.
+  build/lint/test green (108). | frontier: mount habit-detail + hatch/evolution ceremonies (pairs w/
+  the motion pass); keep beautifying Insights (consistency rings, best-day radial, headline summary).
+  | needs eyes: none (real-device hydrated-motion eyeball still Jonny's, as always).
