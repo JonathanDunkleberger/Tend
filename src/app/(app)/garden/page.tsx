@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { TendApp } from "@/components/tend-app";
 import { today, daysAgo, getStage } from "@/lib/utils";
+import { getSeason } from "@/lib/constants";
 import { ensureProfile } from "@/lib/ensure-profile";
 import type { Habit, HabitLog, HabitWithStats, EarnedMilestones, QuitData, QuitProgressRow } from "@/types";
 
@@ -103,7 +104,7 @@ export default async function GardenPage() {
     lastCheckinDate: string | null;
     lastBonusDate: string | null;
     gratitudeEntries: { date: string; items: string[] }[];
-  } = { darkMode: false, season: "summer", earnedMilestoneCoins: {}, onboardingComplete: false, lastCheckinDate: null, lastBonusDate: null, gratitudeEntries: [] };
+  } = { darkMode: false, season: getSeason(), earnedMilestoneCoins: {}, onboardingComplete: false, lastCheckinDate: null, lastBonusDate: null, gratitudeEntries: [] };
   {
     const { data: prefs } = await supabase
       .from("user_preferences")
@@ -113,7 +114,7 @@ export default async function GardenPage() {
     if (prefs) {
       initialPreferences = {
         darkMode: prefs.dark_mode ?? false,
-        season: prefs.season ?? "summer",
+        season: prefs.season ?? getSeason(),
         earnedMilestoneCoins: (prefs.earned_milestone_coins as Record<string, string[]>) ?? {},
         onboardingComplete: prefs.onboarding_complete ?? false,
         lastCheckinDate: prefs.last_checkin_date ?? null,
