@@ -152,6 +152,7 @@ create table if not exists public.user_preferences (
   onboarding_complete   boolean not null default false,
   last_checkin_date     text,
   last_bonus_date       text,
+  gratitude_entries     jsonb not null default '[]',
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );

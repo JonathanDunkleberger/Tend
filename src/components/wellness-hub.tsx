@@ -10,6 +10,8 @@ interface WellnessHubProps {
   darkMode: boolean;
   /** Launch the shared breathing timer (box-breathing) modal from the parent */
   onBreathe: () => void;
+  /** Persist a gratitude entry server-side (via the parent's preferences sync) */
+  onSaveGratitude?: (entry: { date: string; items: string[] }) => void;
 }
 
 type Tool = "grounding" | "urgesurf" | "gratitude";
@@ -29,7 +31,7 @@ const AFFIRMATIONS = [
  * timer; grounding, urge-surf, and gratitude are self-contained mini-tools.
  * Never clinical, never shaming — supportive by design.
  */
-export function WellnessHub({ th, darkMode, onBreathe }: WellnessHubProps) {
+export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: WellnessHubProps) {
   const [tool, setTool] = useState<Tool | null>(null);
   // Stable-per-render affirmation without Math.random (SSR-safe): pick by minute-of-day.
   const [affirmation] = useState(
@@ -38,7 +40,7 @@ export function WellnessHub({ th, darkMode, onBreathe }: WellnessHubProps) {
 
   if (tool === "grounding") return <Grounding th={th} onBack={() => setTool(null)} />;
   if (tool === "urgesurf") return <UrgeSurf th={th} darkMode={darkMode} onBack={() => setTool(null)} />;
-  if (tool === "gratitude") return <Gratitude th={th} onBack={() => setTool(null)} />;
+  if (tool === "gratitude") return <Gratitude th={th} onBack={() => setTool(null)} onSave={onSaveGratitude} />;
 
   const cards: {
     key: Tool | "breathe";
@@ -334,7 +336,7 @@ function UrgeSurf({ th, darkMode, onBack }: { th: ThemeColors; darkMode: boolean
 }
 
 /* ───────────────────────── Gratitude: three good things ───────────────────────── */
-function Gratitude({ th, onBack }: { th: ThemeColors; onBack: () => void }) {
+function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void; onSave?: (entry: { date: string; items: string[] }) => void }) {
   const [items, setItems] = useState<string[]>(["", "", ""]);
   const [saved, setSaved] = useState(false);
 
@@ -342,12 +344,19 @@ function Gratitude({ th, onBack }: { th: ThemeColors; onBack: () => void }) {
 
   const save = () => {
     haptic("success");
-    try {
-      const key = "tend_gratitude";
-      const prev = JSON.parse(localStorage.getItem(key) || "[]");
-      prev.push({ date: new Date().toISOString().slice(0, 10), items: items.filter((s) => s.trim()) });
-      localStorage.setItem(key, JSON.stringify(prev.slice(-60)));
-    } catch { /* localStorage may be unavailable */ }
+    const entry = { date: new Date().toISOString().slice(0, 10), items: items.filter((s) => s.trim()) };
+    if (onSave) {
+      // Parent persists to server (+ localStorage cache) and dedupes by day
+      onSave(entry);
+    } else {
+      // Fallback: no parent handler → keep the localStorage-only behaviour
+      try {
+        const key = "tend_gratitude";
+        const prev = JSON.parse(localStorage.getItem(key) || "[]");
+        prev.push(entry);
+        localStorage.setItem(key, JSON.stringify(prev.slice(-60)));
+      } catch { /* localStorage may be unavailable */ }
+    }
     setSaved(true);
   };
 

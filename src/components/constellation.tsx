@@ -21,6 +21,7 @@ interface ConstellationProps {
   isPro?: boolean;
   onUpgrade?: () => void;
   th: ThemeColors;
+  gratitudeLog?: { date: string; items: string[] }[];
 }
 
 interface Synergy {
@@ -34,7 +35,7 @@ interface Synergy {
 
 export function Constellation({
   habits, isDone, getStreak, getTotal, getCleanDays, getBestStreak, getStage,
-  isPro, onUpgrade, th,
+  isPro, onUpgrade, th, gratitudeLog,
 }: ConstellationProps) {
   const sr = seed;
 
@@ -543,6 +544,33 @@ export function Constellation({
           </div>
         </div>
       )}
+
+      {/* ── 6b. Recent gratitude (from the Wellness "three good things" ritual) ── */}
+      {gratitudeLog && gratitudeLog.length > 0 && (() => {
+        const recent = gratitudeLog.slice(-3).reverse();
+        const daysLogged = new Set(gratitudeLog.map((e) => e.date)).size;
+        return (
+          <div className="cd" style={{ padding: 16, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <Heart size={15} color="#4caf50" />
+              <span style={{ fontSize: 14, fontWeight: 700, color: th.text }}>Things you were grateful for</span>
+              <span style={{ marginLeft: "auto", fontSize: 11, color: th.textMuted, fontWeight: 600 }}>{daysLogged} {daysLogged === 1 ? "day" : "days"} logged</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {recent.map((entry, i) => (
+                <div key={i} style={{ paddingLeft: 12, borderLeft: `2px solid rgba(76,175,80,0.4)` }}>
+                  <div style={{ fontSize: 11, color: th.textMuted, fontWeight: 600, marginBottom: 3 }}>
+                    {(() => { const d = new Date(entry.date + "T00:00:00"); return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }); })()}
+                  </div>
+                  {entry.items.map((it, j) => (
+                    <div key={j} style={{ fontSize: 13, color: th.text, lineHeight: 1.5 }}>· {it}</div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── 7. Calm advice ── */}
       {habits.length > 0 && (

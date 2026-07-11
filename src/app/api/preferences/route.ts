@@ -23,6 +23,7 @@ export async function GET() {
       onboarding_complete: false,
       last_checkin_date: null,
       last_bonus_date: null,
+      gratitude_entries: [],
     });
   }
   return NextResponse.json(data);
@@ -52,6 +53,8 @@ export async function PUT(request: Request) {
   if (typeof body.onboarding_complete === "boolean") allowed.onboarding_complete = body.onboarding_complete;
   if (typeof body.last_checkin_date === "string") allowed.last_checkin_date = body.last_checkin_date;
   if (typeof body.last_bonus_date === "string") allowed.last_bonus_date = body.last_bonus_date;
+  // Wellness gratitude log — append-only array of { date, items[] }, capped to 60
+  if (Array.isArray(body.gratitude_entries)) allowed.gratitude_entries = body.gratitude_entries.slice(-60);
 
   if (Object.keys(allowed).length === 0) {
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });

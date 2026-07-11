@@ -71,8 +71,11 @@ interface TendAppProps {
     onboardingComplete: boolean;
     lastCheckinDate: string | null;
     lastBonusDate: string | null;
+    gratitudeEntries?: GratitudeEntry[];
   };
 }
+
+export interface GratitudeEntry { date: string; items: string[] }
 
 export function TendApp({
   initialHabits, initialCoins, initialEarned, initialStreakFreezes,
@@ -91,6 +94,7 @@ export function TendApp({
   const [milestoneCelebration, setMilestoneCelebration] = useState<{ tier: CoinTier; habitName: string; coinReward: number } | null>(null);
   const [darkMode, setDarkMode] = useState(initialPreferences.darkMode);
   const [season, setSeason] = useState<SeasonKey>((initialPreferences.season as SeasonKey) || getSeason());
+  const [gratitudeLog, setGratitudeLog] = useState<GratitudeEntry[]>(initialPreferences.gratitudeEntries ?? []);
   const th = THEME[darkMode ? "dark" : "light"];
   const [page, setPageRaw] = useState<Page>("main");
   const prevPageRef = useRef<string>("main");
@@ -300,6 +304,17 @@ export function TendApp({
     if (!hasHydrated.current) return;
     apiSync("/api/preferences", "PUT", { dark_mode: darkMode, season });
   }, [darkMode, season]);
+
+  // Save a gratitude entry (from the Wellness hub) → local state, server, localStorage cache
+  const saveGratitude = useCallback((entry: GratitudeEntry) => {
+    setGratitudeLog((prev) => {
+      // One entry per day — replace today's if it exists
+      const next = [...prev.filter((e) => e.date !== entry.date), entry].slice(-60);
+      try { localStorage.setItem("tend_gratitude", JSON.stringify(next)); } catch { /* storage may be unavailable */ }
+      apiSync("/api/preferences", "PUT", { gratitude_entries: next });
+      return next;
+    });
+  }, []);
 
   // Handle ?upgraded=true URL param from Stripe redirect
   // Also poll the server to confirm the webhook has landed
@@ -2727,7 +2742,7 @@ export function TendApp({
             {habits.length > 0 && (
               <MultiHabitHeatmap habits={habits} isDone={isComplete} getCleanDays={getCleanDays} th={th} />
             )}
-            <Constellation habits={habits} isDone={isComplete} getStreak={getStreak} getTotal={getTotal} getCleanDays={getCleanDays} getBestStreak={getBestStreak} getStage={getStageForId} th={th} isPro={isTendPlus()} onUpgrade={() => setShowPaywall(true)} />
+            <Constellation habits={habits} isDone={isComplete} getStreak={getStreak} getTotal={getTotal} getCleanDays={getCleanDays} getBestStreak={getBestStreak} getStage={getStageForId} th={th} isPro={isTendPlus()} onUpgrade={() => setShowPaywall(true)} gratitudeLog={gratitudeLog} />
           </div>
         )}
 
@@ -2751,7 +2766,7 @@ export function TendApp({
 
         {/* ═══ WELLNESS ═══ */}
         {page === "wellness" && (
-          <WellnessHub th={th} darkMode={darkMode} onBreathe={() => { setBreathingHabit(null); setShowBreathe(true); }} />
+          <WellnessHub th={th} darkMode={darkMode} onBreathe={() => { setBreathingHabit(null); setShowBreathe(true); }} onSaveGratitude={saveGratitude} />
         )}
 
         {/* ═══ YOU ═══ */}
