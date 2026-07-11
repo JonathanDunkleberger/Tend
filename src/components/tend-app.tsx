@@ -90,6 +90,19 @@ export function TendApp({
   const [coins, setCoins] = useState(initialCoins);
   const [earned, setEarned] = useState<EarnedMilestones>(initialEarned);
   const [streakFreezes, setStreakFreezes] = useState<Record<string, number>>(initialStreakFreezes);
+  // Ref mirror of streakFreezes so grace-token grants that fire in parallel — e.g.
+  // two build habits both crossing a 7/21/60-day milestone in one "all good" tap,
+  // whose checkMilestones() timeouts each close over the same stale render snapshot
+  // — merge against the freshest map instead of clobbering each other. Without this
+  // the last writer wins in BOTH React state and the server payload (the coins route
+  // replaces streak_freezes wholesale), durably eating the other habit's token.
+  const streakFreezesRef = useRef(streakFreezes);
+  const setGraceTokens = useCallback((habitId: string, count: number) => {
+    const merged = { ...streakFreezesRef.current, [habitId]: count };
+    streakFreezesRef.current = merged;
+    setStreakFreezes(merged);
+    return merged;
+  }, []);
   const [pausedHabits, setPausedHabits] = useState<Record<string, boolean>>(initialPausedHabits);
   const [earnedMilestoneCoins, setEarnedMilestoneCoins] = useState<Record<string, string[]>>(initialPreferences.earnedMilestoneCoins);
   const [milestoneCelebration, setMilestoneCelebration] = useState<{ tier: CoinTier; habitName: string; coinReward: number } | null>(null);
@@ -225,7 +238,15 @@ export function TendApp({
         if (diff >= 2) {
           setDaysAwayCnt(diff);
           setShowWelcomeBack(true);
-          setBounceBackDay(1);
+          // Seed the bounce-back banner from the PERSISTED ramp position (bb_day),
+          // not a hardcoded day 1 — the actual coin grant runs off bb_day (see the
+          // effect near line 1152), so a returning mid-ramp or completed user was
+          // being shown a "Day 1 · +3 coins" banner that never matched the real
+          // grant. Show the day they're about to reach today (= storedBB + 1, the
+          // same newBB the grant effect computes); -1 = ramp already done → no banner.
+          let bb = 0;
+          try { bb = parseInt(localStorage.getItem("bb_day") || "0", 10); } catch { bb = 0; }
+          if (Number.isFinite(bb) && bb >= 0 && bb < 7) setBounceBackDay(bb + 1);
         }
       }
       localStorage.setItem("tend_last_visit", now);
@@ -690,11 +711,10 @@ export function TendApp({
       haptic("medium");
       setCoins((prev) => prev + nc);
       // Gift grace token(s) alongside coins, capped — persist together.
-      const held = streakFreezes[habitId] || 0;
+      const held = streakFreezesRef.current[habitId] || 0;
       const newHeld = Math.min(MAX_GRACE, held + graceGift);
       if (graceGift > 0 && newHeld > held) {
-        const newFreezes = { ...streakFreezes, [habitId]: newHeld };
-        setStreakFreezes(newFreezes);
+        const newFreezes = setGraceTokens(habitId, newHeld);
         syncCoins(nc, { streakFreezes: newFreezes });
         setTimeout(() => setCoinToast({ msg: "Grace token gifted 🛡️", icon: Shield }), 1400);
       } else {
@@ -1083,10 +1103,9 @@ export function TendApp({
   const GRACE_COST = 50;
   const MAX_GRACE = 3;
   const buyFreeze = async (hId: string) => {
-    const held = streakFreezes[hId] || 0;
+    const held = streakFreezesRef.current[hId] || 0;
     if (coins < GRACE_COST || held >= MAX_GRACE) return;
-    const newFreezes = { ...streakFreezes, [hId]: held + 1 };
-    setStreakFreezes(newFreezes);
+    const newFreezes = setGraceTokens(hId, held + 1);
     haptic("success");
     setCoinToast({ msg: "Grace token earned 🛡️", icon: Shield });
     setCoins((prev) => Math.max(0, prev - GRACE_COST));
@@ -1768,7 +1787,7 @@ export function TendApp({
                     {bounceBackDay === 1 ? "You showed up. That's everything." : bounceBackDay <= 3 ? "Building momentum — keep it rolling!" : "You're back in the groove. Your creatures are so happy!"}
                   </div>
                   <div style={{ fontSize: 10, color: th.textSub }}>
-                    {bounceBackDay >= 6 ? "Almost there!" : bounceBackDay >= 4 ? `${7 - bounceBackDay} more days` : `Day ${bounceBackDay} of 7`} • +{BOUNCE_BACK.find((b) => b.d === bounceBackDay)?.c ?? 0} coins today
+                    {bounceBackDay >= 6 ? "Almost there!" : bounceBackDay >= 4 ? `${7 - bounceBackDay} more days` : `Day ${bounceBackDay} of 7`}{(() => { const c = BOUNCE_BACK.find((b) => b.d === bounceBackDay)?.c; return c ? ` • +${c} coins today` : ""; })()}
                   </div>
                 </div>
                 <div style={{
@@ -2162,7 +2181,11 @@ export function TendApp({
               {/* Single hero creature — 140px, centered */}
               <div style={{ position: "relative", zIndex: 1 }}>
                 {dq ? (
-                  <Creature stage={Math.min(4, Math.floor(cleanD / 7))} color={detailHabit.color} happy={cleanD > 0} size={140} creatureType={detailHabit.creature_type} habitId={detailHabit.id} />
+                  // Use the shared stage function (STAGE_THRESHOLDS 0/3/7/14/30 + the
+                  // self-healing computeQuitStage floor) so the hero matches its own
+                  // "Quitting · <stage label>" caption and every other quit surface —
+                  // a raw Math.floor(cleanD/7) disagreed with all of them.
+                  <Creature stage={getStageForId(detailHabit.id)} color={detailHabit.color} happy={cleanD > 0} size={140} creatureType={detailHabit.creature_type} habitId={detailHabit.id} />
                 ) : (
                   <Creature stage={getStageForId(detailHabit.id)} color={detailHabit.color} happy={isHappy(detailHabit.id)} size={140} creatureType={detailHabit.creature_type} habitId={detailHabit.id} />
                 )}
