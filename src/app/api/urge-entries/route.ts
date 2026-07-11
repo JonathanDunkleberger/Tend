@@ -10,7 +10,10 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const habitId = url.searchParams.get("habit_id");
-  const limit = parseInt(url.searchParams.get("limit") || "100", 10);
+  // Guard against a non-numeric/negative ?limit (parseInt("abc")=NaN → .limit(NaN)
+  // builds a malformed PostgREST query → 500); clamp to a sane 1..500 window.
+  const parsedLimit = parseInt(url.searchParams.get("limit") || "100", 10);
+  const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 500) : 100;
 
   let query = supabase
     .from("urge_entries")

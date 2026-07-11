@@ -24,7 +24,12 @@ export function HealingTimeline({ habit, cleanDays, th }: HealingTimelineProps) 
         {timeline.map((step, i) => {
           const reached = cleanDays >= step.d;
           const isNext = !reached && (i === 0 || cleanDays >= timeline[i - 1].d);
-          const daysUntil = Math.max(0, Math.ceil(step.d - cleanDays));
+          const remaining = step.d - cleanDays;
+          // Sub-day milestones (e.g. nicotine's ~2h step) must count down in hours —
+          // Math.ceil'ing them to a whole day showed "tomorrow" next to the "2h" row.
+          const untilLabel = step.d < 1
+            ? `in ${Math.max(1, Math.ceil(remaining * 24))}h`
+            : Math.ceil(remaining) === 1 ? "tomorrow" : `in ${Math.ceil(remaining)}d`;
           return (
             <div key={i} style={{
               position: "relative", paddingBottom: i < timeline.length - 1 ? 14 : 0,
@@ -40,9 +45,9 @@ export function HealingTimeline({ habit, cleanDays, th }: HealingTimelineProps) 
               <div style={{ fontSize: 12, fontWeight: 600, color: reached ? th.text : th.textSub }}>
                 {step.t}
                 {reached && <Check size={9} color={habit.color} style={{ marginLeft: 6, verticalAlign: "middle" }} />}
-                {isNext && daysUntil > 0 && (
+                {isNext && remaining > 0 && (
                   <span style={{ marginLeft: 6, fontSize: 9, color: th.textMuted, fontWeight: 500 }}>
-                    {daysUntil === 1 ? "tomorrow" : `in ${daysUntil}d`}
+                    {untilLabel}
                   </span>
                 )}
               </div>
