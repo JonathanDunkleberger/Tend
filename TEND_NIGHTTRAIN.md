@@ -188,22 +188,33 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 8. DEFINITION OF DONE (refine as the vision sharpens — do NOT declare COMPLETE until all true)
 
-- [ ] `npm run build` + `npm run lint` pass clean on the `night-train` branch.
-- [ ] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream.
-- [ ] A delightful **onboarding** that hatches the first egg in under a minute.
+- [x] `npm run build` + `npm run lint` pass clean on the `night-train` branch. *(green every shift;
+      re-verified shift 5 — build ✅, lint 0 errors / 27 warnings.)*
+- [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
+      new `app/page.tsx`, on-brand, verified 200. Not yet browser-eyeballed but content/sprites serve.)*
+- [x] A delightful **onboarding** that hatches the first egg in under a minute. *(shift 1: rebuilt
+      grow-first twilight-garden flow. NOT yet browser-verified — auth-gated.)*
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
-      progress, dragon evolution art showcased with animation.
+      progress, dragon evolution art showcased with animation. *(shift 2: one-tap assumes-best check-in.
+      shift 5: ambient egg-warming progress bar per garden row. Left: browser-verify on a real phone.)*
 - [x] A **deep analytics** screen that genuinely helps + a shareable **Wrapped**. *(shift 3: Insights
       page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
       synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
-- [ ] An expanded **wellness suite** (breathing + at least 2–3 more uplifting tools).
+- [x] An expanded **wellness suite** (breathing + at least 2–3 more uplifting tools). *(shift 2:
+      `wellness-hub.tsx` ships 4 tools — Breathe + 5-4-3-2-1 grounding + 90s urge-surf + gratitude.
+      Meets "breathing + 2–3 more". Optional leftover: persist gratitude server-side + a calm mode.)*
 - [x] A coherent **pricing/monetization** model (costs modeled, free/Pro split, Stripe wired). *(shift 4:
       §13 PRICING MODEL — costs modeled, competitor benchmark, free/Tend+ split + price recommendation.
       Stripe already wired. Executing the recommended price tweak is an optional follow-up.)*
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
-      *(shift 4: PWA install prompt + on-brand manifest done; micro-interactions/dark-mode/safe-area
-      largely in place. Remaining: a11y pass + empty/error/loading states — frontier #14.)*
-- [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic.
+      *(shift 4: PWA install prompt + on-brand manifest. shift 5: reduced-motion guard, `:focus-visible`
+      ring, accessible role="checkbox" check-off, warm empty-garden state, `syncError` save-fail toasts,
+      egg-warming viz. Loading skeleton already present. Remaining: broader a11y sweep (more div-onClick
+      tap targets → real buttons/roles + contrast check), optional per-view skeletons + service worker.)*
+- [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
+      rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
+      Landing/onboarding/manifest already on-brand. Remaining: eyeball in-app copy on a real device;
+      the pricing route still uses "terrarium" décor labels — cosmetic, verify tone.)*
 - [ ] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
 
 ---
@@ -295,15 +306,22 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 > HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. DONE: front door (landing +
 > onboarding), bottom-nav shell, Wellness + You screens, assumes-best one-tap check-in, **Phase 3 deep
-> Insights + Tend Wrapped** (shift 3), and **shift 4 = grace-token UX (#10) + pricing model §13 (#12) +
-> PWA install prompt & on-brand manifest (#13)**. Remaining DoD levers: **(1) Phase 6 polish pass**
-> (a11y, empty/error/loading states, richer egg-progress viz — frontier #14); **(2) Phase 4 wellness
-> leftovers** (persist gratitude + Insights, calm mode — #15); optionally **(3) execute the §13 price
-> change** (#16). DoD now has only the polish + branding-audit items left un-checked. NOTE: all
-> shift-2/3/4 UI is build-verified but **NOT browser-verified** (auth-gated) — eyeball the Wrapped reel,
-> nav, wellness tools, You screen (incl. the new Install card), grace-token badge/detail, and one-tap
-> once with real Clerk keys. Read §6b audit + §10 decisions + §13 pricing first. `.env.local` +
-> middleware notes in NEEDS EYES still stand.
+> Insights + Tend Wrapped** (shift 3), grace-token UX + pricing model §13 + PWA install (shift 4), and
+> **shift 5 = Phase 6 polish + branding audit**: ambient egg-warming progress bar (#14c/§11), warm
+> empty-garden state + `syncError` save-fail toasts (#14b), reduced-motion guard + `:focus-visible`
+> ring + accessible `role="checkbox"` check-off + FAB aria-label (#14a), and a full **branding pass** —
+> README rebranded off the stale recovery-first framing and the /pricing route copy aligned to the
+> dragon-garden + §13 split. **§8 DoD now shows only 3 items un-checked**, and two of those hinge on
+> **browser-verification** (auth-gated) rather than new code. Remaining DoD levers: **(1)** the last of
+> Phase 6 polish — a broader a11y sweep (many habit-row `div`-onClick tap targets still lack roles/
+> keyboard handlers; contrast check both themes), optional per-view Insights skeletons + a service
+> worker (#14). **(2)** Phase 4 wellness leftovers — persist gratitude server-side + surface in
+> Insights, calm/night mode (#15). **(3, optional)** execute the §13 price change (#16). **BIGGEST
+> BLOCKER TO DECLARING DONE: none of the shift-2→5 UI is browser-verified** — it all renders behind
+> Clerk auth. A successor (or Jonny) with real keys must eyeball the Wrapped reel, nav, wellness tools,
+> You screen, grace-token badge/detail, one-tap, the new egg-warming bars, and the empty-garden state
+> once. Read §6b audit + §10 decisions + §13 pricing first. `.env.local` + middleware notes in NEEDS
+> EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.

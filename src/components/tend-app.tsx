@@ -2784,7 +2784,7 @@ export function TendApp({
       {/* FAB — lifted above the bottom nav + safe area */}
       {page === "main" && (
         <div style={{ position: "fixed", bottom: "calc(84px + env(safe-area-inset-bottom, 0px))", right: 20, zIndex: 55 }}>
-          <button className="fab" onClick={() => {
+          <button className="fab" aria-label="Add a new habit" onClick={() => {
             if (habits.length >= FREE_HABIT_LIMIT && !isTendPlus()) {
               setShowPaywall(true);
               return;
