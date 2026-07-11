@@ -39,6 +39,7 @@ import { CreatureNamingModal } from "@/components/creature-naming-modal";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
+import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
@@ -525,24 +526,8 @@ export function TendApp({
       if (h?.category === "quit") {
         return getCleanDays(hId);
       }
-      let s = 0;
-      // If today isn't complete yet, start counting from yesterday
-      // (don't break streak mid-day — streak breaks when the day ends uncompleted)
-      let d = isComplete(hId, daysAgo(0)) ? 0 : 1;
-      let gaps = 0;
-      const maxGaps = streakFreezes[hId] || 0;
-      while (true) {
-        if (isComplete(hId, daysAgo(d))) {
-          s++;
-          d++;
-        } else if (d > 0 && gaps < maxGaps) {
-          gaps++;
-          d++;
-        } else {
-          break;
-        }
-      }
-      return s;
+      // Delegate to the pure, unit-tested core-loop math (src/lib/streak.ts).
+      return computeStreak((n) => isComplete(hId, daysAgo(n)), streakFreezes[hId] || 0);
     },
     [isComplete, streakFreezes, habits, getCleanDays]
   );
@@ -553,13 +538,9 @@ export function TendApp({
     (hId: string) => {
       const h = habits.find((x) => x.id === hId);
       if (h?.category === "quit") return false;
-      if (!((streakFreezes[hId] || 0) > 0)) return false;
-      let raw = 0;
-      let d = isComplete(hId, daysAgo(0)) ? 0 : 1;
-      while (isComplete(hId, daysAgo(d))) { raw++; d++; }
-      return getStreak(hId) > raw;
+      return computeGraceActive((n) => isComplete(hId, daysAgo(n)), streakFreezes[hId] || 0);
     },
-    [habits, streakFreezes, isComplete, getStreak]
+    [habits, streakFreezes, isComplete]
   );
 
   // Best streak — compute historical maximum consecutive run from logs
@@ -570,23 +551,8 @@ export function TendApp({
         const qd = quitDataMap[hId];
         return Math.max(getCleanDays(hId), qd?.bestStreak ?? 0);
       }
-      // Collect all log dates for this habit, sort chronologically
-      const dates = (h?.logs || []).map((l) => l.log_date).sort();
-      if (!dates.length) return 0;
-      let best = 1;
-      let run = 1;
-      for (let i = 1; i < dates.length; i++) {
-        const prev = new Date(dates[i - 1] + "T12:00:00");
-        const curr = new Date(dates[i] + "T12:00:00");
-        const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
-        if (diffDays === 1) {
-          run++;
-          best = Math.max(best, run);
-        } else if (diffDays > 1) {
-          run = 1;
-        }
-        // diffDays === 0 means duplicate date, skip
-      }
+      // Historical best from logs (pure, tested) ∪ the current live streak.
+      const best = computeBestStreak((h?.logs || []).map((l) => l.log_date));
       return Math.max(best, getStreak(hId));
     },
     [habits, quitDataMap, getCleanDays, getStreak]
