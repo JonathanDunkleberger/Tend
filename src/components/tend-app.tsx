@@ -624,11 +624,17 @@ export function TendApp({
           setTimeout(() => { setCelebrationBanner(false); setCelebrationBannerFading(false); }, 300);
         }, 4000);
       }, 800);
-      // +10 coins at 1200ms
+      // +10 coins at 1200ms — gated to ONCE PER DAY (localStorage, like the
+      // bounce-back reward). Without this, unchecking + re-checking the last
+      // habit flips allDone false→true again and re-grants +10 endlessly.
       setTimeout(() => {
-        setCoins((p) => p + 10);
-        syncCoins(10);
-        setCoinToast({ msg: "+10 all habits done!", icon: Sparkles });
+        const lastAllDone = typeof window !== "undefined" ? localStorage.getItem("tend_alldone_date") : null;
+        if (lastAllDone !== todayStr) {
+          try { localStorage.setItem("tend_alldone_date", todayStr); } catch { /* noop */ }
+          setCoins((p) => p + 10);
+          syncCoins(10);
+          setCoinToast({ msg: "+10 all habits done!", icon: Sparkles });
+        }
       }, 1200);
     }
     prevAllDoneRef.current = allDone;
@@ -639,20 +645,38 @@ export function TendApp({
   const GRACE_MILESTONE_DAYS = new Set([7, 21, 60]);
   const checkMilestones = (habitId: string, streak: number) => {
     const ne = { ...earned };
+    // Durable dedup, localStorage-backed. WHY: build-habit milestones persist to
+    // the server `milestones` table (via the log route) and rehydrate into
+    // `earned`, but QUIT habits never create logs — so their `earned` is always
+    // empty on load and the passive quit-milestone effect re-grants coins + grace
+    // tokens on EVERY reload (a farmable exploit). This set records every granted
+    // milestone on-device so a grant fires once ever, matching build-habit
+    // behaviour. (`earned` still drives in-session UI checkmarks.)
+    const granted: Record<string, true> = (() => {
+      if (typeof window === "undefined") return {};
+      try { return JSON.parse(localStorage.getItem("tend_granted_milestones") || "{}"); }
+      catch { return {}; }
+    })();
     // Pure kernel decides which milestones are newly reached + their coin/grace
     // rewards (see lib/progress.ts); the loop below just fires the side effects.
     const { reached, coins: nc, graceGifts: graceGift } = selectNewMilestones(
       streak,
-      (days) => !!ne[`${habitId}:${days}`],
+      (days) => !!ne[`${habitId}:${days}`] || !!granted[`${habitId}:${days}`],
       MILESTONES,
       GRACE_MILESTONE_DAYS,
     );
     for (const m of reached) {
       ne[`${habitId}:${m.days}`] = true;
+      granted[`${habitId}:${m.days}`] = true;
       const Ic = getIcon(m.iconName);
       setCoinToast({ msg: `${m.label} +${m.coins}`, icon: Ic });
     }
     if (nc > 0) {
+      // Record the durable grant BEFORE any async state work so a fast reload
+      // can't slip a re-grant through.
+      if (typeof window !== "undefined") {
+        try { localStorage.setItem("tend_granted_milestones", JSON.stringify(granted)); } catch { /* noop */ }
+      }
       haptic("medium");
       setCoins((prev) => prev + nc);
       // Gift grace token(s) alongside coins, capped — persist together.
