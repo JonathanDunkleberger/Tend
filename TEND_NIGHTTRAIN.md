@@ -213,14 +213,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    showcase strip, never-shaming promise, Free/Tend+ pricing, repeated CTAs + mobile sticky bar,
    safe-area + reduced-motion. Server component, zero client JS, CSS-only motion. Verified 200 + all
    content + sprites serve. Also fixed the missing Clerk middleware (see §10 / NEEDS EYES).
-5. **[PHASE 1 — NEXT] Rebuild onboarding** (`src/components/onboarding.tsx`) into a delightful
-   ~60-second "hatch your first egg" flow that showcases a REAL dragon sprite (not the colored
-   `Creature` blob on a tiny CSS planet) and lets you name it. Re-center copy on *tending/growing*
-   with quitting as an optional path, matching the new landing's warmth. Verify the hatch moment feels
-   great. (Onboarding is triggered from `tend-app.tsx` when `initialHabits.length === 0`.)
-6. **[PHASE 2] Then:** build the mobile bottom-nav shell (Garden · Insights · Wellness · You) and start
-   carving views out of the 2808-line `tend-app.tsx` monolith as each is polished.
-7. **[PHASE 6, quick win]** Clear the 33 lint warnings opportunistically (don't block features).
+5. ✅ **[PHASE 1] Onboarding rebuilt.** DONE (shift 1, commit `bd0d761`). Grow-first, quitting
+   optional, twilight-garden aesthetic, REAL egg/dragon sprites, staged plant+reveal. Kept the
+   `onComplete(quitPick, buildPick)` contract so tend-app is untouched. **NOT yet visually verified in
+   a browser** (it renders only behind Clerk auth, which needs real keys) — a successor with keys, or
+   a temporary throwaway preview route, should eyeball the 4 steps + the reveal beat once.
+6. **[PHASE 2 — NEXT] Build the mobile bottom-nav shell** (🌱 Garden · 📊 Insights · 🧘 Wellness ·
+   🐉 You) — thumb-first, safe-area, 4 large tap targets. Then begin carving views out of the
+   2808-line `tend-app.tsx` monolith one at a time (start by extracting the "You"/profile + shop and
+   the wellness surfaces, which are the least entangled). Do it incrementally, building+committing per
+   extraction so a mid-way death is safe. This is the structural unlock for Phases 3–4.
+7. **[PHASE 2/6] Core-loop polish + lint hygiene** as you go: the assumes-best one-tap check-in,
+   satisfying micro-interactions, and clearing the 32 lint warnings (mostly unused vars + a few
+   exhaustive-deps in the monolith — the unused-var ones are safe quick wins; exhaustive-deps need
+   care).
+
+> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. Front door (landing + onboarding)
+> is rebuilt & on-brand. Biggest lever now = the bottom-nav shell + starting to decompose
+> `tend-app.tsx`. Read §6b audit + §10 decisions first. Don't forget the `.env.local` + middleware
+> notes in NEEDS EYES.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -256,6 +267,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   Clerk needs a publishable key (public) to prerender; Stripe/Supabase get obvious placeholders and are
   lazy so never hit at build. Keeps `npm run build` green for every successor shift without any real
   secret ever entering the tree. Real keys stay in Vercel. See NEEDS EYES.
+- *(shift 1)* **Landing = warm light garden; onboarding = warm twilight garden.** Researched 2026
+  app-landing conversion + Finch/Forest/Fabulous. Principles applied: lead with the *character/art*
+  (dragons are the emotional hook), hero answers "why care?" in one line, CTAs repeated + a mobile
+  thumb-zone sticky bar, and — since Tend has ZERO users — **no fabricated testimonials**; trust is
+  built with honest signals ("no shame, ever / your data is yours / beautiful on mobile") and the
+  never-shaming promise near the pricing. Landing is a **server component (zero client JS, CSS-only
+  motion)** for fast mobile LCP. If a successor adds interactivity, keep the static-first spirit.
+- *(shift 1)* **Grace token / "one slip never stings" is now a public promise** (stated on the landing
+  + onboarding). There's already `streak_freezes` in the schema/profile — Phase 2/5 should make the
+  grace-token UX real and tie it to coins so we don't over-promise. (Promoted from SURPRISE-ME.)
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
