@@ -246,6 +246,17 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
+> SHIFT 59 IN PROGRESS — baseline re-verified GREEN (build ✅, test 107/107, lint 0/5). Independently
+> re-confirmed shift 58's terrarium reduced-motion fix is COMPLETE (every SMIL cluster in
+> terrarium-scene.tsx — shooting stars/creature-mood-fx/bounce-sparkles/seasonal/moon/planet-shadow — is
+> gated by a `tc.*` flag that is `false` in the `minimal`/reduced tier; `useReducedMotion` hook is clean).
+> Following shift-57's lesson (hunt EXPLICITLY-unswept files, don't rubber-stamp "mature"), launched two
+> focused cold-read hunters at the genuinely-untouched surfaces: (A) the tend-app monolith's DEEP effect
+> wiring (useEffect deps/cleanup/timers/listeners/hydration — never swept), and (B) the smaller
+> never-swept components (creature-naming-modal, egg-picker, relapse-modal, urge-support, reason-editor,
+> planet-items, share-card, milestone-coin, confetti, toast, tend-plus-screen, install-prompt, creature).
+> If they surface reasoning-verifiable bugs → fix + test. If clean → close honestly; branch is mature.
+
 > NEXT SHIFT — shift 58 CLOSED BOTH of shift 57's found-but-deferred bugs (they were more
 > reasoning-verifiable than the deferral implied), then ran a fresh hunter on the least-swept surfaces
 > and fixed 2 more nits. Banked (#0as, 3 fix commits): (1) **log-route milestone keying** — now keys on
