@@ -7,8 +7,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const { intensity, note } = body;
+  // Guard the body parse (an empty/malformed request would otherwise throw an
+  // unhandled 500 — the sibling log route already wraps this).
+  let body: { intensity?: unknown; note?: unknown } = {};
+  try {
+    body = await req.json();
+  } catch {
+    body = {};
+  }
+
+  // Clamp intensity to the 1–10 scale the UI uses (a client could otherwise
+  // persist -100 or a huge value) and cap the free-text note length.
+  const rawIntensity = Number(body?.intensity);
+  const intensity = Number.isFinite(rawIntensity)
+    ? Math.min(10, Math.max(1, Math.round(rawIntensity)))
+    : 5;
+  const note = typeof body?.note === "string" ? body.note.slice(0, 500) : null;
 
   const supabase = await createServerSupabaseClient();
 
@@ -20,8 +34,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     .from("relapse_events")
     .insert({
       habit_id: id,
-      intensity: intensity ?? 5,
-      note: note ?? null,
+      intensity,
+      note,
     })
     .select()
     .single();

@@ -51,18 +51,22 @@ export async function POST(req: Request) {
     case "user.created":
     case "user.updated": {
       const { id, email_addresses, first_name, last_name, image_url } = event.data;
-      const email = email_addresses?.[0]?.email_address ?? "";
+      const email = email_addresses?.[0]?.email_address;
       const display_name = [first_name, last_name].filter(Boolean).join(" ") || null;
 
-      await supabase.from("profiles").upsert(
-        {
-          clerk_id: id,
-          email,
-          display_name,
-          avatar_url: image_url ?? null,
-        },
-        { onConflict: "clerk_id" }
-      );
+      // Only write `email` when Clerk actually provides one. A `user.updated`
+      // event that omits email data would otherwise upsert email:"" over a real
+      // stored address (onConflict: clerk_id → UPDATE), clobbering good data —
+      // the same class the shift-53 Stripe fix closed. display_name/avatar_url can
+      // legitimately be nulled by a user, so those are written as-is.
+      const payload: Record<string, unknown> = {
+        clerk_id: id,
+        display_name,
+        avatar_url: image_url ?? null,
+      };
+      if (email) payload.email = email;
+
+      await supabase.from("profiles").upsert(payload, { onConflict: "clerk_id" });
       break;
     }
     case "user.deleted": {
