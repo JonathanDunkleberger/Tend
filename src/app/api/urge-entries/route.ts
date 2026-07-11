@@ -41,6 +41,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "habit_id and method are required" }, { status: 400 });
   }
 
+  // Verify the habit belongs to this user before writing a row that references it.
+  // Without this, a client could log urge entries against another user's habit_id.
+  const { data: ownedHabit } = await supabase
+    .from("habits")
+    .select("id")
+    .eq("id", habit_id)
+    .eq("user_id", userId)
+    .single();
+  if (!ownedHabit) {
+    return NextResponse.json({ error: "Habit not found" }, { status: 404 });
+  }
+
   const { data, error } = await supabase
     .from("urge_entries")
     .insert({

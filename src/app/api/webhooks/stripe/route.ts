@@ -33,13 +33,16 @@ export async function POST(req: Request) {
       const clerkId = session.metadata?.clerk_id;
       if (!clerkId) break;
 
-      // Use upsert — profile may not exist yet if Clerk webhook didn't fire
+      // Use upsert — profile may not exist yet if Clerk webhook didn't fire.
+      // Only include email when Stripe actually provides one, so an upsert into an
+      // existing profile never clobbers a real stored email with an empty string.
+      const email = session.customer_details?.email;
       await supabase
         .from("profiles")
         .upsert(
           {
             clerk_id: clerkId,
-            email: (session.customer_details?.email) || "",
+            ...(email ? { email } : {}),
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: session.subscription as string,
             tier: "pro",
