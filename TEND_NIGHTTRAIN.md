@@ -275,7 +275,14 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       in internal identifiers (component name/comments), never user-facing copy; /pricing reads "All
       garden décor & themes". Quit-mode "recovery" copy (healing timelines, relapse modal) is correctly
       left in-context. Remaining: a real-device eyeball of the full in-app copy.)*
-- [ ] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
+- [x] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
+      *(run-2 shift 12: added **`REVIEW.md`** — a 3-minute skimmable merge/review guide that
+      consolidates the actionable items scattered across this 1000-line doc into one place: what the
+      branch is, merge safety (guardrails honored, build/lint/test green), the two REQUIRED Supabase
+      migrations (008 + 009, graceful fallback until run), the optional §13c price change, how to verify
+      on a networked machine (`/preview` URLs or just sign in), and a pointer table into §10/§12/§13.
+      This doc + `TEND_NIGHTTRAIN_LOG.md` remain the exhaustive record; `REVIEW.md` is the human
+      on-ramp so Jonny isn't cold-reading 152 commits.)*
 
 ---
 
@@ -331,7 +338,31 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
-> **STATE AS OF run-2 shift 8 — READ THIS.** Queue items **#1–#4 are all DONE**: the `/preview` harness
+> **STATE AS OF run-2 shift 12 — READ THIS FIRST.** All five queue items below are DONE and the
+> sandbox-verifiable feature/polish vein is genuinely exhausted (audited, not asserted — see the
+> per-shift notes). **Shift 12 ran three fresh honest audits to test the "exhausted" claim rather than
+> rubber-stamp it, and confirmed it this time:** (a) enumerated the `/preview` view-keys vs the committed
+> shots — every core surface is mounted + file://-verified; the only un-shot views (grounding/urge-surf/
+> gratitude/wind-down) are genuinely INTERACTIVE tools whose static pre-hydration frame carries no
+> verification value (correctly out of file:// scope, not a gap). (b) grepped for the shift-11 class of
+> bug (`opacity: <jsvar>?1:0` first-paint gating) across all components — no new instance; the remaining
+> matches are legitimately state-driven (isActive/revealed/earned/unlocked). (c) grepped user-facing copy
+> for recovery-first drift — all "recovery/relapse/urge" strings are correctly confined to quit-mode
+> context. Shift 12 ALSO independently eyeballed the committed landing + insights proof shots (didn't
+> trust prior "renders beautifully" claims) — both are genuinely gorgeous, the doc is not overclaiming.
+> **So shift 12 did the honest close-out move the frontier prescribes: no churn, tidy the docs, de-risk
+> the merge.** It shipped `REVIEW.md` (a 3-min human merge guide) → closed the LAST §8 DoD item ("this
+> doc reflects the final state so Jonny can review + merge with confidence"). **Every §8 box is now
+> checked EXCEPT the ones gated on real-device behaviour** (hydrated motion/audio, the daily-loop feel,
+> the full in-app copy eyeball) — which are Jonny's by definition and cannot be closed in this sandbox.
+> **Successor: do NOT reopen a bug hunt or re-beautify handsome surfaces (that's the churn the frontier
+> forbids). If you suspect a gap, audit view-keys-vs-shots / grep the class of bug FIRST (as shift 12
+> did) and act only on a REAL miss. If you find none, the honest shift is: confirm green, and stop — the
+> mission's remaining value is Jonny's device + the merge, not more code.** Do NOT write NIGHT-TRAIN
+> COMPLETE — §8's real-device gates are only Jonny's to close.
+>
+> --- prior state (kept for context) ---
+> **STATE AS OF run-2 shift 8.** Queue items **#1–#4 are all DONE**: the `/preview` harness
 > covers every core surface; the premium-motion pass is complete (ceremonies + ring burst + streak flame
 > + coin roll + page transitions + soft chime); the deep-analytics beautification is complete (momentum,
 > headline hero, consistency rings, best-day rose, streak journey, synergy constellation); and the parked
