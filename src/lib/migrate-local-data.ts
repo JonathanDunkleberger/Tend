@@ -9,17 +9,27 @@ export async function migrateLocalStorageToServer(): Promise<boolean> {
 
   let migrated = false;
 
+  // fetch() only rejects on network errors, NOT on 4xx/5xx — so a plain `await
+  // fetch()` swallows server failures and we'd still mark the migration complete
+  // below, permanently losing the user's data (this is a one-shot, flag-guarded
+  // migration). Throw on a non-ok response so the catch fires and the "done" flag
+  // is never set → the migration honestly retries on the next load.
+  const putJson = async (url: string, method: string, payload: unknown) => {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`Migration ${method} ${url} failed: ${res.status}`);
+  };
+
   try {
     // 1. Migrate quit data
     const quitRaw = localStorage.getItem("tend_quit_data");
     if (quitRaw) {
       const quitDataMap: Record<string, { quitDate: string; dailyCost: number; reason: string; urges: string[]; bestStreak: number }> = JSON.parse(quitRaw);
       for (const [habitId, qd] of Object.entries(quitDataMap)) {
-        await fetch(`/api/quit-progress/${habitId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(qd),
-        });
+        await putJson(`/api/quit-progress/${habitId}`, "PUT", qd);
       }
       migrated = true;
     }
@@ -29,11 +39,7 @@ export async function migrateLocalStorageToServer(): Promise<boolean> {
     if (itemsRaw) {
       const items: string[] = JSON.parse(itemsRaw);
       for (const itemId of items) {
-        await fetch("/api/inventory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ itemId }),
-        });
+        await putJson("/api/inventory", "POST", { itemId });
       }
       migrated = true;
     }
@@ -58,11 +64,7 @@ export async function migrateLocalStorageToServer(): Promise<boolean> {
     if (bonusRaw) prefs.last_bonus_date = bonusRaw;
 
     if (Object.keys(prefs).length > 0) {
-      await fetch("/api/preferences", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(prefs),
-      });
+      await putJson("/api/preferences", "PUT", prefs);
       migrated = true;
     }
 
@@ -72,11 +74,7 @@ export async function migrateLocalStorageToServer(): Promise<boolean> {
       const paused: Record<string, boolean> = JSON.parse(pausedRaw);
       for (const [habitId, isPaused] of Object.entries(paused)) {
         if (isPaused) {
-          await fetch(`/api/habits/${habitId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ is_paused: true }),
-          });
+          await putJson(`/api/habits/${habitId}`, "PATCH", { is_paused: true });
         }
       }
       migrated = true;
