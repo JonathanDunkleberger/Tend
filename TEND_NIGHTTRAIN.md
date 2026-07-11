@@ -246,21 +246,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 52 executed the shift-51 pivot: shipped + BROWSER-VERIFIED a landing
-> "evolution-journey" strip (#0am) — the landing now SHOWS the #1 pillar (dragon art growing up through
-> all 5 real stages, Day 1→30) instead of only describing it. The landing is now genuinely
-> conversion-complete AND showcases the emotional payoff. **Remaining sandbox-verifiable landing levers
-> are thin** (the copy, FAQ, OG, pricing, promise, showcase, and now the evolution payoff are all done).
-> Successor options, in order: (1) a smaller landing polish only if a concrete gap is spotted on a fresh
-> read — do NOT invent churn; (2) execute the §13/#16 Stripe price change IF Jonny wants it (needs new
-> price IDs — a keyed task, don't ship unrunnable config); (3) the DEFERRED §12 bugs (non-atomic
-> coins/inventory → Postgres RPC + migration; urge-entries ownership; Stripe email-clobber;
-> verify-subscription fallback) all need a running DB/Stripe → for Jonny. Also open: the bounce-back ramp
-> fires for ALL users, not just after a real lapse (product call for Jonny, §12). The cold-read bug vein
-> is exhausted (shifts 49–51, four passes) — do NOT re-run a 5th hunt, and do NOT extract math for
-> coverage's sake. **The meaningful remaining DoD gates all hinge on a real-device / networked-browser
-> eyeball on Jonny's machine** (see §14 for why this sandbox can't). This is a mature branch: prefer
-> banking a real, verifiable improvement over manufacturing work.
+> NEXT SHIFT — shift 53 banked two reasoning-verifiable API guards from the §12 deferred list (#0an):
+> the `urge-entries` POST now verifies habit ownership (was an IDOR-adjacent gap), and the Stripe
+> checkout upsert no longer clobbers a stored email with `""`. Both were cold-readable (the deferred
+> label had lumped them with the truly DB-gated bugs, but the *guard logic* is verifiable by reading —
+> exactly like shift 14's inventory error-capture fix). **The §12 deferred list is now down to the two
+> that genuinely need a live DB/Stripe:** (1) non-atomic coins/inventory read-then-write race → needs a
+> Postgres atomic-increment RPC + migration; (2) `verify-subscription`'s 10-session global-pagination
+> fallback → needs real Stripe volume to verify. **Both are for Jonny / a keyed shift — don't ship
+> unrunnable SQL or config blind.** Successor options, in priority order: (a) if a *concrete* correctness
+> or copy gap is spotted on a fresh read, fix it — but do NOT invent churn and do NOT re-run the
+> exhausted cold-read hunt (shifts 49–51 + the §12 sweep have covered the reasoning-verifiable surface);
+> (b) execute the §13/#16 Stripe price change IF Jonny wants it (keyed — new price IDs). Also open: the
+> bounce-back ramp fires for ALL users, not just after a real lapse (product call for Jonny, §12).
+> **The meaningful remaining DoD gates all hinge on a real-device / networked-browser eyeball on Jonny's
+> machine** (see §14 for why this sandbox can't). This is a mature branch: prefer banking a real,
+> verifiable improvement over manufacturing work — and if none is genuinely available, say so plainly
+> rather than churning.
 
 > PRIOR POINTER — shift 51 mined the ONE untouched vein the shift-50 pointer flagged (constellation/Wrapped
 > derivations + shop/gallery/onboarding/settings) and FIXED 3 real analytics bugs (see #0al): the
@@ -280,6 +282,22 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL users, not just
 > after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12). Do NOT extract math
 > for coverage's sake. See §14 for the sandbox limit.
+
+0an. ✅ **[SHIFT 53] Two reasoning-verifiable API guards from the §12 deferred list — habit-ownership
+   check on `urge-entries` + Stripe email-clobber stopped.** The frontier's remaining bug list was
+   mostly "for Jonny (needs DB/Stripe)", but on a fresh read two of them were actually cold-readable
+   guards — the *logic* is verifiable without a live DB, exactly like shift 14's inventory error-capture
+   fix (which also touched a DB route but was reasoning-verified). (1) **IDOR-adjacent:** `urge-entries`
+   POST inserted `{user_id: me, habit_id}` with `habit_id` straight from the request body and no
+   ownership check → a client could log urge rows referencing another user's habit. Added the same
+   ownership SELECT the `habits/[id]` route already uses (`.eq("id", habit_id).eq("user_id", userId)`)
+   before the insert, returning 404 when the habit isn't the caller's. (2) **Data integrity:** the Stripe
+   `checkout.session.completed` upsert set `email: "" ` when `customer_details.email` was absent — and
+   since it upserts `onConflict: clerk_id`, that overwrote a real stored email with an empty string on
+   any returning-customer checkout. Now `email` is only spread into the payload when Stripe actually
+   provides one. build GREEN, lint 0/5, test 99/99, 1 commit. **§12 deferred list now down to the two
+   that genuinely need a live DB/Stripe** (non-atomic coins/inventory race → Postgres RPC; the
+   verify-subscription 10-session fallback) — left for Jonny/a keyed shift.
 
 0am. ✅ **[SHIFT 52] Landing "evolution-journey" strip — SHOWS the #1 pillar (dragon art payoff),
    browser-verified via the file:// harness.** Executed the shift-51 pivot away from bug-hunting to the
@@ -869,6 +887,17 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   in `quit.test.ts` (92→94). This also proves shift 13's "pure-code test lever exhausted" note was about
   *coverage-for-coverage's-sake* — extracting math to FIX a real behavioural bug is still high-value.
 
+- *(shift 53)* **Not every "deferred" bug is actually DB-gated — re-triage before punting.** Shift 14
+  lumped four bugs into §12 as "all need a running DB/Stripe → for Jonny," and shifts since treated the
+  whole list as untouchable in this sandbox. On a fresh read two of them (urge-entries ownership, Stripe
+  email-clobber) were plain guard logic whose *correctness is verifiable by reading* — the DB dependency
+  was for observing the race/volume, not for reasoning about the guard. Fixed both. The lesson recorded
+  for successors: when a bug is parked as "needs a live service," check whether it's the *fix* that needs
+  the service or just the *repro* — a guard/validation fix (return 404 if not owned, don't write "") is
+  usually cold-verifiable and shouldn't wait for Jonny. What genuinely stays deferred: the atomicity
+  race (needs an atomic SQL RPC + migration to even express the fix) and the verify-subscription volume
+  fallback (the correct fix — look up by metadata — needs real Stripe data to confirm it resolves).
+
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
@@ -911,14 +940,21 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
      as it rebuilds, and is NEVER worse than one tier below best no matter how many slips. Removed the
      `stageDrops` counter entirely (state/persistence/hydration; `stage_drops` column left dormant, PUT/
      GET already treat it optional). `npm test` 92→94, build GREEN, lint unchanged. See §10 decision.
-  3. **`urge-entries` POST doesn't verify habit ownership** — writes `{user_id: me, habit_id}` with
-     `habit_id` straight from the body; a user can create urge rows pointing at another user's habit_id
-     (stamped with the attacker's own user_id, so no cross-user *read*, just referentially-bad data).
-  4. **Low-sev:** Stripe `checkout.session.completed` upsert can overwrite a stored email with `""`
-     when `customer_details.email` is absent; `verify-subscription`'s no-customer-id fallback lists only
-     the 10 most-recent GLOBAL checkout sessions, so under real volume a paid user's session won't be
+  3. ✅ **FIXED (shift 53) — `urge-entries` POST now verifies habit ownership.** Was: it wrote
+     `{user_id: me, habit_id}` with `habit_id` straight from the body, so a client could create urge
+     rows pointing at another user's habit_id (stamped with their own user_id → no cross-user *read*,
+     just referentially-bad data). Now adds the same ownership SELECT the `habits/[id]` route uses
+     (`id` + `user_id`) before insert, returning 404 when the habit isn't the caller's. Cold-readable
+     (no DB needed to verify the logic — mirrors an established pattern), like shift 14's inventory fix.
+  4. **Stripe / verify-subscription — email-clobber FIXED (shift 53); the fallback pagination still
+     DEFERRED.** ✅ Fixed: Stripe `checkout.session.completed` upsert used to overwrite a stored email
+     with `""` when `customer_details.email` was absent (it upserts onConflict clerk_id) → now `email`
+     is only included in the payload when Stripe actually provides one. ⏳ Still deferred (needs a
+     running Stripe under real volume to verify): `verify-subscription`'s no-customer-id fallback lists
+     only the 10 most-recent GLOBAL checkout sessions, so under load a paid user's session won't be
      found and they stay on free tier (this route is the webhook-failure fallback → fails exactly when
-     needed). All need a running Stripe/Supabase to verify a fix → left for a keyed shift or Jonny.
+     needed). The proper fix is to look up the session by the Clerk metadata rather than paginating
+     global sessions → left for a keyed shift or Jonny.
 
 - **✅ PARTLY CLEARED (shift 9) — the landing page is now browser-verified; the interactive in-app
   flows need YOUR machine.** Shift 9 proved the night-train sandbox firewalls Chromium's network (§14),
