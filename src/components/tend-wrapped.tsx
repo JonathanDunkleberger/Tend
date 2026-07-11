@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { Creature } from "@/components/creature";
 import { Share2, X, Sparkles, ChevronRight } from "lucide-react";
 import { STAGE_LABELS } from "@/lib/constants";
+import { computeDayOfWeekRates } from "@/lib/progress";
 import { daysAgo, haptic } from "@/lib/utils";
 import type { HabitWithStats } from "@/types";
 
@@ -60,23 +61,21 @@ export function TendWrapped({
       if (t > topTotal) { topTotal = t; topHabit = h; }
     });
 
-    // Best day of the week (build habits, last 60 days)
-    const dayTotals = [0, 0, 0, 0, 0, 0, 0];
-    const dayDone = [0, 0, 0, 0, 0, 0, 0];
-    for (let i = 0; i < 60; i++) {
-      const d = daysAgo(i);
-      const dayIdx = new Date(d + "T12:00:00").getDay();
-      buildHabits.forEach((h) => {
-        dayTotals[dayIdx]++;
-        if (isDone(h.id, d)) dayDone[dayIdx]++;
-      });
-    }
+    // Best day of the week — same tested kernel + 30-day window as Insights, so
+    // the two surfaces can never name different "best days" for the same person.
+    // The kernel skips days before a habit existed (no bogus 0% from empty days).
+    const last30 = Array.from({ length: 30 }, (_, i) => daysAgo(i));
+    const dayRates = computeDayOfWeekRates(
+      last30,
+      buildHabits.map((h) => ({ id: h.id, startDate: h.created_at.slice(0, 10) })),
+      isDone,
+      (d) => new Date(d + "T12:00:00").getDay(),
+    );
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     let bestDayIdx = 0;
     let bestDayRate = -1;
-    dayNames.forEach((_, i) => {
-      const rate = dayTotals[i] > 0 ? dayDone[i] / dayTotals[i] : 0;
-      if (dayTotals[i] > 0 && rate > bestDayRate) { bestDayRate = rate; bestDayIdx = i; }
+    dayRates.forEach((r, i) => {
+      if (r.total > 0 && r.pct > bestDayRate) { bestDayRate = r.pct; bestDayIdx = i; }
     });
     const hasDayData = bestDayRate > 0;
 
@@ -416,7 +415,10 @@ export function TendWrapped({
     }
   }, [stats, persona]);
 
-  const current = cards[idx];
+  // Clamp: the card set is dynamic (some cards are conditional on stats), so if it
+  // shrinks while open, idx could exceed the last index → cards[idx] undefined →
+  // crash on current.bg. Clamp defensively rather than trust go()'s tap-time clamp.
+  const current = cards[Math.min(idx, cards.length - 1)];
 
   return (
     <div

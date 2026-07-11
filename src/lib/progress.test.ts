@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeConsistency, selectNewMilestones, selectNewCoinTiers, computeSynergies } from "./progress";
+import { computeConsistency, selectNewMilestones, selectNewCoinTiers, computeSynergies, computeDayOfWeekRates } from "./progress";
 
 // isDone(n) predicate from a boolean array indexed by "days ago".
 const fromDays = (days: boolean[]) => (n: number) => days[n] ?? false;
@@ -192,5 +192,61 @@ describe("computeSynergies", () => {
     // minDays 5 drops a 4-day pair; strengthWindow 10 → 4/10 would-be... but dropped
     expect(computeSynergies(2, () => 4, { minDays: 5 })).toHaveLength(0);
     expect(computeSynergies(2, () => 5, { minDays: 5, strengthWindow: 10 })[0].strength).toBe(0.5);
+  });
+});
+
+describe("computeDayOfWeekRates", () => {
+  // Fixed calendar: 7 consecutive dates whose weekday indices are 0=Sun…6=Sat.
+  // (2024-06-30 is a Sunday, so the index equals the offset here.)
+  const week = ["2024-06-30", "2024-07-01", "2024-07-02", "2024-07-03", "2024-07-04", "2024-07-05", "2024-07-06"];
+  const dayIndexOf = (d: string) => new Date(d + "T12:00:00").getDay();
+
+  it("tallies done/total/pct per weekday for a habit done every day", () => {
+    const rates = computeDayOfWeekRates(week, [{ id: "a", startDate: "2024-06-30" }], () => true, dayIndexOf);
+    rates.forEach((r) => {
+      expect(r.total).toBe(1);
+      expect(r.done).toBe(1);
+      expect(r.pct).toBe(100);
+    });
+  });
+
+  it("does NOT count days before a habit existed as misses", () => {
+    // Habit starts mid-week (Wed = index 3). Done on every day it existed.
+    const start = "2024-07-03";
+    const rates = computeDayOfWeekRates(week, [{ id: "a", startDate: start }], (_id, d) => d >= start, dayIndexOf);
+    // Sun–Tue (pre-creation) are untallied → total 0, pct 0 (not a fabricated miss).
+    [0, 1, 2].forEach((i) => { expect(rates[i].total).toBe(0); expect(rates[i].pct).toBe(0); });
+    // Wed–Sat all counted and done → 100%.
+    [3, 4, 5, 6].forEach((i) => { expect(rates[i].total).toBe(1); expect(rates[i].pct).toBe(100); });
+  });
+
+  it("computes an honest rate over only the days a young habit existed", () => {
+    // 4-day-old habit (Wed–Sat), done Wed+Fri, missed Thu+Sat → each weekday 0/1 or 1/1.
+    const start = "2024-07-03";
+    const done = new Set(["2024-07-03", "2024-07-05"]);
+    const rates = computeDayOfWeekRates(week, [{ id: "a", startDate: start }], (_id, d) => done.has(d), dayIndexOf);
+    expect(rates[3].pct).toBe(100); // Wed done
+    expect(rates[4].pct).toBe(0);   // Thu missed
+    expect(rates[5].pct).toBe(100); // Fri done
+    expect(rates[6].pct).toBe(0);   // Sat missed
+  });
+
+  it("aggregates multiple habits into the same weekday buckets", () => {
+    const rates = computeDayOfWeekRates(
+      ["2024-06-30", "2024-07-07"], // two Sundays
+      [{ id: "a", startDate: "2024-06-01" }, { id: "b", startDate: "2024-06-01" }],
+      (id, d) => id === "a" || d === "2024-07-07", // a always; b only on the 2nd Sunday
+      dayIndexOf,
+    );
+    // Sunday bucket: 2 habits × 2 Sundays = 4 counted; done = a(2) + b(1) = 3 → 75%.
+    expect(rates[0].total).toBe(4);
+    expect(rates[0].done).toBe(3);
+    expect(rates[0].pct).toBe(75);
+  });
+
+  it("returns all-zero tallies for an empty habit list", () => {
+    const rates = computeDayOfWeekRates(week, [], () => true, dayIndexOf);
+    expect(rates).toHaveLength(7);
+    rates.forEach((r) => { expect(r.total).toBe(0); expect(r.done).toBe(0); expect(r.pct).toBe(0); });
   });
 });

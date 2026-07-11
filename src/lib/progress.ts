@@ -30,6 +30,54 @@ export function computeConsistency(
   return Math.round((done / window) * 100);
 }
 
+/** One weekday's completion tally: how many done out of how many counted. */
+export interface DayTally {
+  done: number;
+  total: number;
+  pct: number;
+}
+
+/**
+ * Day-of-week completion rates over a set of dates, for the "which day do I tend
+ * best/worst?" analytics on Insights and in Wrapped.
+ *
+ * A day is only counted for a habit when it's on or after that habit's start
+ * date — a day BEFORE a habit existed is not a "miss" and must not inflate the
+ * denominator (this mirrors computeConsistency's age cap; without it a 3-day-old
+ * habit reads ~0% on every weekday and fabricates a bogus "you slip on Tuesdays"
+ * insight). Kept framework-free: the caller supplies `dayIndexOf(date)` (0=Sun…
+ * 6=Sat) and `isDone(id, date)`, so nothing here touches `Date` or React.
+ *
+ * @param dates      the window of ISO `YYYY-MM-DD` dates to tally
+ * @param habits     `{ id, startDate }` — startDate is the ISO date the habit began
+ * @param isDone     (id, date) => was that habit completed on that date
+ * @param dayIndexOf (date) => weekday index 0=Sun … 6=Sat
+ * @returns 7 tallies indexed 0=Sun … 6=Sat, each with done/total/pct (pct 0–100)
+ */
+export function computeDayOfWeekRates(
+  dates: readonly string[],
+  habits: readonly { id: string; startDate: string }[],
+  isDone: (id: string, date: string) => boolean,
+  dayIndexOf: (date: string) => number,
+): DayTally[] {
+  const done = [0, 0, 0, 0, 0, 0, 0];
+  const total = [0, 0, 0, 0, 0, 0, 0];
+  for (const d of dates) {
+    const idx = dayIndexOf(d);
+    if (idx < 0 || idx > 6) continue;
+    for (const h of habits) {
+      if (d < h.startDate) continue; // day predates the habit — not a miss
+      total[idx]++;
+      if (isDone(h.id, d)) done[idx]++;
+    }
+  }
+  return total.map((t, i) => ({
+    done: done[i],
+    total: t,
+    pct: t > 0 ? Math.round((done[i] / t) * 100) : 0,
+  }));
+}
+
 /**
  * Which streak-milestones are newly reached at `streak`, plus the coins and free
  * grace tokens they grant. A milestone counts once: `alreadyEarned(days)` filters

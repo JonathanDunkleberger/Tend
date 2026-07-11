@@ -6,7 +6,7 @@ import {
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
 import { seed, daysAgo, daysBetween, today } from "@/lib/utils";
-import { computeConsistency, computeSynergies } from "@/lib/progress";
+import { computeConsistency, computeSynergies, computeDayOfWeekRates } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
 import type { HabitWithStats } from "@/types";
@@ -109,22 +109,20 @@ export function Constellation({
   }, [habits, getStreak, getBestStreak, getTotal, getStage, isDone]);
 
   // ── Day-of-week completion rate (last 30 days) ──
+  // Delegates to the tested computeDayOfWeekRates kernel (lib/progress.ts), which
+  // skips days before a habit was created so young habits don't read ~0% on every
+  // weekday. Wrapped's "best day" uses the same kernel + window so they can't
+  // contradict each other.
   const dayOfWeekData = useMemo(() => {
-    const dayTotals = [0, 0, 0, 0, 0, 0, 0];
-    const dayDone = [0, 0, 0, 0, 0, 0, 0];
     const last30 = Array.from({ length: 30 }, (_, i) => daysAgo(i));
-    last30.forEach((d) => {
-      const dayIdx = new Date(d + "T12:00:00").getDay();
-      buildHabits.forEach((h) => {
-        dayTotals[dayIdx]++;
-        if (isDone(h.id, d)) dayDone[dayIdx]++;
-      });
-    });
+    const tallies = computeDayOfWeekRates(
+      last30,
+      buildHabits.map((h) => ({ id: h.id, startDate: h.created_at.slice(0, 10) })),
+      isDone,
+      (d) => new Date(d + "T12:00:00").getDay(),
+    );
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return dayNames.map((name, i) => ({
-      name,
-      pct: dayTotals[i] > 0 ? Math.round((dayDone[i] / dayTotals[i]) * 100) : 0,
-    }));
+    return dayNames.map((name, i) => ({ name, pct: tallies[i].pct }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habits, isDone]);
 
