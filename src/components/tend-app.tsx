@@ -2012,6 +2012,33 @@ export function TendApp({
                         >
                           <X size={12} />
                         </button>
+                        {/* Ambient egg-warming progress — fills toward the next hatch/evolution */}
+                        {!isPaused && !quit && stage < 4 && (() => {
+                          const pv = STAGE_THRESHOLDS[stage];
+                          const nx = STAGE_THRESHOLDS[stage + 1];
+                          const pct = Math.max(0, Math.min(((total - pv) / (nx - pv)) * 100, 100));
+                          const warming = pct >= 66; // egg is glowing hot, close to hatch
+                          const label = stage === 0 ? "warming toward hatch" : "growing toward next form";
+                          return (
+                            <div
+                              aria-hidden="true"
+                              title={`${Math.round(pct)}% — ${label}`}
+                              style={{
+                                position: "absolute", left: 12, right: 12, bottom: 3,
+                                height: 2.5, borderRadius: 2, overflow: "hidden",
+                                background: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                              }}
+                            >
+                              <div style={{
+                                height: "100%", width: `${pct}%`, borderRadius: 2,
+                                background: `linear-gradient(90deg,${h.color}55,${h.color})`,
+                                boxShadow: warming ? `0 0 6px ${h.color}` : "none",
+                                animation: warming ? "eggWarm 2.4s ease-in-out infinite" : "none",
+                                transition: "width 0.5s ease",
+                              }} />
+                            </div>
+                          );
+                        })()}
                     </div>
                   );
                 })
