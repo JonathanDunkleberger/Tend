@@ -40,7 +40,7 @@ export function WelcomeBack({ daysAway, onClose, th }: WelcomeBackProps) {
         </button>
         <div style={{ marginTop: 12, fontSize: 10, color: th.textFaint }}>
           <RefreshCw size={10} style={{ verticalAlign: "middle", marginRight: 3 }} />
-          Bounce-back streak starts now — earn bonus coins for recovery!
+          Bounce-back streak starts now — earn bonus coins for showing up!
         </div>
       </div>
     </div>

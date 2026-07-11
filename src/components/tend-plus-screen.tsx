@@ -13,7 +13,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
     {
       Icon: Infinity,
       title: "Unlimited habits",
-      desc: "Track everything that matters to your recovery",
+      desc: "Grow as many habit eggs as you like — no cap",
     },
     {
       Icon: Egg,
@@ -158,7 +158,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
           textAlign: "center", lineHeight: 1.5, marginBottom: 12,
         }}>
           Tend+ supports continued development of free<br />
-          recovery tools for everyone.
+          wellness tools for everyone.
         </p>
 
         {/* Restore purchase */}
