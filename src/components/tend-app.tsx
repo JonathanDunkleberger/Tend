@@ -2145,7 +2145,7 @@ export function TendApp({
                           </div>
                         ) : (
                           <div
-                            className={`ck ${done ? "d" : ""}`}
+                            className={`ck ${done ? "d" : ""} ${bouncingId === h.id && done ? "burst" : ""}`}
                             role="checkbox"
                             aria-checked={done}
                             aria-label={done ? `Mark ${h.name} as not done today` : `Mark ${h.name} done today`}
@@ -2153,6 +2153,7 @@ export function TendApp({
                             style={{
                               background: done ? h.color : "transparent",
                               borderColor: done ? "transparent" : th.checkBorder,
+                              ["--ck-color" as string]: h.color,
                             }}
                             onClick={(e) => { e.stopPropagation(); toggleCompletion(h.id); }}
                             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggleCompletion(h.id); } }}

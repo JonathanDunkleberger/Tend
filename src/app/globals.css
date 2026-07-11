@@ -288,6 +288,7 @@ body {
 
 /* ─── Check circle ─── */
 .ck {
+  position: relative;
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -301,6 +302,23 @@ body {
 .ck.d { border-color: transparent; animation: pop 0.28s ease; }
 .ck.d svg { opacity: 1; transform: scale(1); }
 .ck svg { opacity: 0; transform: scale(0.5); transition: all 0.14s; }
+/* A satisfying ring that bursts out of the circle on a fresh check-off. Only
+   present while `.burst` is applied (the transient bouncing window), so it never
+   fires on page load for already-done habits. Colored to the habit via --ck-color. */
+.ck::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--ck-color, #4caf50);
+  opacity: 0;
+  pointer-events: none;
+}
+.ck.burst::after { animation: checkRing 0.55s ease-out; }
+@keyframes checkRing {
+  0% { opacity: 0.55; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.1); }
+}
 
 /* ─── Delete button ─── */
 .dl {
