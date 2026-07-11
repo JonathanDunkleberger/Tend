@@ -226,6 +226,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
+0. ✅ **[SHIFT 8] Public `/preview` showcase route — the browser-verification blocker now has a path.**
+   DONE (commit `60923d9`). A **public, auth-free `/preview` page** mounts the real feature components
+   with mock props + THEME so Jonny (or any successor, no Clerk keys needed) can eyeball the whole UI in
+   a browser at `/preview` and finally sign off the 3 remaining DoD items. Showcases (a top tab switcher
+   + light/dark toggle): dragon-art gallery (all 36 species, egg↔dragon toggle, real `Creature` hero),
+   Onboarding reel, Wellness hub (+ its tools incl. Wind-down), Tend Wrapped story, You screen, Bottom
+   nav, Breathing timer. **Verified by actually serving it** (`next start`): `/preview` → 200 with all
+   36 dragon sprites, `/garden` → 404 (still correctly protected for a signed-out request). Reviewers:
+   it's a dev/QA harness — imports no secrets, renders only fabricated state; ship behind the branch or
+   delete before merge, nothing depends on it. **Also fixed a real footgun (see §10):** the repo had TWO
+   Clerk middleware files; consolidated to one.
+
 1. ✅ **[PHASE 0] Baseline green.** DONE (shift 1, commit `00cb4bc`): build + lint pass. See §6a.
 2. ✅ **[PHASE 0] Honest audit.** DONE (shift 1). See §6b.
 3. ✅ **[PHASE 0] Product spine + IA decided.** DONE (shift 1). See §10 (dragon-garden re-center;
@@ -342,15 +354,19 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > pair fixed to ≥4.5:1 AA and *verified by computing luminance ratios, so no browser was needed*
 > (light-theme subtext had been a near-invisible ~1.5–2:1). That closes the last meaningful pure-code
 > polish lever (#14b). **§8 DoD now shows only 3 items un-checked**, and ALL THREE hinge on
-> **browser-verification** (auth-gated) rather than new code — the only remaining pure-code levers are
+> **browser-verification** rather than new code. **NEW in shift 8 (#0): a public `/preview` route now
+> UNBLOCKS that** — it renders all the key UI (dragon gallery of 36 species, onboarding, wellness hub,
+> Tend Wrapped, You screen, bottom nav, breathing timer) with mock props and NO Clerk auth, so the whole
+> app can finally be eyeballed in a browser without keys. **NEXT SHIFT / JONNY: open `/preview`** (run
+> `npm run build && npx next start`, or `next dev`, then visit `/preview`) and eyeball each tab on a
+> phone viewport — that's the last real gate. The auth-gated *in-app* flows (real streaks/coins, grace
+> badge, one-tap, egg-warming bars, gratitude Insights card) still want a real-keys pass eventually, but
+> `/preview` covers the pure presentational verification. Shift 8 also **consolidated a duplicate Clerk
+> middleware** (root vs `src/`) — see §10; shift 1's "missing middleware / prod-auth-broken" alarm was a
+> FALSE ALARM and is now stood down. **Still open NEEDS EYES: migration-008 must be run in Supabase**
+> before gratitude persists (localStorage fallback until then). Remaining pure-code levers are all
 > minor/optional (per-view skeletons, a service worker [skip until browser-verifiable], the §13 price
-> change). **BIGGEST BLOCKER TO DECLARING DONE: none of the shift-2→7 UI
-> is browser-verified** — it all renders behind Clerk auth. A successor (or Jonny) with real keys must
-> eyeball the whole app once: Wrapped reel, nav, wellness tools (incl. the new Wind-down mode), You
-> screen, grace-token badge/detail, one-tap, egg-warming bars, empty-garden state, and the new gratitude
-> Insights card. **Also NEEDS EYES: migration-008 must be run in Supabase** before gratitude persists
-> for real (falls back to localStorage gracefully until then). Read §6b audit + §10 decisions + §13
-> pricing first. `.env.local` + middleware notes in NEEDS EYES still stand.
+> change). Read §6b audit + §10 decisions + §13 pricing first. `.env.local` note in NEEDS EYES still stands.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -440,6 +456,20 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   place. tend-app owns the state + sync (dedupe-by-day) and passes a `saveGratitude` handler down;
   wellness-hub keeps a localStorage-only fallback when no handler is wired, so it degrades gracefully
   offline and before the migration is run. Surfaced read-only in Insights (Constellation card).
+- *(shift 8)* **Consolidated the duplicate Clerk middleware; shift 1's "missing middleware" alarm was
+  a FALSE ALARM.** Discovered while making `/preview` public that the repo had TWO middleware files: the
+  original **repo-root `middleware.ts`** (present since the very first commit `24c72b9`) and a redundant
+  **`src/middleware.ts`** that shift 1 added believing none existed. Next 16 uses the ROOT file (it even
+  labels it `proxy.ts` in dev logs) and ignores the `src/` one — so shift 1's edit path was silently
+  dead (proven: adding `/preview` to `src/middleware.ts` had zero runtime effect; Clerk still ran
+  `auth.protect()` and 404'd it). Fix: made the root file the single documented source of truth (added
+  `/preview` to its public matcher), **deleted `src/middleware.ts`**. **Corollary for NEEDS EYES:**
+  production auth was NEVER broken for lack of middleware — the root middleware shipped in commit 1 and
+  is almost certainly what `origin/main`/Vercel runs. The shift-1 alarm can be stood down.
+- *(shift 8)* **`/preview` is a QA harness, not a product surface.** Built it as a single client page
+  that switches between showcases with mock props rather than threading real app state, so it stays
+  decoupled from the monolith and can't leak data. It's public (in the middleware matcher) purely so it
+  renders without Clerk keys. Ship-behind-branch or delete-before-merge — reviewer's call.
 - *(shift 6)* **Calm/night mode = a self-contained wellness tool, not a global palette shift.** Rather
   than re-theming the whole garden into a starlit terrarium (deep + risky in the monolith), "Wind
   down" is a full-screen overlay launched from the Wellness hub — a breathing moon-orb + starfield +
@@ -471,11 +501,13 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   NOT be part of any merge (it's gitignored). Your real keys stay in Vercel / your own local env. If
   you ever run the app for real on this branch, drop in real keys. Nothing to action unless you want
   to verify — just so you're not surprised to see it locally.
-- **⚠️ MISSING CLERK MIDDLEWARE — was the live site's auth broken? (shift 1).** This branch had NO
-  `middleware.ts`/`proxy.ts` at all, which makes Clerk `auth()` 500 on every page. Shift 1 added
-  `src/middleware.ts` (standard `clerkMiddleware`) and verified the landing now returns 200. **Please
-  confirm** whether `origin/main` / the Vercel deploy has its own middleware — if not, production auth
-  is broken and this fix needs to ship. If main DOES have one, reconcile the two before merging.
+- **✅ RESOLVED (shift 8) — Clerk middleware was never actually missing.** Shift 1 believed there was
+  NO middleware and added `src/middleware.ts`. Shift 8 found the repo has ALWAYS had a **root
+  `middleware.ts`** (since the first commit `24c72b9`) — and Next 16 runs the ROOT file, ignoring the
+  `src/` one. So shift 1's file was dead and its "production auth is broken" alarm was a false alarm:
+  `origin/main`/Vercel almost certainly runs that root middleware fine. Shift 8 consolidated to the one
+  root file and deleted the dead `src/middleware.ts` (see §10). **No action needed** unless you want to
+  confirm `origin/main` still has `middleware.ts` at the root (it does in this branch's history).
 - **Product direction check (shift 1).** Shift 1 decided to re-center on the dragon-egg garden and
   demote the quit/recovery framing to a first-class *mode* (see §10). If you actually want Tend to BE
   a recovery-first app, say so and the frontier flips — otherwise the night train proceeds
