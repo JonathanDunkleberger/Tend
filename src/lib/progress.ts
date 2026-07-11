@@ -170,3 +170,28 @@ export function computeSynergies(
   }
   return pairs;
 }
+
+/**
+ * Streak-length-over-time — the "streak history" analytic. For each day in a
+ * trailing window, counts the consecutive completed days ENDING at (and including)
+ * that day, so the series tells the story of streaks climbing and resetting.
+ *
+ * Derived purely from an offset predicate so it never touches Date/timezones:
+ * `isDoneAgo(offset)` answers "was it done `offset` days before today" (0 = today,
+ * increasing = further past). Each day walks back up to `lookback` days until it
+ * hits a miss. Returns `windowDays` values ordered OLDEST→NEWEST (left→right for a
+ * chart); the last element is today's live streak.
+ */
+export function computeStreakSeries(
+  isDoneAgo: (offset: number) => boolean,
+  windowDays: number,
+  lookback = 120,
+): number[] {
+  const series: number[] = [];
+  for (let d = windowDays - 1; d >= 0; d--) {
+    let s = 0;
+    for (let k = 0; k < lookback && isDoneAgo(d + k); k++) s++;
+    series.push(s);
+  }
+  return series;
+}

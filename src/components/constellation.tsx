@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { seed, daysAgo, daysBetween, today } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { computeConsistency, computeSynergies, computeDayOfWeekRates } from "@/lib/progress";
+import { computeConsistency, computeSynergies, computeDayOfWeekRates, computeStreakSeries } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
 import type { HabitWithStats } from "@/types";
@@ -207,6 +207,21 @@ export function Constellation({
     }
     return weeks;
   }, [habits, isDone, getCleanDays]);
+
+  // ── Streak journey (30 days) — the flagship build habit's running streak length
+  // day-by-day, so the climb-and-reset story is visible. Delegates to the tested
+  // computeStreakSeries kernel; flagship = the build habit on the longest run now.
+  const streakJourney = useMemo(() => {
+    if (buildHabits.length === 0) return null;
+    const WINDOW = 30;
+    const flagship = buildHabits.reduce((best, h) =>
+      getStreak(h.id) > getStreak(best.id) ? h : best, buildHabits[0]);
+    const series = computeStreakSeries((o) => isDone(flagship.id, daysAgo(o)), WINDOW);
+    const peak = Math.max(...series, 0);
+    if (peak === 0) return null; // no streak history to tell yet
+    return { flagship, series, peak, current: series[series.length - 1], window: WINDOW };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habits, isDone, getStreak]);
 
   // ── Habit scoreboard ──
   const scoreboard = useMemo(() => {
@@ -484,6 +499,81 @@ export function Constellation({
                 </div>
               );
             })}
+          </div>
+        </div>
+        );
+      })()}
+
+      {/* ── 2b. Streak journey (FREE) — flagship habit's streak length over 30 days ── */}
+      {streakJourney && (() => {
+        const { flagship, series, peak, current, window } = streakJourney;
+        const yTop = 14, yBottom = 86, xL = 4, xR = 96;
+        const n = series.length;
+        const pts = series.map((s, i) => ({
+          x: n > 1 ? xL + (i / (n - 1)) * (xR - xL) : (xL + xR) / 2,
+          y: yTop + (1 - s / peak) * (yBottom - yTop),
+          s,
+        }));
+        // Peak marker (first day the max was reached) + the live end point.
+        const peakIdx = series.indexOf(peak);
+        const line = flagship.color || "#f59e0b";
+        const gid = "streakFill";
+        return (
+        <div className="cd" style={{ padding: 14, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
+          <div className="lb" style={{ marginBottom: 4, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
+            <Flame size={10} /> Streak journey
+            <span style={{
+              marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 3,
+              fontSize: 10, fontWeight: 700, letterSpacing: 0, textTransform: "none",
+              padding: "2px 8px", borderRadius: 999, color: line,
+              background: `${line}1f`,
+            }}>
+              🔥 best {peak}d
+            </span>
+          </div>
+          <div style={{ fontSize: 11, color: th.textSub, marginBottom: 2 }}>
+            {flagship.creature_name || flagship.name}
+            {current > 0
+              ? ` · on a ${current}-day run`
+              : peak > 0 ? " · ready for a fresh run" : ""}
+          </div>
+          <div style={{ position: "relative", height: 72, margin: "16px 0 8px" }}>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="72" style={{ display: "block", overflow: "visible" }}>
+              <defs>
+                <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={line} stopOpacity="0.30" />
+                  <stop offset="100%" stopColor={line} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="100" x2="100" y2="100" stroke={th.cardBorder} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+              <path d={smoothPath(pts, true)} fill={`url(#${gid})`} stroke="none" />
+              <path d={smoothPath(pts)} fill="none" stroke={line} strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+            {/* peak marker + label (only if the peak isn't the live end point) */}
+            {peakIdx !== n - 1 && (
+              <div style={{
+                position: "absolute", left: `${pts[peakIdx].x}%`, top: `${pts[peakIdx].y}%`,
+                transform: "translate(-50%,-50%)", width: 6, height: 6, borderRadius: "50%",
+                background: line, opacity: 0.55,
+              }} />
+            )}
+            {/* live end point */}
+            <div style={{
+              position: "absolute", left: `${pts[n - 1].x}%`, top: `${pts[n - 1].y}%`,
+              transform: "translate(-50%,-165%)", whiteSpace: "nowrap",
+              fontSize: 12, fontWeight: 800, color: line,
+            }}>{current}d</div>
+            <div style={{
+              position: "absolute", left: `${pts[n - 1].x}%`, top: `${pts[n - 1].y}%`,
+              transform: "translate(-50%,-50%)", width: 11, height: 11, borderRadius: "50%",
+              background: line, border: `2px solid ${th.card}`,
+              boxShadow: `0 0 0 2px ${line}, 0 2px 8px ${line}66`,
+            }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8, fontWeight: 600, color: th.textMuted, textTransform: "uppercase", letterSpacing: 0.3 }}>
+            <span>{window}d ago</span>
+            <span>Today</span>
           </div>
         </div>
         );

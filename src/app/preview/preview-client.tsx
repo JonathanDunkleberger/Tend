@@ -91,7 +91,8 @@ const mockIsDone = (id: string, date: string) => {
   if (!h) return false;
   const n = Math.round((Date.now() - new Date(date + "T00:00:00").getTime()) / 86400000);
   if (n < 0 || n >= h._total + 6) return false;
-  if (n < h._streak) return true; // current streak intact
+  if (n < h._streak) return true;  // current streak intact
+  if (n === h._streak) return false; // the day the current run began — keep the streak length exactly _streak
   const hash = (id.charCodeAt(id.length - 1) * 2654435761 + n * 40503) >>> 0;
   return hash % 100 < 68;
 };

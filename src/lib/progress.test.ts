@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeConsistency, selectNewMilestones, selectNewCoinTiers, computeSynergies, computeDayOfWeekRates } from "./progress";
+import { computeConsistency, selectNewMilestones, selectNewCoinTiers, computeSynergies, computeDayOfWeekRates, computeStreakSeries } from "./progress";
 
 // isDone(n) predicate from a boolean array indexed by "days ago".
 const fromDays = (days: boolean[]) => (n: number) => days[n] ?? false;
@@ -248,5 +248,40 @@ describe("computeDayOfWeekRates", () => {
     const rates = computeDayOfWeekRates(week, [], () => true, dayIndexOf);
     expect(rates).toHaveLength(7);
     rates.forEach((r) => { expect(r.total).toBe(0); expect(r.done).toBe(0); expect(r.pct).toBe(0); });
+  });
+});
+
+describe("computeStreakSeries", () => {
+  it("ramps 1..N over a solid recent run, ending on today's live streak", () => {
+    // Done every one of the last 5 days (offsets 0–4), nothing older.
+    const series = computeStreakSeries((o) => o < 5, 5);
+    // Ordered oldest→newest: the day 4-ago sees a 5-day run behind it, … today sees 1.
+    // Wait: offset 4 (oldest in window) walks back to 4,5,6… → only offset 4 done → 1.
+    expect(series).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("resets to 0 on a missed day and climbs again after", () => {
+    // Done on offsets 0,1,2 and 4,5 ; missed offset 3.
+    const done = new Set([0, 1, 2, 4, 5]);
+    const series = computeStreakSeries((o) => done.has(o), 6);
+    // Window offsets 5..0 → oldest→newest.
+    // o5: run 5,6 → done5,done6? only 5 → 1 ; o4: 4,5,6 → 4,5 done → 2 ; o3: missed → 0
+    // o2: 2,3.. → 3 missed → just 2 → 1 ; o1: 1,2,3 → 1,2 done,3 miss → 2 ; o0: 0,1,2,3 → 3 → 3
+    expect(series).toEqual([1, 2, 0, 1, 2, 3]);
+  });
+
+  it("returns all zeros when nothing is done", () => {
+    expect(computeStreakSeries(() => false, 4)).toEqual([0, 0, 0, 0]);
+  });
+
+  it("honors the lookback cap so a long run doesn't over-count", () => {
+    // Everything done, but only count back `lookback` days per point.
+    const series = computeStreakSeries(() => true, 3, 2);
+    // Each point walks back at most 2 days → capped at 2.
+    expect(series).toEqual([2, 2, 2]);
+  });
+
+  it("produces one value per window day", () => {
+    expect(computeStreakSeries((o) => o % 2 === 0, 30)).toHaveLength(30);
   });
 });
