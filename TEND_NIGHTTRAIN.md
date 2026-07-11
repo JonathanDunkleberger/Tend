@@ -349,11 +349,14 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    days), reduced-motion-gated (static shape, no flicker), unlit grey ember at streak 0. Reusable/pure
    over a `streak` number. Wired into the REAL app: the build-habit detail hero now shows a "N day
    streak" flame pill (was name+stage only) + it anchors the /preview detail surface — both
-   composition-verified light+dark via file://.)* Still to build: a **soft chime** on check/hatch
-   (sound-optional, off by default), a **coin-counter roll**, and smooth **page/tab transitions**. Use
-   CSS/Web-Animations, keep 60fps, gate ALL of it behind `useReducedMotion`. Compile- + composition-verify
-   via `/preview`; flag the live-motion eyeball for Jonny (interaction-triggered motion can't be
-   file://-verified).
+   composition-verified light+dark via file://. ALSO shipped the **coin-counter roll** —
+   `components/animated-number.tsx`, a rAF easeOutCubic counter that rolls old→new with an upward pop on
+   an increase, first-mount-tween-skipped, reduced-motion-safe; wired into the real header coin pill +
+   the /preview garden pill, composition-verified it renders the value static via file://.)* Still to
+   build: a **soft chime** on check/hatch (sound-optional, off by default) + smooth **page/tab
+   transitions**. Use CSS/Web-Animations, keep 60fps, gate ALL of it behind `useReducedMotion`. Compile- +
+   composition-verify via `/preview`; flag the live-motion eyeball for Jonny (interaction-triggered
+   motion can't be file://-verified).
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
@@ -752,6 +755,13 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   preview's, so at least that new element is verified-by-proxy, and the note here + the on-screen
   "Preview approximation… rendered from the monolith" caption keep a reviewer from mistaking it for the
   live view. If a future shift decomposes the monolith, replace the approximation with the real component.
+- *(run-2 shift 4)* **AnimatedNumber (coin-roll) skips its first-mount tween on purpose.** A counter that
+  always animated from 0 would make every page load spin every coin counter up from zero — noisy + slow.
+  So it guards a `mountedRef`: first effect run just seeds the display to the initial value; only *real
+  subsequent changes* roll. The rAF loop is cancelled on unmount AND on a new target (landing on the
+  target, never freezing mid-roll), so a rapid burst of coin grants can't stack loops. Reduced-motion
+  jumps straight to the value. Wired into the header coin pill only (the one high-visibility, low-risk
+  coin surface); the You-screen/Shop coin props were left as-is to avoid a wider monolith blast radius.
 - *(run-2 shift 4)* **StreakFlame heat/size is a pure function of the streak, mixed in hex — no per-tier
   config, no theme coupling.** The flame's colour ramps amber→orange (body) with a yellow→near-white
   core and a hotter glow tint via a linear hex `mix()` keyed off `min(1, streak/30)`, and its height
