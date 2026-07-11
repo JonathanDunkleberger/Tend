@@ -196,7 +196,12 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       **shift 12: extended the net to the reward + analytics math** — extracted `lib/progress.ts`
       (`computeConsistency` / `selectNewMilestones` / `selectNewCoinTiers` / `computeSynergies`) out of
       constellation + the tend-app monolith and added 24 more cases, so `npm test` is now **54/54 green**
-      covering consistency %, milestone coin+grace-token grants, AA coin-tier unlocks, and synergy grading.)*
+      covering consistency %, milestone coin+grace-token grants, AA coin-tier unlocks, and synergy grading.
+      **shift 13: locked the LAST untested reward cluster — the quit-mode economy + relapse-evolution
+      math** — extracted `lib/quit.ts` (`computeCleanDays` / `computeMoneySaved` / `computeTotalSaved` /
+      `computeQuitBest` / `applyStageDrop` / `computeQuitStage`) out of the monolith + delegated, adding
+      24 more cases → `npm test` **78/78 green**. Every user-facing dollar figure AND the gentle
+      dragon-regresses-one-stage-on-slip math is now regression-locked, not trusted by cold-read.)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
       new `app/page.tsx`, on-brand, verified 200. **shift 9: BROWSER-VERIFIED** — rendered the real
       page in headless Chromium at a 390px phone viewport and eyeballed it end-to-end (Fraunces serif
@@ -237,6 +242,33 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 ---
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
+
+> NEXT SHIFT — the browser-free pure-code test levers are now EXHAUSTED (streak/grace/best +
+> consistency/milestone/coin-tier/synergy + quit-economy/relapse-evolution are all extracted &
+> regression-locked; `npm test` is 78 green). The reward/gameplay math no longer has an untested
+> corner. What genuinely remains is browser-verification-gated (Jonny's machine) OR out-of-safe-scope
+> (the §13/#16 Stripe price change needs new price IDs). A successor should either (a) do a fresh cold
+> read hunting for an ACTUAL latent bug to fix — not just add coverage — or (b) find a *server-component /
+> `file://`-verifiable* improvement (landing/OG/pricing-route copy). Do NOT keep extracting math for
+> coverage's sake; the high-value pure-code test work is done. See §14 for the sandbox limit.
+
+0ae. ✅ **[SHIFT 13] Locked the LAST untested reward/gameplay cluster — the quit-mode economy + the
+   relapse-evolution math.** Shifts 11–12 regression-locked the streak/grace kernel + the
+   consistency/milestone/coin-tier/synergy math, but left one corner: the **quit-a-bad-habit MODE's**
+   numbers — the dollars a user has saved (a headline figure shown on the garden, in habit detail, and
+   in the 7-day celebration) and how far their **dragon regresses when they slip** (the emotional
+   gentle-not-shaming payoff). Both were buried inline in the 3000-line monolith and trusted only by
+   cold-read (auth-gated → un-eyeballable here). Same extract-delegate-test pattern: new pure kernel
+   **`src/lib/quit.ts`** (`computeCleanDays` / `computeMoneySaved` [cent-rounded] / `computeTotalSaved` /
+   `computeQuitBest` [best-run preserved across a relapse] / `applyStageDrop` [penalty floored at the
+   egg, shared by build + quit] / `computeQuitStage` [dragon stage off the *best-ever* clean run minus
+   drops]); the monolith's `getCleanDays` / `totalSaved` / `resetQuit` / `getStageForId` (both branches)
+   / the 7-day-celebration money now **delegate** to it (behaviour byte-identical, build-verified;
+   removed the now-unused `daysBetween` import). **`src/lib/quit.test.ts` adds 24 cases**: clean-day
+   counting incl. ISO-timestamp + future-date + same-day; cent rounding + FP-crumb + missing-cost NaN
+   guards; total summing across skipped/started habits; best-preservation post-relapse; drop floored at
+   the egg; best-vs-current stage selection + a heavy penalty knocking a grown dragon back to an egg.
+   `npm test` **54 → 78 green**, build GREEN, lint unchanged (0 errors / 5 intentional), 1 feature commit.
 
 0ad. ✅ **[SHIFT 12] Extended the regression net to the REWARD + ANALYTICS math (the other logic that
    can't be browser-verified here).** Shift 11 locked the streak/grace/best-streak kernel; shift 12
@@ -637,6 +669,14 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   (the tests mirror the real MILESTONES/COIN_TIERS locally), exactly like `streak.ts`'s `isDone`
   predicate. The delegation is behaviour-identical — the components still own all side effects (toasts,
   haptics, `setCoins`/`setStreakFreezes`, celebration); only the pure "which/how-much" decision moved.
+- *(shift 13)* **The pure-code test lever is now exhausted; stop extracting math for coverage's sake.**
+  `lib/quit.ts` closed the last untested reward/gameplay cluster (quit-economy + relapse-evolution). With
+  streak/grace/best (shift 11) + consistency/milestone/coin-tier/synergy (shift 12) + quit (shift 13) all
+  regression-locked at 78 green, there is no remaining *high-value* buried-math target — further extraction
+  would be shuffling already-simple glue (formatters, state setters) for a green-number vanity metric, not
+  correctness insurance. A future shift's better moves: a fresh cold read to find + FIX a real latent bug
+  (not just cover one), or a server-component/`file://`-verifiable UX improvement. Recorded here so a
+  successor doesn't reflexively continue the pattern past its point of value.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
