@@ -133,3 +133,70 @@ One line per shift below (newest last).
 - shift 61: aimed hunters at the surfaces shift 60 named as unswept (settings-client, onboarding→save handoff, webhook edge cases) + fixed the shift-60-documented garden error-swallowing — 6 genuine reasoning-verified bugs FIXED (#0av, 5 fix commits), several on the MONEY/AUTH path. (1) garden had NO error boundary anywhere → a transient Supabase read failure silently rendered a false-empty garden / streaks-0; the two critical reads now THROW to a new warm (app)/garden/error.tsx ("Your garden needs a moment", reassures data is safe, one-tap retry re-runs the server component). (2) BOTH webhooks swallowed every DB write error + always returned 200 → Stripe/svix never retried → a transient blip during checkout.session.completed permanently stranded a paying user on tier:free; now a failed write throws → 500 → provider retries, guarded against the profiles.email NOT-NULL poison-retry via UPDATE-first/INSERT-with-"" (without reintroducing the shift-53 email-clobber). (3) Stripe subscription.updated downgraded to free on the FIRST past_due (mid-dunning, still recoverable) → now keeps Pro through active/trialing/past_due, only terminal states drop. (4) Clerk stored email_addresses[0] not the primary → now resolves via primary_email_address_id. (5) onboarding committed tend_onboarding_complete even when the starter-habit POSTs FAILED → empty garden + onboarding permanently suppressed + silent loss of the chosen habit; now addHabit returns ok, the flag/close only run on real success (retryable otherwise), + a re-entrancy guard + disabled "Entering…" button kill double-tap duplicates, + dropped the destructive absolute {coins:250} POST. (6) preferences PUT blind-replaced append-only jsonb (earned_milestone_coins/gratitude) → a stale 2nd-device snapshot wiped entries; now server-side MERGES (union), + fixed the GET default season:"summer"→getSeason(). build GREEN, lint 0/5, test 107/107. LESSON reaffirmed: "cold-read vein exhausted" is always SURFACE-scoped — shift 60 named these exact surfaces as unswept and each held a real bug. | frontier: webhook + onboarding + settings + preferences + server-hydration surfaces now swept; genuinely-unswept territory left is thin (deeper monolith effect wiring beyond shift 59, quit/relapse/urge client internals) with thin expected returns; meaningful un-checked DoD items still hinge on Jonny's browser | needs eyes: RUN migration-009 + -008 in Supabase; §13/#16 Stripe price change (keyed); verify-subscription 10-session fallback (real Stripe volume); bounce-back ramp fires for ALL users not just after a lapse (product call); eyeball the auth-gated app on your machine (§14)
 - shift 61 05:32->05:47 (14m): 7 commit(s), frontier ADVANCED
 - shift 62: hunted the quit/relapse/urge CLIENT internals + the deeper monolith effect wiring (shift-61's named-thin surfaces) — FIXED 7 real reasoning-verified bugs (no DB/browser), two on the quit-mode emotional core. (1) EVENING QUITTERS UNDER-COUNTED + hero showed "N minutes clean" 24h+ in: computeCleanDays compared the stored UTC quit timestamp against today-at-noon, so a 6pm quitter read 0 clean days for ~two calendar days (delaying money-saved, the 24h/72h/7d celebration gates, dragon-stage floor), and the cleanD-vs-live-timer disagreement made the detail hero render the giant "minutes clean" number 27h in — FIXED by anchoring the quit date to its LOCAL calendar day (matches the app's date-keying + tend-app's isStarted slice) in computeCleanDays/TotalSaved/QuitStage, which also makes cleanD===0 ⟺ same calendar day ⟺ totalHours<24 so the minutes branch only fires under an hour (+ dropped the redundant <24 hero guard); +1 regression test. (2) RELAPSE PERMANENTLY KILLED FUTURE ENCOURAGEMENT: resetQuit restarted the clean run at 0 but left the per-habit dedup flags (tend_quit_celebrations/tend_7day_shown/tend_granted_milestones + earned badges) set, so a rebuilt run got NO toasts/nudge/milestones ever again — against the soul; now cleared on reset (re-earning needs real re-accumulated clean days → not farmable). (3) dead hasHydrated guard (set by an effect defined BEFORE the guarded ones → mount-skip never fired → every load re-PUT preferences) → per-effect first-run refs. (4) two bare JSON.parse in the quit-celebration effect would throw on a corrupt value + permanently suppress the celebrations+coin grants → try/caught. (5) daily Tend+ +5 never re-granted across midnight in a long session ([mounted,isPro] deps, no date) → added today(). (6) relapse-modal creature stage used Math.floor(cleanDays/5) vs shared getStage 3/7/14/30 → delegates. Considered+LEFT: modal CSS animations are ALREADY reduced-motion-gated by the global @media rule (only SMIL/canvas escape it — a hunter false-positive); updateQuitData/logUrge apiSync-in-updater is benign (idempotent full-object PUT). build GREEN, lint 0/5, test 107->108, 4 commits. | frontier: quit-client + monolith-effect-wiring surfaces now swept twice (shift 59 + 62); genuinely-unswept territory is very thin — a successor can hunt any unread file but expect diminishing returns; meaningful un-checked DoD items hinge on Jonny's browser | needs eyes: RUN migration-009 + -008 in Supabase; §13/#16 Stripe price change (keyed); verify-subscription 10-session fallback (real Stripe volume); bounce-back ramp fires for ALL users not just after a lapse (product call); eyeball the auth-gated app on your machine (§14)
+- shift 62 05:48->06:05 (17m): 5 commit(s), frontier ADVANCED
+- shift 63 06:06->06:12 (6m): 0 commit(s), frontier ADVANCED
+- shift 64 FAST-FAIL 06:13 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 64 06:13->06:13 (0m): 0 commit(s), frontier unchanged
+- shift 65 FAST-FAIL 06:14 (3 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 65 06:14->06:14 (0m): 0 commit(s), frontier unchanged
+- shift 66 FAST-FAIL 06:15 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 66 06:15->06:15 (0m): 0 commit(s), frontier unchanged
+- shift 67 FAST-FAIL 06:16 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 67 06:16->06:16 (0m): 0 commit(s), frontier unchanged
+- shift 68 FAST-FAIL 06:17 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 68 06:17->06:17 (0m): 0 commit(s), frontier unchanged
+- shift 69 FAST-FAIL 06:18 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 69 06:18->06:18 (0m): 0 commit(s), frontier unchanged
+- shift 70 FAST-FAIL 06:19 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 70 06:19->06:19 (0m): 0 commit(s), frontier unchanged
+- shift 71 FAST-FAIL 06:20 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 71 06:20->06:20 (0m): 0 commit(s), frontier unchanged
+- shift 72 FAST-FAIL 06:21 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 72 06:21->06:21 (0m): 0 commit(s), frontier unchanged
+- shift 73 FAST-FAIL 06:22 (3 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 73 06:22->06:22 (0m): 0 commit(s), frontier unchanged
+- shift 74 FAST-FAIL 06:23 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 74 06:23->06:23 (0m): 0 commit(s), frontier unchanged
+- shift 75 FAST-FAIL 06:24 (3 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 75 06:24->06:24 (0m): 0 commit(s), frontier unchanged
+- shift 76 FAST-FAIL 06:25 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 76 06:25->06:25 (0m): 0 commit(s), frontier unchanged
+- shift 77 FAST-FAIL 06:26 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 77 06:26->06:26 (0m): 0 commit(s), frontier unchanged
+- shift 78 FAST-FAIL 06:27 (3 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 78 06:27->06:27 (0m): 0 commit(s), frontier unchanged
+- shift 79 FAST-FAIL 06:28 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 79 06:28->06:28 (0m): 0 commit(s), frontier unchanged
+- shift 80 FAST-FAIL 06:29 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 80 06:29->06:29 (0m): 0 commit(s), frontier unchanged
+- shift 81 FAST-FAIL 06:30 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 81 06:30->06:30 (0m): 0 commit(s), frontier unchanged
+- shift 82 FAST-FAIL 06:31 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 82 06:31->06:31 (0m): 0 commit(s), frontier unchanged
+- shift 83 FAST-FAIL 06:32 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 83 06:32->06:32 (0m): 0 commit(s), frontier unchanged
+- shift 84 FAST-FAIL 06:34 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 84 06:33->06:34 (0m): 0 commit(s), frontier unchanged
+- shift 85 FAST-FAIL 06:35 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 85 06:35->06:35 (0m): 0 commit(s), frontier unchanged
+- shift 86 FAST-FAIL 06:36 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 86 06:36->06:36 (0m): 0 commit(s), frontier unchanged
+- shift 87 FAST-FAIL 06:37 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 87 06:37->06:37 (0m): 0 commit(s), frontier unchanged
+- shift 88 FAST-FAIL 06:38 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 88 06:38->06:38 (0m): 0 commit(s), frontier unchanged
+- shift 89 FAST-FAIL 06:39 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 89 06:39->06:39 (0m): 0 commit(s), frontier unchanged
+- shift 90 FAST-FAIL 06:40 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 90 06:40->06:40 (0m): 0 commit(s), frontier unchanged
+- shift 91 FAST-FAIL 06:41 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 91 06:41->06:41 (0m): 0 commit(s), frontier unchanged
+
+--- HANDOFF REVIEW (Jonny + Claude, morning after night 1) ---
+Night 1 = 63 real shifts, 111 commits on night-train ahead of main. Real work: shifts 1-16 (build) +
+49-63 (orphan recovery + deep bug-hunt + landing/SEO polish). Spend-limit no-op spins: 17-48 and 64-91
+(ignored). Baseline re-verified GREEN this morning: npm test 108/108. Frontier (§9) REWRITTEN from an
+885-line stale-pointer archive into a tight forward queue: stop re-hunting bugs (vein mined out),
+pivot to the under-delivered ambition — premium visual/motion polish + BEAUTIFUL analytics, made
+sandbox-verifiable by expanding the /preview harness. Sentinel deliberately NOT set — mission continues.
+Ready to relaunch.
