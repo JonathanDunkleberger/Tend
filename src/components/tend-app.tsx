@@ -38,9 +38,10 @@ import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
-import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
+import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
 import { selectNewMilestones, selectNewCoinTiers } from "@/lib/progress";
+import { computeCleanDays, computeMoneySaved, computeTotalSaved, computeQuitBest, computeQuitStage, applyStageDrop } from "@/lib/quit";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
@@ -449,11 +450,7 @@ export function TendApp({
   );
 
   const getCleanDays = useCallback(
-    (hId: string): number => {
-      const qd = quitDataMap[hId];
-      if (!qd?.quitDate) return 0;
-      return daysBetween(qd.quitDate, todayStr);
-    },
+    (hId: string): number => computeCleanDays(quitDataMap[hId]?.quitDate, todayStr),
     [quitDataMap, todayStr]
   );
 
@@ -489,8 +486,7 @@ export function TendApp({
       // Save bestStreak before resetting
       const qd = quitDataMap[hId];
       const currentClean = getCleanDays(hId);
-      const prevBest = qd?.bestStreak ?? 0;
-      const newBest = Math.max(currentClean, prevBest);
+      const newBest = computeQuitBest(currentClean, qd?.bestStreak);
       // Store exact ISO timestamp so "Started today at 6:04 PM" works
       updateQuitData(hId, { quitDate: new Date().toISOString(), bestStreak: newBest });
     },
@@ -505,13 +501,10 @@ export function TendApp({
   );
 
   const totalSaved = useMemo(() => {
-    return habits
-      .filter((h) => h.category === "quit")
-      .reduce((sum, h) => {
-        const qd = quitDataMap[h.id];
-        if (!qd?.quitDate) return sum;
-        return sum + (qd.dailyCost || 0) * daysBetween(qd.quitDate, todayStr);
-      }, 0);
+    return computeTotalSaved(
+      habits.filter((h) => h.category === "quit").map((h) => quitDataMap[h.id] || {}),
+      todayStr,
+    );
   }, [habits, quitDataMap, todayStr]);
 
   const isComplete = useCallback(
@@ -587,19 +580,13 @@ export function TendApp({
   const getStageForId = useCallback(
     (hId: string) => {
       const h = habits.find((x) => x.id === hId);
-      let stage: number;
+      const drops = stageDrops[hId] || 0;
       if (h?.category === "quit") {
         const qd = quitDataMap[hId];
-        if (!qd?.quitDate) return 0;
-        const cleanDays = daysBetween(qd.quitDate, todayStr);
-        const best = Math.max(cleanDays, qd.bestStreak ?? 0);
-        stage = getStage(best);
-      } else {
-        stage = getStage(getTotal(hId));
+        // Best-ever clean run drives evolution; a relapse gently drops one stage, never below egg.
+        return computeQuitStage(qd?.quitDate, qd?.bestStreak, todayStr, drops);
       }
-      // Apply relapse stage drop penalty (creature drops one stage on relapse)
-      const drops = stageDrops[hId] || 0;
-      return Math.max(0, stage - drops);
+      return applyStageDrop(getStage(getTotal(hId)), drops);
     },
     [getTotal, habits, quitDataMap, todayStr, stageDrops]
   );
@@ -773,7 +760,7 @@ export function TendApp({
           const qd = quitDataMap[h.id];
           const cost = qd?.dailyCost ?? 0;
           const urgeCount = (qd?.urges ?? []).length;
-          setSevenDayCelebration({ habitName: h.name, moneySaved: Math.round(cost * cd * 100) / 100, urgeCount });
+          setSevenDayCelebration({ habitName: h.name, moneySaved: computeMoneySaved(cost, cd), urgeCount });
           break; // only show one at a time
         }
       }
