@@ -246,42 +246,52 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 53 banked two reasoning-verifiable API guards from the §12 deferred list (#0an):
-> the `urge-entries` POST now verifies habit ownership (was an IDOR-adjacent gap), and the Stripe
-> checkout upsert no longer clobbers a stored email with `""`. Both were cold-readable (the deferred
-> label had lumped them with the truly DB-gated bugs, but the *guard logic* is verifiable by reading —
-> exactly like shift 14's inventory error-capture fix). **The §12 deferred list is now down to the two
-> that genuinely need a live DB/Stripe:** (1) non-atomic coins/inventory read-then-write race → needs a
-> Postgres atomic-increment RPC + migration; (2) `verify-subscription`'s 10-session global-pagination
-> fallback → needs real Stripe volume to verify. **Both are for Jonny / a keyed shift — don't ship
-> unrunnable SQL or config blind.** Successor options, in priority order: (a) if a *concrete* correctness
-> or copy gap is spotted on a fresh read, fix it — but do NOT invent churn and do NOT re-run the
-> exhausted cold-read hunt (shifts 49–51 + the §12 sweep have covered the reasoning-verifiable surface);
-> (b) execute the §13/#16 Stripe price change IF Jonny wants it (keyed — new price IDs). Also open: the
-> bounce-back ramp fires for ALL users, not just after a real lapse (product call for Jonny, §12).
-> **The meaningful remaining DoD gates all hinge on a real-device / networked-browser eyeball on Jonny's
-> machine** (see §14 for why this sandbox can't). This is a mature branch: prefer banking a real,
-> verifiable improvement over manufacturing work — and if none is genuinely available, say so plainly
-> rather than churning.
+> NEXT SHIFT — shift 54 shipped the atomic-coins fix (#0ao), clearing the non-atomic coins/inventory
+> race — the last §12 deferred bug that WASN'T purely for Jonny. Key insight (same lesson as shift 53's
+> re-triage): the race was deferred as "needs a running DB," but that was only needed to *observe* the
+> race, not to *express the fix*. The fix is standard atomic SQL (single-statement UPDATEs under a row
+> lock) shipped as `migration-009-atomic-coins.sql` — exactly the migration-008 pattern (a SQL file
+> Jonny runs) — and both routes call the new RPCs via `supabase.rpc()` with a **graceful fallback to the
+> existing read-then-write path** so the app keeps working before/without the migration. Reasoning-
+> verifiable + build/lint/test green. **The §12 list is now down to ONE genuinely-blocked item:**
+> `verify-subscription`'s 10-session global-pagination fallback needs real Stripe volume to verify the
+> proper fix (look up by Clerk metadata) → for Jonny / a keyed shift. **What's actually left for a
+> successor is thin and honest:** (a) NEW NEEDS-EYES for Jonny — run `migration-009` (and still `-008`)
+> in Supabase to activate atomicity/gratitude; (b) the §13/#16 Stripe price change (keyed — new price
+> IDs); (c) the bounce-back ramp fires for ALL users not just after a lapse (product call). Do NOT
+> re-run the exhausted cold-read hunt (shifts 49–53 swept it) and do NOT manufacture churn. **Every
+> remaining DoD gate now hinges on a real-device / networked-browser eyeball on Jonny's machine** (§14).
+> If no genuinely-verifiable improvement is available next shift, say so plainly rather than churning —
+> this branch is mature and ready for Jonny's review + merge.
 
-> PRIOR POINTER — shift 51 mined the ONE untouched vein the shift-50 pointer flagged (constellation/Wrapped
-> derivations + shop/gallery/onboarding/settings) and FIXED 3 real analytics bugs (see #0al): the
-> day-of-week chart counted pre-creation days as misses (fabricated a "you slip on Tuesdays" insight for
-> young habits); Insights (30d) and Wrapped (60d) disagreed on "best day of week"; and Wrapped had a
-> latent undefined-card crash. All three fixed via one shared tested kernel + a clamp; the hunter gave
-> shop/gallery/onboarding→save/settings a CLEAN bill (traced, not skipped — see #0al). **The cold-read
-> vein is now genuinely exhausted** — four passes across shifts 49–51 have swept the reward, celebration,
-> optimistic-update, stale-snapshot AND analytics-derivation classes; a fifth hunt will almost certainly
-> come back empty. **Successor: pivot AWAY from bug-hunting.** Best remaining moves, in order: (1) a
-> `file://`-verifiable landing/OG/pricing-copy improvement (the landing is the one sandbox-verifiable
-> surface + is literally "what makes someone pay" — e.g. a soft social-proof/"how it feels" section, a
-> sharper hero sub-headline, or an animated-egg-crack micro-story); (2) execute the §13/#16 Stripe price
-> change IF Jonny wants it (needs new price IDs — a keyed task). The remaining DEFERRED bugs in §12
-> (non-atomic coins/inventory race → Postgres RPC + migration; urge-entries ownership; Stripe
-> email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe or a keyed shift →
-> for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL users, not just
-> after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12). Do NOT extract math
-> for coverage's sake. See §14 for the sandbox limit.
+> PRIOR POINTER (shift 53) — re-triaged the §12 "for Jonny" list and banked the two that were actually
+> reasoning-verifiable guards (urge-entries habit-ownership check + Stripe email-clobber, #0an). Lesson
+> recorded in §10: when a bug is parked "needs a live service," check whether the *fix* needs the service
+> or just the *repro* — a guard/validation fix is usually cold-verifiable. Shift 54 applied the same
+> lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
+> snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
+> verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0ao. ✅ **[SHIFT 54] Atomic coin mutations — killed the non-atomic coins/inventory read-then-write
+   lost-update race (§12 deferred #1).** This was parked for months as "needs a running DB → for
+   Jonny," but (per shift 53's re-triage lesson) the DB was only needed to *observe* the race, not to
+   *express the fix*. Both `/api/coins` (delta path) and `/api/inventory` (purchase) did
+   `read balance → compute → write balance` in two round-trips, so two concurrent requests could read
+   the same balance and clobber each other → a lost grant (coins vanish) or a lost spend (free item).
+   Fix = do the mutation in a **single UPDATE statement**, which Postgres runs under a row lock and
+   re-evaluates the WHERE against the freshest committed tuple, so writers serialize instead of racing.
+   **`migration-009-atomic-coins.sql`** adds two SQL functions: `tend_increment_coins(clerk_id, delta)`
+   (bounded `coins = greatest(0, coins + delta)`, the delta already clamped in the tested
+   `lib/economy.ts`) and `tend_deduct_coins_if_afford(clerk_id, price)` (conditional
+   `... - price WHERE coins >= price`, returns the new balance or NULL when unaffordable). Both routes
+   call the RPC via `supabase.rpc()` and **GRACEFULLY FALL BACK to the existing read-then-write path if
+   the function is absent** (RPC returns a Postgres error → fallback), so the app keeps working
+   before/without the migration — exactly the migration-008 pattern (a SQL file Jonny runs). Coins
+   response is fire-and-forget on the client (`apiSync`), inventory still returns `{coins}` on 201 — no
+   contract change. Reasoning-verifiable (standard atomic SQL + fallback preserves current behaviour);
+   build GREEN, lint 0/5, test 99/99, 1 commit. **§12 now down to ONE Jonny-only item** (the
+   verify-subscription 10-session Stripe fallback — needs real volume). **NEW NEEDS EYES: run
+   `migration-009` in Supabase to activate atomicity** (harmless until run; the app falls back).
 
 0an. ✅ **[SHIFT 53] Two reasoning-verifiable API guards from the §12 deferred list — habit-ownership
    check on `urge-entries` + Stripe email-clobber stopped.** The frontier's remaining bug list was
@@ -926,11 +936,13 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **⚠️ KNOWN BUGS DEFERRED (shift 14) — surfaced by the cold-read bug hunt; couldn't safely fix here.**
   Two were FIXED this shift (see frontier #0af: milestone-coin truncation + the two farmable coin
   paths). These four are DEFERRED because they need DB-level verification or a product call:
-  1. **Coins + inventory routes are not atomic (read-then-write lost-update race).** Two concurrent
-     `/api/coins` (or inventory purchase) requests can both read the same balance and clobber each
-     other → a lost increment or a lost spend. The real fix is a Postgres atomic-increment RPC
-     (`coins = coins + delta` in one statement) + a migration; deferred so we don't ship SQL that can't
-     be run/verified in this sandbox. Low real-world hit rate at current scale.
+  1. ✅ **FIXED (shift 54) — coin mutations are now atomic.** Was: `/api/coins` (delta) and
+     `/api/inventory` (purchase) did read-then-write in two round-trips → two concurrent requests could
+     clobber each other (lost grant / free item). Fixed with single-statement UPDATEs in
+     `migration-009-atomic-coins.sql` (`tend_increment_coins` + `tend_deduct_coins_if_afford`); both
+     routes call them via `supabase.rpc()` and gracefully fall back to the old read-then-write path if
+     the migration hasn't been run yet. **ACTION: run `migration-009` in Supabase to activate it** (safe
+     to re-run; harmless until run — the app falls back). See frontier #0ao.
   2. ✅ **FIXED (shift 15) — the relapse penalty is now gentle + self-healing.** Was: `stageDrops`
      accumulated across relapses and never reset, so after ~4 slips the dragon pinned at Egg forever
      even with a long current clean run + big best-ever streak (anti-soul). The product call (made per
