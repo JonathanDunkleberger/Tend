@@ -209,7 +209,14 @@ export function TendApp({
   const [celebrationBanner, setCelebrationBanner] = useState(false);
   const [celebrationBannerFading, setCelebrationBannerFading] = useState(false);
   const [shootingStar, setShootingStar] = useState(false);
-  const prevAllDoneRef = useRef(false);
+  // null until the first celebration effect run adopts the current state as its
+  // baseline — so an app that opens ALREADY all-done (notably a quit-only user,
+  // whose quit habits read "done" every day) doesn't replay the confetti/banner and
+  // re-run the +10 grant on every reload as if the user just flipped everything done.
+  const prevAllDoneRef = useRef<boolean | null>(null);
+  // Pending habit-DELETE timers, keyed by habit id. removeHabit defers the
+  // destructive server call by the undo window so "Undo" can actually cancel it.
+  const pendingDeletesRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // ── Coin sync helper — uses delta-based API to prevent race conditions ──
   const syncCoins = useCallback((delta: number, extraPayload?: Record<string, unknown>) => {
@@ -634,6 +641,12 @@ export function TendApp({
   // All-done celebration + aurora
   useEffect(() => {
     setShowAurora(allDone);
+    if (prevAllDoneRef.current === null) {
+      // First run after mount: adopt the current state as the baseline so an app
+      // that opens already all-done isn't mistaken for a fresh false→true flip.
+      prevAllDoneRef.current = allDone;
+      return;
+    }
     if (allDone && !prevAllDoneRef.current) {
       // Trigger one-time celebration sequence
       haptic("success");
@@ -696,8 +709,10 @@ export function TendApp({
       MILESTONES,
       giftGrace ? GRACE_MILESTONE_DAYS : NO_GRACE_DAYS,
     );
+    const newlyEarned: Record<string, true> = {};
     for (const m of reached) {
       ne[`${habitId}:${m.days}`] = true;
+      newlyEarned[`${habitId}:${m.days}`] = true;
       granted[`${habitId}:${m.days}`] = true;
       const Ic = getIcon(m.iconName);
       setCoinToast({ msg: `${m.label} +${m.coins}`, icon: Ic });
@@ -720,7 +735,11 @@ export function TendApp({
       } else {
         syncCoins(nc);
       }
-      setEarned(ne);
+      // Functional merge (not setEarned(ne)) so two habits crossing a milestone in
+      // the same synchronous batch — e.g. the passive quit loop, or markAllGood's
+      // timeouts sharing one stale `earned` snapshot — don't clobber each other's
+      // newly-earned badges.
+      setEarned((prev) => ({ ...prev, ...newlyEarned }));
     }
   };
 
@@ -1061,16 +1080,25 @@ export function TendApp({
     setUndoToast({
       msg: `Removed "${habit?.name}"`,
       onUndo: () => {
+        // Cancel the deferred server DELETE — the row still exists, so restoring
+        // client state fully un-does the removal.
+        const t = pendingDeletesRef.current[id];
+        if (t) { clearTimeout(t); delete pendingDeletesRef.current[id]; }
         if (habit) setHabits((p) => [...p, { ...habit, logs: habitLogs }]);
         if (savedQuitData) setQuitDataMap((prev) => ({ ...prev, [id]: savedQuitData }));
         setUndoToast(null);
       },
     });
 
-    await apiCall(`/api/habits/${id}`, {
-      method: "DELETE",
-      onError: syncError,
-    });
+    // Defer the DESTRUCTIVE delete until just after the 5s undo window closes.
+    // Previously it fired immediately and "Undo" only restored client state, so the
+    // server row (+ its cascaded logs / quit_progress) was already gone — the
+    // "restored" habit then vanished for good on the next reload or log attempt.
+    if (pendingDeletesRef.current[id]) clearTimeout(pendingDeletesRef.current[id]);
+    pendingDeletesRef.current[id] = setTimeout(() => {
+      delete pendingDeletesRef.current[id];
+      apiCall(`/api/habits/${id}`, { method: "DELETE", onError: syncError });
+    }, 5200);
   };
 
   const saveEdit = async () => {
