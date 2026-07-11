@@ -34,7 +34,7 @@ interface OnboardingProps {
   onComplete: (
     quitPick: { name: string; color: string; iconName: string; cost: number } | null,
     buildPick: { name: string; color: string; iconName: string } | null,
-  ) => void;
+  ) => void | Promise<boolean>;
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
@@ -43,6 +43,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [buildPick, setBuildPick] = useState<{ name: string; color: string; iconName: string } | null>(null);
   const [fadeIn, setFadeIn] = useState(false);
   const [reveal, setReveal] = useState(0); // staged reveal on final step
+  const [submitting, setSubmitting] = useState(false);
+
+  // Disable the finish button while the starter habits are being created so a
+  // double-tap can't create duplicates; re-enable if it fails so the user can retry.
+  const finish = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    const ok = await onComplete(quitPick, buildPick);
+    if (ok === false) setSubmitting(false); // on success the overlay unmounts
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setFadeIn(true), 40);
@@ -178,7 +188,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
 
           <div style={{ opacity: reveal >= 3 ? 1 : 0, transform: reveal >= 3 ? "translateY(0)" : "translateY(10px)", transition: "all .5s ease", marginTop: 26 }}>
-            <button className="obBtn" onClick={() => onComplete(quitPick, buildPick)}>Enter your garden</button>
+            <button className="obBtn" onClick={finish} disabled={submitting} style={submitting ? { opacity: 0.7 } : undefined}>{submitting ? "Entering…" : "Enter your garden"}</button>
           </div>
         </div>
       )}

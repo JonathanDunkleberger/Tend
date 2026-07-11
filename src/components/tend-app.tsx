@@ -1023,6 +1023,7 @@ export function TendApp({
       setPendingHabit(null);
       setPickedEgg(null);
     }
+    return result.ok;
   };
 
   /** Route habit creation through egg picker for pro users */
@@ -1279,27 +1280,44 @@ export function TendApp({
     : { opacity: 0, transform: "translateY(5px)" };
 
   // ── Onboarding completion handler ──
+  const onboardingSubmittingRef = useRef(false);
   const handleOnboardingComplete = async (
     quitPick: { name: string; color: string; iconName: string; cost: number } | null,
     buildPick: { name: string; color: string; iconName: string } | null,
-  ) => {
-    // Set 250 starting coins
-    setCoins(250);
-    apiSync("/api/coins", "POST", { coins: 250 });
+  ): Promise<boolean> => {
+    // Re-entrancy guard: the "Enter your garden" tap awaits two /api/habits
+    // POSTs, during which the overlay stays mounted; a double-tap would otherwise
+    // create duplicate starter habits (the habits route has no dedup).
+    if (onboardingSubmittingRef.current) return false;
+    onboardingSubmittingRef.current = true;
+    try {
+      // Starting coins are already 250 by the profile default (ensureProfile), so
+      // show it optimistically but DON'T POST an absolute {coins:250} overwrite —
+      // that legacy path would reset a real balance to 250 on any re-entry.
+      setCoins(250);
 
-    // Create quit habit
-    if (quitPick) {
-      await addHabit(quitPick.name, quitPick.color, quitPick.iconName, "quit", quitPick.cost);
-    }
-    // Create build habit
-    if (buildPick) {
-      await addHabit(buildPick.name, buildPick.color, buildPick.iconName);
-    }
+      // Create the starter habits. addHabit does NOT throw on a failed POST (it
+      // surfaces an error toast and returns false), so gate the completion flag on
+      // actual success — otherwise a transient failure would leave an empty garden
+      // AND permanently suppress onboarding (the localStorage flag never re-shows it).
+      let ok = true;
+      if (quitPick) {
+        ok = (await addHabit(quitPick.name, quitPick.color, quitPick.iconName, "quit", quitPick.cost)) !== false && ok;
+      }
+      if (buildPick) {
+        ok = (await addHabit(buildPick.name, buildPick.color, buildPick.iconName)) !== false && ok;
+      }
 
-    // Mark onboarding complete — persist to server + localStorage fallback
-    apiSync("/api/preferences", "PUT", { onboarding_complete: true });
-    localStorage.setItem("tend_onboarding_complete", "1");
-    setShowOnboarding(false);
+      if (!ok) return false; // a create failed → let the user retry; toast already shown
+
+      // Mark onboarding complete — persist to server + localStorage fallback
+      apiSync("/api/preferences", "PUT", { onboarding_complete: true });
+      localStorage.setItem("tend_onboarding_complete", "1");
+      setShowOnboarding(false);
+      return true;
+    } finally {
+      onboardingSubmittingRef.current = false;
+    }
   };
 
   const overallHeatData = useCallback(
