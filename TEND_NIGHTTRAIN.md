@@ -338,6 +338,31 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 22.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
+> only on a real miss, else confirm green + stop) — held clean, no miss (10th consecutive clean shift).
+> (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
+> `npm test` **129/129**; branch is **166 commits** ahead of `main`. (b) Re-ran the git-tracked audit —
+> read all 14 `VIEW_KEYS` from `preview/page.tsx` (garden/today/insights/detail/hatch/evolve/gallery/
+> onboarding/wellness/wrapped/you/breathe/nav/loading) and matched each against `git ls-files
+> scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery=`preview-fold`,
+> garden=`preview-garden-full`, the rest by name, most light+dark). No untracked/gitignore gap. (c)
+> Applied "verify, don't assert" to FRESH evidence — deliberately eyeballed the DARK variants (recent
+> shifts mostly checked light): `preview-detail-dark-fold` (habit-detail — green Ember Drake hero + "41
+> day streak" flame + the full Egg→Hatchling→Whelp→Drake→Elder evolution filmstrip + 20d-to-Elder bar +
+> "Streak shield · 2 grace days banked" card), `preview-you-dark-full` (profile — Jonny hero + 340 Coins/
+> 5 Dragons/41d Best-streak stat row + green Tend+ Upgrade banner + Collection/World-Shop/Settings rows +
+> Light-mode & Sound-effects toggles + Season selector + Sign out), and `preview-today-dark-fold` (share
+> card — blue ice-dragon Ember in an orange 3/4 progress ring + 41d flame + 5 dragons + "Over halfway —
+> lovely momentum" + `tend.` wordmark) — **all three render genuinely and gorgeously in dark mode, not
+> blank frames.** This closes a real (small) evidence gap: dark-mode parity across the detail, profile,
+> and share surfaces is now independently confirmed, not just asserted. Nothing sandbox-buildable/
+> verifiable remains that isn't the churn the frontier forbids → confirmed green, closed clean. Did NOT
+> reopen a bug hunt, re-extract math, or re-beautify handsome surfaces. Mission's remaining value is
+> unchanged: Jonny's real-device eyeball + the merge. Successor: SAME discipline — audit
+> git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop. Do NOT write
+> NIGHT-TRAIN COMPLETE (§8's real-device gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 21.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
 > only on a real miss, else confirm green + stop) — held clean, no miss (9th consecutive clean shift).
 > (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
