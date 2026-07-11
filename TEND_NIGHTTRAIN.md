@@ -243,20 +243,22 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 50 ran another cold-read bug hunt and FIXED 3 more real client bugs (see #0aj): the
-> quit-detail hero rendered the WRONG evolution stage (raw Math.floor(cleanD/7), disagreeing with its own
-> caption + every other quit surface); simultaneous grace-milestone crossings in the one-tap "all good"
-> button DURABLY dropped a gifted token (stale-snapshot non-functional setState + a full-map POST to a
-> replace-wholesale route); and the bounce-back banner promised "Day 1 · +3 coins" decoupled from the
-> persisted ramp that drives the actual grant. All build/lint/test-verified. The cold-read bug-hunt vein
-> is thinning but not dry — a successor could run one more targeted hunt (I'd point it at the celebration/
-> milestone-coin paths + the add/delete-habit optimistic updates, areas not yet swept). The remaining
-> DEFERRED bugs in §12 (non-atomic coins/inventory race → Postgres RPC + migration; urge-entries
-> ownership; Stripe email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe
-> or a keyed shift → for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL
-> users, not just after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12).
-> Otherwise a `file://`-verifiable landing/OG/pricing-copy improvement. Do NOT extract math for
-> coverage's sake. See §14 for the sandbox limit.
+> NEXT SHIFT — shift 50 ran TWO cold-read bug hunts and FIXED 6 real client bugs total (see #0aj + #0ak).
+> Pass 1 (#0aj): quit-detail hero rendered the WRONG evolution stage; simultaneous grace-milestone
+> crossings DURABLY dropped a gifted token; bounce-back banner promised coins decoupled from the real
+> ramp. Pass 2 (#0ak): delete "Undo" couldn't actually undo (immediate unconditional DELETE → permanent
+> data loss); the all-done celebration replayed on every reload + auto-fired for quit-only users; parallel
+> milestone grants clobbered each other's earned badges. All build/lint/test-verified. The cold-read vein
+> is now well-mined — TWO passes surfaced clean-tracing bugs but the obvious optimistic-update / reward /
+> celebration / stale-snapshot classes are largely swept. A successor could try ONE more hunt pointed at
+> untouched surfaces (constellation/wrapped derivations, the shop/gallery interactions, onboarding→save
+> handoff, settings persistence) but expect diminishing returns; if it comes back empty, pivot to a
+> `file://`-verifiable landing/OG/pricing-copy improvement instead. The remaining DEFERRED bugs in §12
+> (non-atomic coins/inventory race → Postgres RPC + migration; urge-entries ownership; Stripe
+> email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe or a keyed shift →
+> for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL users, not just
+> after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12). Do NOT extract math
+> for coverage's sake. See §14 for the sandbox limit.
 
 0aj. ✅ **[SHIFT 50] Cold-read bug hunt — FIXED 3 more real client-side bugs (reasoning-verified, no
    DB/browser).** A fan-out bug-hunter agent + hand-trace surfaced three genuine defects. (1) **Quit
@@ -278,6 +280,27 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    (or granted nothing). Now seeds the banner from `bb_day` (shows storedBB+1 = the day the grant effect
    reaches; -1 = done → no banner), and the "+N coins today" suffix renders only on real reward days (no
    more "+0 coins today" on interim days). build GREEN, lint 0/5, test 94/94, 1 commit.
+
+0ak. ✅ **[SHIFT 50] Cold-read bug hunt, PASS 2 — FIXED 3 more real client-side bugs.** A second
+   fan-out hunter (pointed at the celebration / milestone-coin / optimistic add-delete / relapse paths)
+   surfaced three more. (1) **Delete "Undo" couldn't undo → permanent data loss** (med-high). `removeHabit`
+   fired `DELETE /api/habits/{id}` immediately + unconditionally, while the Undo button only restored
+   client React state — so after the server row (and its cascaded logs / quit_progress) was gone, tapping
+   Undo re-showed the habit with its old id but no backing row, which then vanished for good on the next
+   reload or log attempt (404 → syncError → router.refresh). Fixed: the destructive DELETE is now deferred
+   past the 5s undo window via a per-id timer map (`pendingDeletesRef`); Undo clears the timer so the row
+   is never touched, and letting the toast expire runs the delete normally. (2) **All-done celebration
+   replayed on every reload + auto-fired for quit-only users** (low-med). `prevAllDoneRef` init'd to
+   `false`, so any app opening ALREADY all-done (notably a pure-quit user — quit habits read "done" every
+   day) was treated as a fresh false→true flip → confetti/shooting-star/banner on every reload, and the
+   +10 grant fired with zero engagement (coins were day-gated but the FX weren't). The effect now adopts
+   the initial `allDone` as its baseline on the first run and only celebrates genuine in-session flips.
+   (3) **Parallel milestone grants clobbered each other's earned badges** (low). `checkMilestones` did
+   `setEarned(ne)` with `ne = {...earned}` (a stale snapshot + whole-object write), so two habits crossing
+   a milestone in the same tick (the passive quit loop, or `markAllGood`'s shared-snapshot timeouts) lost
+   one habit's newly-earned keys. Now a functional merge of only the newly-earned keys, mirroring the
+   coins/grace fixes. build GREEN, lint 0/5, test 94/94, 1 commit. (Traced clean + NOT reported: `addHabit`
+   is server-first not optimistic; `buyItem`/`buyFreeze`/relapse `resetQuit` rollbacks are correct.)
 
 0ai. ✅ **[SHIFT 49] Recovered + banked shift 16's orphaned timezone fix.** Shift 16 ran 8 min, made 4
    uncommitted edits, then died (0 commits); shifts 17–48 then all fast-failed on a monthly spend limit,
