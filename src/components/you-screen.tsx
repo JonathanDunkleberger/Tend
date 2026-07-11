@@ -7,6 +7,7 @@ import {
 import type { ThemeColors, SeasonKey } from "@/lib/constants";
 import { SEASONS } from "@/lib/constants";
 import { haptic } from "@/lib/utils";
+import { InstallPromptCard } from "./install-prompt";
 
 interface YouScreenProps {
   th: ThemeColors;
@@ -138,6 +139,9 @@ export function YouScreen({
           )}
         </div>
       </div>
+
+      {/* Install-as-PWA affordance (renders only when installable & not dismissed) */}
+      <InstallPromptCard th={th} darkMode={darkMode} />
 
       {/* Navigation rows */}
       <div style={{ borderRadius: 18, background: th.card, border: `1px solid ${th.cardBorder}`, boxShadow: th.cardShadow, overflow: "hidden", marginBottom: 16 }}>
