@@ -243,18 +243,41 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 49 banked shift 16's orphaned timezone fix (see #0ai) + FIXED 4 fresh cold-read bugs
-> (see #0ah): a bounce-back coin faucet, a quit-habit start-day happiness bug, wasted grace gifts to quit
-> habits, and a quit-dampened heatmap. (Context: shifts 17–48 all FAST-FAILED on a monthly spend limit;
-> shift 16 died mid-work leaving 4 uncommitted files — shift 49 recovered + committed them.) Good next
-> moves for a successor: the cold-read bug-hunt vein is still productive — keep hunting ACTUAL client-side
-> bugs to FIX (reasoning-verifiable, no DB/browser). The remaining DEFERRED bugs in §12 (non-atomic
-> coins/inventory race → Postgres RPC + migration; urge-entries ownership; Stripe email-clobber;
-> verify-subscription 10-session fallback) all need a running DB/Stripe or a keyed shift → for Jonny;
-> don't ship unrunnable SQL. Also open: the bounce-back ramp now fires for ALL users, not just after a
-> real lapse (no lapse-detection wiring exists) — a product call for Jonny (see §12). Otherwise a
-> `file://`-verifiable landing/OG/pricing-copy improvement. Do NOT extract math for coverage's sake.
-> See §14 for the sandbox limit.
+> NEXT SHIFT — shift 50 ran another cold-read bug hunt and FIXED 3 more real client bugs (see #0aj): the
+> quit-detail hero rendered the WRONG evolution stage (raw Math.floor(cleanD/7), disagreeing with its own
+> caption + every other quit surface); simultaneous grace-milestone crossings in the one-tap "all good"
+> button DURABLY dropped a gifted token (stale-snapshot non-functional setState + a full-map POST to a
+> replace-wholesale route); and the bounce-back banner promised "Day 1 · +3 coins" decoupled from the
+> persisted ramp that drives the actual grant. All build/lint/test-verified. The cold-read bug-hunt vein
+> is thinning but not dry — a successor could run one more targeted hunt (I'd point it at the celebration/
+> milestone-coin paths + the add/delete-habit optimistic updates, areas not yet swept). The remaining
+> DEFERRED bugs in §12 (non-atomic coins/inventory race → Postgres RPC + migration; urge-entries
+> ownership; Stripe email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe
+> or a keyed shift → for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL
+> users, not just after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12).
+> Otherwise a `file://`-verifiable landing/OG/pricing-copy improvement. Do NOT extract math for
+> coverage's sake. See §14 for the sandbox limit.
+
+0aj. ✅ **[SHIFT 50] Cold-read bug hunt — FIXED 3 more real client-side bugs (reasoning-verified, no
+   DB/browser).** A fan-out bug-hunter agent + hand-trace surfaced three genuine defects. (1) **Quit
+   detail hero showed the wrong evolution stage.** The 140px hero creature used a raw
+   `Math.min(4, Math.floor(cleanD/7))` while its own "Quitting · <label>" caption AND every other quit
+   surface (garden row, gallery, share card) use `getStageForId` (STAGE_THRESHOLDS 0/3/7/14/30 + the
+   self-healing `computeQuitStage` floor). At cleanD=3 the hero rendered an Egg while the label said
+   Hatchling; at 7, Hatchling vs Whelp; and it ignored the post-relapse one-tier floor. Now delegates to
+   `getStageForId` — the lone disagreeing surface is fixed. (2) **Simultaneous grace-milestone crossings
+   dropped a gifted token, durably.** In `markAllGood`, each target habit's `checkMilestones()` fires in
+   its own `setTimeout` closing over the SAME stale `streakFreezes` render snapshot, and the grant did a
+   non-functional `setStreakFreezes({...streakFreezes,[id]:n})` → two build habits both crossing 7/21/60
+   in one "all good" tap clobbered each other (last-write-wins), and `syncCoins` POSTs the full map to a
+   route that REPLACES `streak_freezes` wholesale → the loss survived reload. Added a `streakFreezesRef`
+   mirror + a `setGraceTokens()` merge helper; both write sites (checkMilestones, buyFreeze) now merge
+   against the freshest map. (3) **Bounce-back banner promised coins it wouldn't deliver.** Welcome-back
+   hardcoded `setBounceBackDay(1)` independent of the persisted `bb_day` ramp that actually drives the
+   grant → a returning mid-ramp/completed user saw "Day 1 · +3 coins today" that never matched reality
+   (or granted nothing). Now seeds the banner from `bb_day` (shows storedBB+1 = the day the grant effect
+   reaches; -1 = done → no banner), and the "+N coins today" suffix renders only on real reward days (no
+   more "+0 coins today" on interim days). build GREEN, lint 0/5, test 94/94, 1 commit.
 
 0ai. ✅ **[SHIFT 49] Recovered + banked shift 16's orphaned timezone fix.** Shift 16 ran 8 min, made 4
    uncommitted edits, then died (0 commits); shifts 17–48 then all fast-failed on a monthly spend limit,
