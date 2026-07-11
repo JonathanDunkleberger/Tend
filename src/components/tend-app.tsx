@@ -4,10 +4,10 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Check, Plus, X, Flame, ChevronLeft, Coins, Sparkles,
-  Pencil, Shield, Sun, Moon, LayoutGrid, Crown,
+  Pencil, Shield, Crown,
   Users, RefreshCw, Wind, DollarSign, Heart,
-  Sunrise, SunMedium, MoonStar, Menu, Store, Pause, Play,
-  Share2, LogOut, ExternalLink,
+  Sunrise, SunMedium, MoonStar, Store, Pause, Play,
+  Share2,
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Creature } from "@/components/creature";
@@ -27,6 +27,9 @@ import { Shop } from "@/components/shop";
 import { UrgeSupport } from "@/components/urge-support";
 import { TendPlusScreen, TendPlusMiniPrompt, SevenDayCelebration } from "@/components/tend-plus-screen";
 import { Onboarding } from "@/components/onboarding";
+import { BottomNav, type NavTab } from "@/components/bottom-nav";
+import { WellnessHub } from "@/components/wellness-hub";
+import { YouScreen } from "@/components/you-screen";
 import { MultiHabitHeatmap } from "@/components/multi-habit-heatmap";
 import { MilestoneCoin, MilestoneCelebration, CoinBadge, CoinRow, MILESTONE_COINS } from "@/components/milestone-coin";
 import type { CoinTier } from "@/components/milestone-coin";
@@ -46,6 +49,8 @@ import { migrateLocalStorageToServer } from "@/lib/migrate-local-data";
 import { apiCall, apiSync } from "@/lib/api";
 import type { LucideIcon } from "lucide-react";
 import type { SeasonKey } from "@/lib/constants";
+
+type Page = "main" | "detail" | "add" | "gallery" | "constellation" | "social" | "shop" | "wellness" | "you";
 
 interface TendAppProps {
   initialHabits: HabitWithStats[];
@@ -85,16 +90,15 @@ export function TendApp({
   const [darkMode, setDarkMode] = useState(initialPreferences.darkMode);
   const [season, setSeason] = useState<SeasonKey>((initialPreferences.season as SeasonKey) || getSeason());
   const th = THEME[darkMode ? "dark" : "light"];
-  const [page, setPageRaw] = useState<"main" | "detail" | "add" | "gallery" | "constellation" | "social" | "shop">("main");
+  const [page, setPageRaw] = useState<Page>("main");
   const prevPageRef = useRef<string>("main");
   const [pageAnim, setPageAnim] = useState<string>("");
 
   // Wrap setPage to track transitions
-  const setPage = useCallback((next: "main" | "detail" | "add" | "gallery" | "constellation" | "social" | "shop") => {
+  const setPage = useCallback((next: Page) => {
     const prev = prevPageRef.current;
     if (next === prev) return;
     // Determine animation direction
-    const pageOrder = ["main", "detail", "add", "gallery", "constellation", "social", "shop"];
     const goingDeeper = next !== "main";
     const goingBack = next === "main" && prev !== "main";
     setPageAnim(
@@ -124,7 +128,6 @@ export function TendApp({
   const [showBreathe, setShowBreathe] = useState(false);
   const [relapseHabit, setRelapseHabit] = useState<HabitWithStats | null>(null);
   const [urgeSupportHabit, setUrgeSupportHabit] = useState<HabitWithStats | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [ownedItems, setOwnedItems] = useState<string[]>(initialOwnedItems);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -605,6 +608,14 @@ export function TendApp({
   const totalToday = activeHabits.filter((h) => isHappy(h.id)).length;
   const todayPct = activeHabits.length ? totalToday / activeHabits.length : 0;
   const allDone = todayPct >= 1 && activeHabits.length > 0;
+
+  // Which bottom-nav tab reads as "active" for the current page
+  const navActiveTab: NavTab | null =
+    page === "main" || page === "detail" ? "garden"
+    : page === "constellation" ? "insights"
+    : page === "wellness" ? "wellness"
+    : page === "you" || page === "gallery" || page === "shop" ? "you"
+    : null;
 
   // All-done celebration + aurora
   useEffect(() => {
@@ -1432,188 +1443,9 @@ export function TendApp({
                 <DollarSign size={11} />{fmtMoney(totalSaved)} saved
               </div>
             )}
-            <button
-              onClick={() => setMenuOpen(true)}
-              title="Menu"
-              style={{
-                background: th.progressBg, border: "none", borderRadius: 8,
-                padding: 5, cursor: "pointer", display: "flex", color: th.textSub,
-                transition: "all .15s",
-              }}
-            >
-              <Menu size={16} />
-            </button>
           </div>
         </div>
 
-        {/* SLIDE-OUT MENU */}
-        {menuOpen && (
-          <>
-            <div onClick={() => setMenuOpen(false)} style={{
-              position: "fixed", inset: 0, background: th.overlayBg,
-              zIndex: 90, animation: "fi .15s ease",
-            }} />
-            <div style={{
-              position: "fixed", top: 0, right: 0, bottom: 0, width: 280,
-              background: th.modalBg, zIndex: 91, padding: "24px 20px",
-              animation: "slideFromRight .25s cubic-bezier(.16,1,.3,1)",
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.15)",
-              display: "flex", flexDirection: "column", gap: 0,
-              overflowY: "auto", WebkitOverflowScrolling: "touch",
-            }}>
-              {/* Close button */}
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: th.textSub, display: "flex" }}>
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* ── Profile section ── */}
-              <div style={{
-                padding: "14px 12px", borderRadius: 14, marginBottom: 12,
-                background: isTendPlus() ? "rgba(74,222,128,0.05)" : th.hoverBg,
-                border: `1px solid ${isTendPlus() ? "rgba(74,222,128,0.15)" : th.cardBorder}`,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                  {/* Avatar */}
-                  {user?.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.imageUrl} alt="" width={36} height={36} style={{
-                      borderRadius: 10, border: `2px solid ${isTendPlus() ? "#4ade80" : th.cardBorder}`,
-                    }} />
-                  ) : (
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 10,
-                      background: th.progressBg, display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 16, fontWeight: 700, color: th.textMuted,
-                      border: `2px solid ${th.cardBorder}`,
-                    }}>
-                      {(user?.firstName || user?.primaryEmailAddress?.emailAddress || "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 14, fontWeight: 700, color: th.text,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                      display: "flex", alignItems: "center", gap: 4,
-                    }}>
-                      {user?.firstName || "Tender"}
-                      {isTendPlus() && <Crown size={12} color="#fbbf24" />}
-                    </div>
-                    <div style={{
-                      fontSize: 11, color: th.textMuted,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>
-                      {user?.primaryEmailAddress?.emailAddress || ""}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tier badge */}
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "8px 10px", borderRadius: 10,
-                  background: isTendPlus() ? "rgba(74,222,128,0.08)" : th.progressBg,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <Crown size={13} color={isTendPlus() ? "#4ade80" : th.textMuted} />
-                    <span style={{
-                      fontSize: 12, fontWeight: 700,
-                      color: isTendPlus() ? "#4ade80" : th.textMuted,
-                    }}>
-                      {isTendPlus() ? "Tend+" : "Free Plan"}
-                    </span>
-                  </div>
-                  {isTendPlus() ? (
-                    <button
-                      onClick={async () => {
-                        try {
-                          const res = await fetch("/api/portal", { method: "POST" });
-                          const data = await res.json();
-                          if (data.url) window.location.href = data.url;
-                        } catch { /* ignore */ }
-                      }}
-                      style={{
-                        background: "none", border: "1px solid rgba(74,222,128,0.2)",
-                        borderRadius: 8, padding: "4px 10px", cursor: "pointer",
-                        fontSize: 10, fontWeight: 600, color: "#4ade80",
-                        fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
-                      }}
-                    >
-                      Manage <ExternalLink size={9} />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { setShowPaywall(true); setMenuOpen(false); }}
-                      style={{
-                        background: "#4ade80", border: "none",
-                        borderRadius: 8, padding: "4px 12px", cursor: "pointer",
-                        fontSize: 10, fontWeight: 700, color: "#0a0e18",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      Upgrade
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* ── Navigation items ── */}
-              {[
-                { label: "Collection", Icon: LayoutGrid, color: th.textSub, action: () => { setPage("gallery"); setMenuOpen(false); } },
-                { label: "Insights", Icon: Sparkles, color: "#8B5CF6", action: () => { setPage("constellation"); setMenuOpen(false); } },
-                { label: "Breathe", Icon: Wind, color: "#38bdf8", action: () => { setShowBreathe(true); setMenuOpen(false); } },
-                { label: "Tend Together", Icon: Users, color: "#4caf50", action: () => { setPage("social"); setMenuOpen(false); } },
-                { label: "World Shop", Icon: Store, color: "#f59e0b", action: () => { setPage("shop"); setMenuOpen(false); } },
-                { label: darkMode ? "Light Mode" : "Dark Mode", Icon: darkMode ? Sun : Moon, color: th.textSub, action: () => { setDarkMode((d) => !d); setMenuOpen(false); } },
-              ].map((item, i) => (
-                <button key={i} onClick={item.action} style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "12px 8px",
-                  background: "none", border: "none", borderRadius: 12,
-                  cursor: "pointer", fontFamily: "inherit", fontSize: 14,
-                  fontWeight: 500, color: th.text, width: "100%", textAlign: "left",
-                }}>
-                  <item.Icon size={18} color={item.color} />
-                  {item.label}
-                </button>
-              ))}
-
-              {/* ── Season picker ── */}
-              <div style={{ height: 1, background: th.cardBorder, margin: "8px 0" }} />
-              <div style={{ padding: "8px" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: th.textMuted }}>Season</span>
-                <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
-                  {(["spring", "summer", "autumn", "winter"] as SeasonKey[]).map((s) => (
-                    <button key={s} onClick={() => setSeason(s)} style={{
-                      padding: "5px 10px", borderRadius: 8, border: "none",
-                      background: season === s ? (darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent",
-                      cursor: "pointer", fontSize: 11, fontWeight: 600,
-                      color: season === s ? th.text : th.textMuted, fontFamily: "inherit",
-                      transition: "all .15s",
-                    }}>
-                      {SEASONS[s].label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── Sign out ── */}
-              <div style={{ height: 1, background: th.cardBorder, margin: "8px 0" }} />
-              <button
-                onClick={() => signOut({ redirectUrl: "/" })}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "12px 8px",
-                  background: "none", border: "none", borderRadius: 12,
-                  cursor: "pointer", fontFamily: "inherit", fontSize: 13,
-                  fontWeight: 500, color: th.textMuted, width: "100%", textAlign: "left",
-                }}
-              >
-                <LogOut size={16} color={th.textMuted} />
-                Sign Out
-              </button>
-            </div>
-          </>
-        )}
 
         {/* ═══ MAIN ═══ */}
         {page === "main" && (
@@ -2607,11 +2439,48 @@ export function TendApp({
             onOwnedTap={() => { setPage("main"); setTimeout(() => terRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100); }}
           />
         )}
+
+        {/* ═══ WELLNESS ═══ */}
+        {page === "wellness" && (
+          <WellnessHub th={th} darkMode={darkMode} onBreathe={() => { setBreathingHabit(null); setShowBreathe(true); }} />
+        )}
+
+        {/* ═══ YOU ═══ */}
+        {page === "you" && (
+          <YouScreen
+            th={th}
+            darkMode={darkMode}
+            season={season}
+            profile={{
+              firstName: user?.firstName,
+              imageUrl: user?.imageUrl,
+              email: user?.primaryEmailAddress?.emailAddress,
+            }}
+            isPro={isTendPlus()}
+            coins={coins}
+            dragonCount={habits.length}
+            bestStreak={habits.reduce((m, h) => Math.max(m, getBestStreak(h.id)), 0)}
+            onSeasonChange={setSeason}
+            onToggleDark={() => setDarkMode((d) => !d)}
+            onOpenGallery={() => setPage("gallery")}
+            onOpenShop={() => setPage("shop")}
+            onOpenSettings={() => router.push("/settings")}
+            onManageSubscription={async () => {
+              try {
+                const res = await fetch("/api/portal", { method: "POST" });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+              } catch { /* ignore */ }
+            }}
+            onUpgrade={() => setShowPaywall(true)}
+            onSignOut={() => signOut({ redirectUrl: "/" })}
+          />
+        )}
       </div>
 
-      {/* FAB */}
+      {/* FAB — lifted above the bottom nav + safe area */}
       {page === "main" && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50 }}>
+        <div style={{ position: "fixed", bottom: "calc(84px + env(safe-area-inset-bottom, 0px))", right: 20, zIndex: 55 }}>
           <button className="fab" onClick={() => {
             if (habits.length >= FREE_HABIT_LIMIT && !isTendPlus()) {
               setShowPaywall(true);
@@ -2622,6 +2491,21 @@ export function TendApp({
             <Plus size={22} />
           </button>
         </div>
+      )}
+
+      {/* ═══ BOTTOM NAV — primary thumb-first navigation ═══ */}
+      {page !== "add" && (
+        <BottomNav
+          th={th}
+          darkMode={darkMode}
+          active={navActiveTab}
+          onNavigate={(tab) => {
+            if (tab === "garden") { setPage("main"); }
+            else if (tab === "insights") { setPage("constellation"); }
+            else if (tab === "wellness") { setPage("wellness"); }
+            else if (tab === "you") { setPage("you"); }
+          }}
+        />
       )}
 
       {/* ADD */}
