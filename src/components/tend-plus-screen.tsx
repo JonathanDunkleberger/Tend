@@ -5,9 +5,10 @@ import { X, Infinity, TrendingUp, TreePine, Sparkles, Egg } from "lucide-react";
 interface TendPlusScreenProps {
   onClose: () => void;
   onSubscribe: (plan: "annual" | "monthly") => void;
+  onRestore?: () => void;
 }
 
-export function TendPlusScreen({ onClose, onSubscribe }: TendPlusScreenProps) {
+export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScreenProps) {
   const features = [
     {
       Icon: Infinity,
@@ -163,6 +164,7 @@ export function TendPlusScreen({ onClose, onSubscribe }: TendPlusScreenProps) {
         {/* Restore purchase */}
         <div style={{ textAlign: "center" }}>
           <button
+            onClick={onRestore}
             style={{
               background: "none", border: "none", cursor: "pointer",
               fontSize: 12, color: "rgba(255,255,255,0.3)",

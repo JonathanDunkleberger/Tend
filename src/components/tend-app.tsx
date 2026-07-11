@@ -1536,6 +1536,25 @@ export function TendApp({
             }
             // On error: don't activate — user needs to retry
           }}
+          onRestore={async () => {
+            // Re-check the user's subscription with Stripe directly (in case a
+            // webhook was missed) and reflect the result — the same idempotent
+            // verify the app runs on mount, but forced regardless of current tier.
+            setCoinToast({ msg: "Checking your subscription…", icon: Sparkles });
+            try {
+              const res = await fetch("/api/verify-subscription", { method: "POST" });
+              const v = await res.json();
+              if (v.isPro) {
+                setIsPro(true);
+                setShowPaywall(false);
+                setCoinToast({ msg: "Welcome back to Tend+!", icon: Sparkles });
+              } else {
+                setCoinToast({ msg: "No active subscription found", icon: X });
+              }
+            } catch {
+              setCoinToast({ msg: "Couldn't reach the server — try again", icon: X });
+            }
+          }}
         />
       )}
 
