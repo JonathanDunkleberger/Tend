@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import {
   Sparkles, TrendingUp, Shield, Flame, Heart, Calendar,
-  Crown, BarChart3, Trophy, Lock,
+  Crown, Trophy, Lock,
 } from "lucide-react";
 import { seed, daysAgo, daysBetween, today } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -33,6 +33,32 @@ interface Synergy {
   coCount: number;
   name: string | null;
   label: string;
+}
+
+/**
+ * Build a smooth (Catmull-Rom → cubic-bézier) SVG path through points given in a
+ * normalized 0..100 user space. Used for the momentum curve; the SVG is drawn
+ * with preserveAspectRatio="none" + non-scaling stroke so it fills any width
+ * while the 2px line stays crisp. `close` extends the path down to the baseline
+ * for the area fill.
+ */
+function smoothPath(pts: { x: number; y: number }[], close = false): string {
+  if (pts.length === 0) return "";
+  if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+  if (close) d += ` L ${pts[pts.length - 1].x.toFixed(2)} 100 L ${pts[0].x.toFixed(2)} 100 Z`;
+  return d;
 }
 
 export function Constellation({
@@ -238,50 +264,88 @@ export function Constellation({
         </div>
       </div>
 
-      {/* ── 2. Weekly trend (FREE) ── */}
-      {habits.length > 0 && (
+      {/* ── 2. Momentum curve (FREE) — 4-week completion %, single-series area sparkline ── */}
+      {habits.length > 0 && (() => {
+        // Points in a normalized 0..100 space, inset from the edges so the end
+        // markers aren't clipped; y leaves headroom top (for a 100% peak) + bottom.
+        const yTop = 16, yBottom = 84, xL = 6, xR = 94;
+        const n = weeklyTrend.length;
+        const pts = weeklyTrend.map((w, i) => ({
+          x: n > 1 ? xL + (i / (n - 1)) * (xR - xL) : (xL + xR) / 2,
+          y: yTop + (1 - w.pct / 100) * (yBottom - yTop),
+          pct: w.pct,
+        }));
+        const last = weeklyTrend[n - 1];
+        const prev = n > 1 ? weeklyTrend[n - 2] : null;
+        const delta = prev ? last.pct - prev.pct : 0;
+        // Green reads on both surfaces; brighten the marker for dark contrast.
+        const line = "#4caf50";
+        const gid = "momentumFill";
+        return (
         <div className="cd" style={{ padding: 14, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
-          <div className="lb" style={{ marginBottom: 10, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
-            <BarChart3 size={10} /> Weekly Trend
+          <div className="lb" style={{ marginBottom: 6, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
+            <TrendingUp size={10} /> Momentum
+            {prev && (
+              <span style={{
+                marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 3,
+                fontSize: 10, fontWeight: 700, letterSpacing: 0, textTransform: "none",
+                padding: "2px 8px", borderRadius: 999,
+                color: delta > 0 ? "#4caf50" : delta < 0 ? "#e57373" : th.textMuted,
+                background: delta > 0 ? "rgba(76,175,80,0.12)" : delta < 0 ? "rgba(229,115,115,0.12)" : th.progressBg,
+              }}>
+                {delta > 0 ? "▲" : delta < 0 ? "▼" : "•"} {delta > 0 ? "+" : ""}{delta}% vs last wk
+              </span>
+            )}
           </div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 80, padding: "0 4px" }}>
-            {weeklyTrend.map((w, i) => {
-              const barH = Math.max(4, (w.pct / 100) * 68);
-              const isThis = i === weeklyTrend.length - 1;
-              const improving = i > 0 && w.pct > weeklyTrend[i - 1].pct;
+          {/* chart area + overlaid markers/labels */}
+          <div style={{ position: "relative", height: 80, margin: "18px 0 20px" }}>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="80" style={{ display: "block", overflow: "visible" }}>
+              <defs>
+                <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={line} stopOpacity="0.28" />
+                  <stop offset="100%" stopColor={line} stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {/* baseline */}
+              <line x1="0" y1="100" x2="100" y2="100" stroke={th.cardBorder} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+              <path d={smoothPath(pts, true)} fill={`url(#${gid})`} stroke="none" />
+              <path d={smoothPath(pts)} fill="none" stroke={line} strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+            {pts.map((p, i) => {
+              const isThis = i === n - 1;
               return (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div key={i}>
+                  {/* value label above the point */}
                   <div style={{
-                    fontSize: 11, fontWeight: 700, color: isThis ? "#4caf50" : th.textSub,
-                  }}>
-                    {w.pct}%
-                  </div>
+                    position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+                    transform: "translate(-50%,-165%)", whiteSpace: "nowrap",
+                    fontSize: isThis ? 13 : 10.5, fontWeight: isThis ? 800 : 600,
+                    color: isThis ? line : th.textSub,
+                  }}>{p.pct}%</div>
+                  {/* marker */}
                   <div style={{
-                    width: "100%", height: barH, borderRadius: 6,
-                    background: isThis
-                      ? "linear-gradient(to top, #4caf50, #66bb6a)"
-                      : `rgba(76,175,80,${0.15 + (w.pct / 100) * 0.25})`,
-                    transition: "height 0.4s ease",
-                    position: "relative",
-                  }}>
-                    {improving && isThis && (
-                      <TrendingUp size={10} color="#4caf50" style={{
-                        position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)",
-                      }} />
-                    )}
-                  </div>
+                    position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
+                    transform: "translate(-50%,-50%)",
+                    width: isThis ? 11 : 7, height: isThis ? 11 : 7, borderRadius: "50%",
+                    background: line,
+                    border: isThis ? `2px solid ${th.card}` : "none",
+                    boxShadow: isThis ? `0 0 0 2px ${line}, 0 2px 8px rgba(76,175,80,0.45)` : "none",
+                  }} />
+                  {/* week label below */}
                   <div style={{
-                    fontSize: 8, fontWeight: 600, color: th.textMuted,
+                    position: "absolute", left: `${p.x}%`, top: "100%",
+                    transform: "translate(-50%, 5px)", whiteSpace: "nowrap",
+                    fontSize: 8, fontWeight: 600, color: isThis ? th.textSub : th.textMuted,
                     textTransform: "uppercase" as const, letterSpacing: 0.3,
-                  }}>
-                    {w.label}
-                  </div>
+                  }}>{weeklyTrend[i].label}</div>
                 </div>
               );
             })}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ── 3. Habit scoreboard (FREE: top 3, PRO: all + best) ── */}
       {scoreboard.length > 0 && (
