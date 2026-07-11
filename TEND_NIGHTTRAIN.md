@@ -197,7 +197,9 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
       synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
 - [ ] An expanded **wellness suite** (breathing + at least 2–3 more uplifting tools).
-- [ ] A coherent **pricing/monetization** model (costs modeled, free/Pro split, Stripe wired).
+- [x] A coherent **pricing/monetization** model (costs modeled, free/Pro split, Stripe wired). *(shift 4:
+      §13 PRICING MODEL — costs modeled, competitor benchmark, free/Tend+ split + price recommendation.
+      Stripe already wired. Executing the recommended price tweak is an optional follow-up.)*
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic.
 - [ ] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
@@ -248,19 +250,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 9. **[PHASE 4] Wellness suite — mostly banked (shift 2).** Breathe + grounding + urge-surf + gratitude
    now live in `wellness-hub.tsx`. Remaining: persist gratitude server-side (currently localStorage
    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
-10. 🔨 **[PHASE 5 — IN PROGRESS shift 4] Grace token / "one slip never stings" UX.** Found on cold
-    read: the streak-math exists (`getStreak` bridges gaps via `streakFreezes`) AND a `buyFreeze(hId)`
-    fn (50 coins) already existed — but `buyFreeze` was NEVER CALLED and the `hasFz` row var was
-    computed but NEVER RENDERED. So it was fully dead. Shift 4 wiring: (a) `isGraceProtected(hId)`
-    helper (streak-with-freeze > raw consecutive streak → a token is actively bridging a gap);
-    (b) shield badge w/ count on the garden habit row (glows green when protecting); (c) a "Streak
-    shield" card in the habit detail (see tokens, spend 50 coins, capped at 3, gentle protected
-    moment); (d) buyFreeze capped + success haptic + "Grace token earned 🛡️" copy. Makes the public
-    promise real. IN PROGRESS — verify build before banking.
-12. **[PHASE 5] Pricing/monetization model.** Stripe is wired (Free 3 habits / Tend+ $4.99mo·$39.99yr),
-    but DoD wants costs *modeled* + a benchmarked free/Pro split documented. Research Finch/Forest/
-    Fabulous/Duolingo price points + model Supabase/Clerk/Stripe/Vercel free-tier reality, then write
-    the recommendation into DECISIONS. No code necessarily — a decision doc closes this DoD item.
+10. ✅ **[PHASE 5] Grace token / "one slip never stings" UX.** DONE (shift 4, commits `859b099` +
+    `9b4b501`). Found on cold read: streak-math existed (`getStreak` bridges gaps via `streakFreezes`)
+    AND a `buyFreeze(hId)` fn (50 coins) existed — but `buyFreeze` was NEVER CALLED and the `hasFz` row
+    var was computed but NEVER RENDERED. Fully dead. Now real: (a) `isGraceProtected(hId)` helper
+    (streak-with-freeze > raw consecutive streak → a token is actively bridging a gap); (b) shield badge
+    w/ count on the garden habit row (glows green + shadow when actively protecting); (c) a "Streak
+    shield" card in the habit detail (see tokens, spend 50 coins, capped at 3, gentle "🛡️ a grace day
+    is protecting your streak right now" moment); (d) buyFreeze capped at 3 + success haptic + "Grace
+    token earned" copy; (e) **free** grace token gifted at 7-/21-/60-day streak milestones via
+    `checkMilestones` (GRACE_MILESTONE_DAYS) so the landing's "milestone rewards → a grace token"
+    promise is honest for non-payers. Build + lint green. NOT browser-verified (auth-gated).
+12. ✅ **[PHASE 5] Pricing/monetization model doc.** DONE (shift 4). Wrote **§13 PRICING & MONETIZATION
+    MODEL**: cost model (infra ≈$45/mo at 10k users → cost is a non-constraint; price for conversion),
+    competitor benchmark table (Finch/Duolingo/Fabulous/Habitica/Streaks/Productive), recommended
+    free/Tend+ split, and a price recommendation (monthly $5.99, annual $39.99 "save 44%", $79.99
+    lifetime, 7-day annual trial). DoD "pricing modeled + documented" item satisfied. Executing the
+    price change (new Stripe price IDs + lifetime/trial flow) is parked as an OPTIONAL follow-up below.
 11. **[ongoing] Lint hygiene** — 32 warnings (unused vars + unused exhaustive-deps disables). NOTE:
     `eslint --fix` on the monolith leaves ugly trailing-whitespace where it strips disable comments —
     do these by hand (delete the whole comment line), don't --fix blindly.
@@ -381,3 +387,73 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   demote the quit/recovery framing to a first-class *mode* (see §10). If you actually want Tend to BE
   a recovery-first app, say so and the frontier flips — otherwise the night train proceeds
   garden-first.
+
+---
+
+## 13. PRICING & MONETIZATION MODEL (shift 4 — researched; DoD "pricing modeled" item)
+
+> Purpose: satisfy the DoD "coherent pricing/monetization model (costs modeled, free/Pro split, Stripe
+> wired)". Stripe is already wired (Free 3 habits / Tend+ $4.99mo · $39.99yr). This section models the
+> real costs, benchmarks competitors, and recommends the split + price. Web-researched July 2026.
+
+### 13a. Cost model — infra is effectively free until real scale
+| Provider | Free tier that bites first | First paid tier | When it forces an upgrade |
+|---|---|---|---|
+| **Supabase** | 7-day inactivity **auto-pause**; then 500 MB DB / 5 GB egress / 50k MAU | Pro **$25/mo** | Auto-pause hits a quiet app almost immediately; capacity caps ~low-thousands of active users |
+| **Vercel** | Hobby is **non-commercial-use only**; 100 GB bandwidth / 1M invocations | Pro **$20/mo** | Attaching Stripe = commercial → Pro on day 1 (loosely enforced tiny-scale); bandwidth by ~10k users |
+| **Clerk** | 50,000 MRU (returning users) | $25/mo (+$0.02/MRU over) | Doesn't bite until ~50k returning users — very far out |
+| **Stripe** | none (usage-priced) | — | Never; **2.9% + $0.30** per US card charge, no monthly fee |
+
+**Bottom line:** a *monetized* 10k-user Tend costs ≈ **$45/mo** (Vercel Pro $20 + Supabase Pro $25);
+Clerk + Stripe stay free/usage-only to ~50k users. Net per annual sub after Stripe ≈ $39.99 − (2.9% +
+$0.30) ≈ **$38.23/yr ≈ $3.19/mo**. So **~14 annual subscribers cover all infra.** At 10k users × a
+conservative 2–5% freemium conversion = **200–500 payers** → wildly profitable. **Conclusion: cost is a
+non-constraint. Price for conversion, not cost recovery.**
+
+### 13b. Competitor benchmark (2025–26, USD)
+| App | Monthly | Annual (eff. $/mo) | Lifetime | Model |
+|---|---|---|---|---|
+| Finch | $9.99 | $69.99 (~$5.83) | — | freemium, Plus is cosmetic |
+| Duolingo Super | $12.99 | $59.99 (~$5.00) | — | freemium, free tier fully usable |
+| Fabulous | ~$16.99 | $39.99 (~$3.33) | ~$250 | freemium, heavily gated |
+| Habitica | $4.99 | $47.99 (~$4.00) | — | freemium, subs cosmetic/convenience |
+| Streaks | — | — | **$5.99 one-time** | pure paid, no sub |
+| Productive | $3.99 | $23.99 (~$2.00) | — | freemium |
+| **Tend (today)** | **$4.99** | **$39.99 (~$3.33)** | — | freemium, 3-habit free cap |
+
+**Read:** Tend's annual ($3.33/mo eff.) is competitive (≈ Fabulous). Tend's **monthly is priced too low
+relative to its annual** — the $4.99→$39.99 gap is only "save 33%", so there's weak pull toward annual,
+which is the plan that actually retains. Health/fitness apps sell **~68% annual**; annual is the plan to
+optimize. Nobody in the set except Streaks/Fabulous offers **lifetime** — an easy differentiator + a
+cash-now lever for subscription-averse users (and Tend has zero users, so front-loaded cash is fine).
+
+### 13c. RECOMMENDED SPLIT & PRICE
+**Free (the generous, on-brand "never shaming" tier):**
+- Up to **3 habit eggs**, full daily assumes-best check-in + one-tap "all good", streaks, coins.
+- Core garden + dragon hatching/evolution art, **all wellness tools** (breathe/grounding/urge-surf/
+  gratitude), basic Insights (recent heatmap + current streaks), **grace tokens earned at milestones**.
+- Rationale: the soul is warmth, not a paywall. A stingy free tier contradicts "assumes the best in you."
+  Give the whole emotional loop free; charge for *depth, breadth, and expression*.
+
+**Tend+ (paywall = depth / breadth / vanity, never the core loop):**
+- **Unlimited** habit eggs · choose your egg & species · full history + deep Insights (trends,
+  correlations, records) · **Tend Wrapped** · all garden décor/themes · extra/bankable grace tokens ·
+  (future) calm-mode terrarium. This matches the landing's current Tend+ bullet list — no promise drift.
+
+**Price (recommended change):**
+- **Monthly $5.99** (up from $4.99) — widens the annual discount, still under Finch/Duolingo/Habitica.
+- **Annual $39.99** (unchanged) → now **"save 44%"** vs monthly, a much stronger nudge to the retaining plan.
+- **Lifetime $79.99** (new) ≈ 2× annual — differentiator + cash-now; low marginal cost per §13a.
+- **7-day free trial on annual** (new) — the single biggest lever: health/fitness **trial→paid ≈ 40%**.
+  Default the pricing toggle to **annual** with the savings badge (it already shows a save-badge).
+
+**Expected math (illustrative):** 10k users → ~3% blended conversion ≈ 300 payers; if 68% pick annual
+(~$38 net) and rest monthly/lifetime, that's well over **$1k/mo net** against ~$45/mo infra. The
+constraint on revenue is **conversion (trial + annual framing)**, which is exactly what the above targets.
+
+**Implementation status:** documentation only this shift (closes the DoD item). Executing the price
+change is a Stripe-config + copy task — new price IDs for $5.99/mo, $79.99 lifetime (one-time), and a
+trial period on the annual price, plus a `lifetime` entitlement branch alongside the existing sub check.
+Parked as an optional follow-up in the frontier; **not required** for the DoD, which asks for the model
+to be *modeled + documented*, done here. Sources captured in shift-4 research (RevenueCat/Business of
+Apps benchmarks; Vercel/Clerk/Supabase/Stripe pricing pages).
