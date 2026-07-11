@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { MILESTONES } from "@/lib/constants";
+import { computeStreakForDate } from "@/lib/streak";
 
 const MILESTONE_DAYS: number[] = MILESTONES.map((m) => m.days);
 
@@ -53,23 +54,32 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Check for milestones
-  const { count } = await supabase
+  // Persist a milestone keyed by the CONSECUTIVE STREAK, not total-days-logged.
+  // WHY: this row rehydrates into the client's earned-milestone map (garden/page
+  // → tend-app), which both dedups celebrations and lights the detail badge grid.
+  // Keying off total logs meant a sporadic logger who reached e.g. 7 *total* days
+  // (never a 7-day run) got a "streak:7" row that then suppressed the real 7-day
+  // streak celebration later. The server can't see the client's grace tokens, so
+  // it records the best RAW consecutive streak it can derive from the logs.
+  const { data: logRows } = await supabase
     .from("habit_logs")
-    .select("*", { count: "exact", head: true })
+    .select("log_date")
     .eq("habit_id", id);
 
-  const totalDays = count ?? 0;
+  const streak = computeStreakForDate(
+    (logRows ?? []).map((r: { log_date: string }) => r.log_date),
+    today,
+  );
   let milestone = null;
 
-  if (MILESTONE_DAYS.includes(totalDays)) {
+  if (MILESTONE_DAYS.includes(streak)) {
     // Check if this milestone already exists
     const { data: existingMilestone } = await supabase
       .from("milestones")
       .select("id")
       .eq("habit_id", id)
       .eq("milestone_type", "streak")
-      .eq("value", totalDays)
+      .eq("value", streak)
       .maybeSingle();
 
     if (!existingMilestone) {
@@ -78,7 +88,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         .insert({
           habit_id: id,
           milestone_type: "streak",
-          value: totalDays,
+          value: streak,
         })
         .select()
         .single();

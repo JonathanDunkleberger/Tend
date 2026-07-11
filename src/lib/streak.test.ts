@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeStreak, computeGraceActive, computeBestStreak } from "./streak";
+import { computeStreak, computeGraceActive, computeBestStreak, computeStreakForDate } from "./streak";
 
 // Build an isDone(n) predicate from a boolean array indexed by "days ago".
 // e.g. fromDays([true, true, false]) → done today & yesterday, not 2 days ago.
@@ -105,5 +105,52 @@ describe("computeBestStreak", () => {
   it("resets the run across a multi-day gap", () => {
     const dates = ["2026-07-01", "2026-07-05", "2026-07-06"];
     expect(computeBestStreak(dates)).toBe(2);
+  });
+});
+
+describe("computeStreakForDate (server-side, from log dates)", () => {
+  it("counts a clean run ending today", () => {
+    const dates = ["2026-07-09", "2026-07-10", "2026-07-11"];
+    expect(computeStreakForDate(dates, "2026-07-11")).toBe(3);
+  });
+
+  it("is 0 when today is undone and yesterday is undone", () => {
+    expect(computeStreakForDate(["2026-07-01"], "2026-07-11")).toBe(0);
+  });
+
+  it("does not break when today itself is not yet logged (counts from yesterday)", () => {
+    // logged through yesterday, today not yet logged → streak still 2
+    const dates = ["2026-07-09", "2026-07-10"];
+    expect(computeStreakForDate(dates, "2026-07-11")).toBe(2);
+  });
+
+  it("stops at the first gap (no grace bridging server-side)", () => {
+    // today + gap + earlier run → only today counts
+    const dates = ["2026-07-11", "2026-07-08", "2026-07-07"];
+    expect(computeStreakForDate(dates, "2026-07-11")).toBe(1);
+  });
+
+  it("KEY FIX: sporadic logging to 7 total days is NOT a 7-day streak", () => {
+    // seven logged days but never consecutive → no false streak:7 milestone
+    const dates = [
+      "2026-07-01", "2026-07-03", "2026-07-05", "2026-07-07",
+      "2026-07-09", "2026-07-10", "2026-07-11",
+    ];
+    expect(dates.length).toBe(7);
+    expect(computeStreakForDate(dates, "2026-07-11")).toBe(3); // only the last three are consecutive
+  });
+
+  it("crosses a month boundary correctly", () => {
+    const dates = ["2026-06-29", "2026-06-30", "2026-07-01"];
+    expect(computeStreakForDate(dates, "2026-07-01")).toBe(3);
+  });
+
+  it("ignores duplicate log dates", () => {
+    const dates = ["2026-07-10", "2026-07-11", "2026-07-11"];
+    expect(computeStreakForDate(dates, "2026-07-11")).toBe(2);
+  });
+
+  it("is empty-safe", () => {
+    expect(computeStreakForDate([], "2026-07-11")).toBe(0);
   });
 });

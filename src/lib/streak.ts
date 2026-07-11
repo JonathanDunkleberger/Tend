@@ -61,6 +61,25 @@ export function computeGraceActive(isDone: (n: number) => boolean, freezes: numb
 }
 
 /**
+ * Raw consecutive-day streak (NO grace bridging) ending at `todayStr`, derived
+ * from a list of completion dates ("YYYY-MM-DD").
+ *
+ * Used server-side (the habit log route) where grace-token state isn't known, so
+ * milestones persist keyed by the actual streak rather than total-days-logged.
+ * This is the best consecutive streak the server can compute; a client streak
+ * that a grace token bridged may exceed it (that rarer case relies on the
+ * client's own durable dedup). Calendar offsets are anchored to UTC-noon so the
+ * result is independent of the server's timezone and DST.
+ */
+export function computeStreakForDate(logDates: string[], todayStr: string): number {
+  const done = new Set(logDates);
+  const base = new Date(todayStr + "T12:00:00Z").getTime();
+  const dateNDaysAgo = (n: number): string =>
+    new Date(base - n * 86_400_000).toISOString().slice(0, 10);
+  return computeStreak((n) => done.has(dateNDaysAgo(n)));
+}
+
+/**
  * Historical best (longest ever) consecutive run from a list of completion dates
  * ("YYYY-MM-DD"). Duplicate dates are ignored; a gap of >1 day resets the run.
  * Callers typically take Math.max with the *current* streak (which may include
