@@ -6,6 +6,7 @@ import {
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
 import { seed, daysAgo, daysBetween, today } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { computeConsistency, computeSynergies, computeDayOfWeekRates } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
@@ -38,6 +39,8 @@ export function Constellation({
   habits, isDone, getStreak, getTotal, getCleanDays, getBestStreak, getStage,
   isPro, onUpgrade, th, gratitudeLog,
 }: ConstellationProps) {
+  // SVG SMIL isn't stopped by the global reduced-motion CSS rule, so gate the synergy-line pulse manually.
+  const prefersReducedMotion = useReducedMotion();
   const sr = seed;
 
   const buildHabits = habits.filter((h) => h.category !== "quit");
@@ -462,7 +465,7 @@ export function Constellation({
                     stroke="#8B5CF6" strokeWidth={2 + syn.strength * 3} opacity={syn.strength * 0.15} filter="url(#cgl)" />
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
                     stroke="#8B5CF6" strokeWidth={0.8 + syn.strength * 1.2} opacity={syn.strength * 0.5} strokeLinecap="round">
-                    <animate attributeName="opacity" values={`${syn.strength * 0.3};${syn.strength * 0.6};${syn.strength * 0.3}`} dur={`${3 + i}s`} repeatCount="indefinite" />
+                    {!prefersReducedMotion && <animate attributeName="opacity" values={`${syn.strength * 0.3};${syn.strength * 0.6};${syn.strength * 0.3}`} dur={`${3 + i}s`} repeatCount="indefinite" />}
                   </line>
                 </g>
               );

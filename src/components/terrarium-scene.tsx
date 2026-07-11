@@ -207,7 +207,7 @@ export function TerrariumScene({
         {/* ── MOON ── */}
         <g style={{ animation: "float 20s ease-in-out infinite" }}>
           <circle cx="340" cy="55" r={half ? 16 : 12} fill="url(#lp-moon)" opacity={half ? 0.9 : 0.5}>
-            <animate attributeName="r" values={half ? "15;17;15" : "11;13;11"} dur="6s" repeatCount="indefinite" />
+            {tc.ambientPulse && <animate attributeName="r" values={half ? "15;17;15" : "11;13;11"} dur="6s" repeatCount="indefinite" />}
           </circle>
           {/* Moon craters */}
           <circle cx="335" cy="52" r="2.5" fill="#D4CCC0" opacity="0.35" />
@@ -215,7 +215,7 @@ export function TerrariumScene({
           <circle cx="338" cy="60" r="1.2" fill="#D4CCC0" opacity="0.25" />
           {/* Moon glow — pulsing */}
           <circle cx="340" cy="55" r={half ? 24 : 16} fill="#FFFDE8" opacity={half ? 0.06 : 0.02}>
-            <animate attributeName="opacity" values={half ? "0.04;0.1;0.04" : "0.02;0.05;0.02"} dur="8s" repeatCount="indefinite" />
+            {tc.ambientPulse && <animate attributeName="opacity" values={half ? "0.04;0.1;0.04" : "0.02;0.05;0.02"} dur="8s" repeatCount="indefinite" />}
           </circle>
         </g>
 
@@ -601,7 +601,7 @@ export function TerrariumScene({
 
         {/* ── PLANET SHADOW (floating effect) ── */}
         <ellipse cx={cx} cy={cy + pr + 35} rx={pr * 0.55} ry={5 + pct * 2} fill="rgba(255,255,255,0.02)">
-          <animate attributeName="ry" values={`${5 + pct * 2};${3 + pct * 2};${5 + pct * 2}`} dur="5s" repeatCount="indefinite" />
+          {tc.ambientPulse && <animate attributeName="ry" values={`${5 + pct * 2};${3 + pct * 2};${5 + pct * 2}`} dur="5s" repeatCount="indefinite" />}
         </ellipse>
 
         {/* ── AURORA (all complete) ── */}

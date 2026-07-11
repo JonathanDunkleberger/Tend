@@ -57,6 +57,8 @@ export interface TierConfig {
   showBounceSparkles: boolean;
   /** Use animated creature bob/float */
   animateCreatures: boolean;
+  /** Ambient scene pulses — moon breathe/glow + planet shadow (SVG SMIL, NOT stopped by the reduced-motion CSS rule) */
+  ambientPulse: boolean;
 }
 
 const FULL_CONFIG: TierConfig = {
@@ -72,6 +74,7 @@ const FULL_CONFIG: TierConfig = {
   showCreatureMoodFx: true,
   showBounceSparkles: true,
   animateCreatures: true,
+  ambientPulse: true,
 };
 
 const REDUCED_CONFIG: TierConfig = {
@@ -87,6 +90,7 @@ const REDUCED_CONFIG: TierConfig = {
   showCreatureMoodFx: false,
   showBounceSparkles: true,
   animateCreatures: true,
+  ambientPulse: true,
 };
 
 const MINIMAL_CONFIG: TierConfig = {
@@ -102,6 +106,7 @@ const MINIMAL_CONFIG: TierConfig = {
   showCreatureMoodFx: false,
   showBounceSparkles: false,
   animateCreatures: false,
+  ambientPulse: false,
 };
 
 export function getTierConfig(tier: AnimationTier): TierConfig {
