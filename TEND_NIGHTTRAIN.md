@@ -201,6 +201,8 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       §13 PRICING MODEL — costs modeled, competitor benchmark, free/Tend+ split + price recommendation.
       Stripe already wired. Executing the recommended price tweak is an optional follow-up.)*
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
+      *(shift 4: PWA install prompt + on-brand manifest done; micro-interactions/dark-mode/safe-area
+      largely in place. Remaining: a11y pass + empty/error/loading states — frontier #14.)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic.
 - [ ] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
 
@@ -267,20 +269,38 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
     free/Tend+ split, and a price recommendation (monthly $5.99, annual $39.99 "save 44%", $79.99
     lifetime, 7-day annual trial). DoD "pricing modeled + documented" item satisfied. Executing the
     price change (new Stripe price IDs + lifetime/trial flow) is parked as an OPTIONAL follow-up below.
-11. **[ongoing] Lint hygiene** — 32 warnings (unused vars + unused exhaustive-deps disables). NOTE:
+13. ✅ **[PHASE 6] PWA install prompt + on-brand manifest.** DONE (shift 4, commit `8751184`). New
+    `install-prompt.tsx` — a gentle "Install Tend" card in the You screen: captures `beforeinstallprompt`
+    (Android/Chrome → native install) and shows Share → Add-to-Home-Screen steps on iOS Safari; renders
+    nothing when already standalone or dismissed. Fixed the off-brand `manifest.json` (was "Habit &
+    Recovery Tracker / Quit bad habits") to the dragon-garden identity + maskable icons + categories.
+14. **[PHASE 6 — NEXT] Remaining premium-polish pass.** The biggest still-open DoD bucket. Concrete
+    sub-items, pick any: (a) **a11y** — the app is inline-style + div-onClick heavy; add `aria-label`s,
+    real `<button>`s where divs handle taps, focus states, and check color contrast in both themes.
+    (b) **empty/error/loading states** — first-run empty garden, failed-API toasts, skeleton shimmer.
+    (c) **richer egg-progress-toward-hatch viz** on the garden home (frontier #7 leftover — the daily
+    "warming egg" ambient-progress idea in §11). (d) Consider a minimal **service worker** for offline
+    shell (SW no longer strictly required for install, so this is optional; watch for caching bugs).
+15. **[PHASE 4] Wellness leftovers.** Persist gratitude server-side (currently localStorage
+    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
+16. **[PHASE 5 — OPTIONAL] Execute the §13 price change.** Only if desired: new Stripe price IDs
+    ($5.99/mo, $79.99 one-time lifetime), a 7-day trial on the annual price, and a `lifetime` entitlement
+    branch alongside the existing sub check. NOT required for the DoD (model is documented in §13).
+17. **[ongoing] Lint hygiene** — 27 warnings (unused vars + unused exhaustive-deps disables). NOTE:
     `eslint --fix` on the monolith leaves ugly trailing-whitespace where it strips disable comments —
     do these by hand (delete the whole comment line), don't --fix blindly.
 
-> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. DONE so far: front door (landing +
-> onboarding), bottom-nav shell, Wellness + You screens, assumes-best one-tap check-in, AND **Phase 3
-> — deep Insights analytics + shareable Tend Wrapped** (`tend-wrapped.tsx` + consistency bars, shift 3).
-> Biggest remaining DoD levers now: **(1) Phase 5 grace-token UX** — make the public "one slip never
-> stings" promise real (frontier #10; streak-freeze math already exists in `getStreak`, only the
-> earn/spend/see UX is missing); **(2) Phase 5 pricing model doc** (#12); **(3) Phase 6 premium-polish
-> pass** (PWA install, a11y, empty/error states). NOTE: all shift-2/3 UI is build-verified but **NOT
-> browser-verified** (auth-gated) — eyeball the Wrapped reel, nav, wellness tools, You, one-tap once
-> with real Clerk keys. Read §6b audit + §10 decisions first. `.env.local` + middleware notes in NEEDS
-> EYES still stand.
+> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. DONE: front door (landing +
+> onboarding), bottom-nav shell, Wellness + You screens, assumes-best one-tap check-in, **Phase 3 deep
+> Insights + Tend Wrapped** (shift 3), and **shift 4 = grace-token UX (#10) + pricing model §13 (#12) +
+> PWA install prompt & on-brand manifest (#13)**. Remaining DoD levers: **(1) Phase 6 polish pass**
+> (a11y, empty/error/loading states, richer egg-progress viz — frontier #14); **(2) Phase 4 wellness
+> leftovers** (persist gratitude + Insights, calm mode — #15); optionally **(3) execute the §13 price
+> change** (#16). DoD now has only the polish + branding-audit items left un-checked. NOTE: all
+> shift-2/3/4 UI is build-verified but **NOT browser-verified** (auth-gated) — eyeball the Wrapped reel,
+> nav, wellness tools, You screen (incl. the new Install card), grace-token badge/detail, and one-tap
+> once with real Clerk keys. Read §6b audit + §10 decisions + §13 pricing first. `.env.local` +
+> middleware notes in NEEDS EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
