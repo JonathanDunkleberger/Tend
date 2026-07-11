@@ -208,7 +208,10 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       hero + green-gradient headline, dragon+eggs hero art, "assumes the best" pill, readable subtitle
       [shift-7 contrast holds], daily-loop steps, feature bento, dark collection strip, never-shaming
       quote, $0/$4.99 pricing, sticky mobile CTA). CSS/fonts/sprites all resolved, **zero failed
-      requests**. Proof: `scripts/shots/landing-fold.png`. See §14 for how [file:// pipeline].)*
+      requests**. Proof: `scripts/shots/landing-fold.png`. See §14 for how [file:// pipeline].
+      **shift 52: added an evolution-journey strip** that SHOWS the dragon growing through all 5 real
+      stages (Egg→Elder, Day 1→30) — the #1 emotional payoff was previously only described in words;
+      browser-verified, all 5 stages fit in view on a phone. Proof: `scripts/shots/evo-journey.png`.)*
 - [x] A delightful **onboarding** that hatches the first egg in under a minute. *(shift 1: rebuilt
       grow-first twilight-garden flow. NOT yet browser-verified — auth-gated.)*
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
@@ -243,7 +246,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 51 mined the ONE untouched vein the shift-50 pointer flagged (constellation/Wrapped
+> NEXT SHIFT — shift 52 executed the shift-51 pivot: shipped + BROWSER-VERIFIED a landing
+> "evolution-journey" strip (#0am) — the landing now SHOWS the #1 pillar (dragon art growing up through
+> all 5 real stages, Day 1→30) instead of only describing it. The landing is now genuinely
+> conversion-complete AND showcases the emotional payoff. **Remaining sandbox-verifiable landing levers
+> are thin** (the copy, FAQ, OG, pricing, promise, showcase, and now the evolution payoff are all done).
+> Successor options, in order: (1) a smaller landing polish only if a concrete gap is spotted on a fresh
+> read — do NOT invent churn; (2) execute the §13/#16 Stripe price change IF Jonny wants it (needs new
+> price IDs — a keyed task, don't ship unrunnable config); (3) the DEFERRED §12 bugs (non-atomic
+> coins/inventory → Postgres RPC + migration; urge-entries ownership; Stripe email-clobber;
+> verify-subscription fallback) all need a running DB/Stripe → for Jonny. Also open: the bounce-back ramp
+> fires for ALL users, not just after a real lapse (product call for Jonny, §12). The cold-read bug vein
+> is exhausted (shifts 49–51, four passes) — do NOT re-run a 5th hunt, and do NOT extract math for
+> coverage's sake. **The meaningful remaining DoD gates all hinge on a real-device / networked-browser
+> eyeball on Jonny's machine** (see §14 for why this sandbox can't). This is a mature branch: prefer
+> banking a real, verifiable improvement over manufacturing work.
+
+> PRIOR POINTER — shift 51 mined the ONE untouched vein the shift-50 pointer flagged (constellation/Wrapped
 > derivations + shop/gallery/onboarding/settings) and FIXED 3 real analytics bugs (see #0al): the
 > day-of-week chart counted pre-creation days as misses (fabricated a "you slip on Tuesdays" insight for
 > young habits); Insights (30d) and Wrapped (60d) disagreed on "best day of week"; and Wrapped had a
@@ -261,6 +280,26 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL users, not just
 > after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12). Do NOT extract math
 > for coverage's sake. See §14 for the sandbox limit.
+
+0am. ✅ **[SHIFT 52] Landing "evolution-journey" strip — SHOWS the #1 pillar (dragon art payoff),
+   browser-verified via the file:// harness.** Executed the shift-51 pivot away from bug-hunting to the
+   one sandbox-verifiable, conversion-critical surface. The landing already *told* the emotional payoff
+   ("watch it evolve through five gorgeous stages") in words but never *showed* the dragon art growing
+   up — the reason someone opens Tend every morning was invisible on the page that has to sell it. Added
+   a new **"The payoff · Watch your dragon grow up"** section to `app/page.tsx` (between "How it works"
+   and the feature bento): one species (id 16, Ancient Verdant — a nature legendary, on-brand green)
+   rendered across ALL FIVE real stages — Egg → Hatchling → Whelp → Drake → Elder — with sizes growing
+   left-to-right on a green→gold "growth path" line, each stage tagged with its **truthful day threshold**
+   from `STAGE_THRESHOLDS [0,3,7,14,30]` → Day 1/3/7/14/30 (so the timeline is an honest promise, not
+   marketing fiction), the Elder stage getting a golden legendary glow as the climax, and a never-shaming
+   footer ("Slip a day? The journey just pauses — your dragon waits for you, it never resets to zero").
+   **Pure CSS, zero client JS** (native `<img>` + keyframes) so the landing stays a static server
+   component AND stays file://-verifiable; reduced-motion guarded. **Browser-verified**: rendered the
+   real SSR page in headless Chromium at a 390px phone viewport — the section reads faithfully, **all
+   five stages incl. the Elder climax fit in view** (first cut sized the row into a horizontal scroll
+   that hid the payoff dragon → shrank sprites 40/50/62/74/92px so the whole journey is visible on a
+   phone, scroll retained only as a safety net for sub-360px screens), zero console errors / zero failed
+   requests. Proof: `scripts/shots/evo-journey.png`. build GREEN, lint 0/5, test 99/99, 1 commit.
 
 0al. ✅ **[SHIFT 51] Cold-read bug hunt on the untouched analytics surfaces — FIXED 3 real client bugs
    (reasoning-verified, no DB/browser).** A fan-out hunter aimed at the surfaces prior shifts hadn't swept

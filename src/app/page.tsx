@@ -161,6 +161,39 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Evolution journey (the payoff, shown not told) ── */}
+      <section className="tSection tEvoSection">
+        <p className="tKicker">The payoff</p>
+        <h2 className="tH2">Watch your dragon grow up</h2>
+        <p className="tEvoIntro">
+          Every day you tend nudges the egg closer to hatching — then your dragon evolves through five
+          gorgeous stages. Here’s the whole journey, one good day at a time.
+        </p>
+        <div className="tEvoScroll">
+          <div className="tEvoRail">
+            <div className="tEvoGround" aria-hidden />
+            {EVO_STAGES.map((s, i) => (
+              <div key={s.name} className={`tEvoStage${i === EVO_STAGES.length - 1 ? " tEvoStageLast" : ""}`}>
+                <div className="tEvoPod">
+                  <img
+                    src={getDragonSprite(s.stage, EVO_SPECIES)}
+                    alt={`${s.name} — day ${s.day}`}
+                    className="tEvoSprite"
+                    style={{ width: s.size, height: s.size, animationDelay: `${i * 0.35}s` }}
+                    draggable={false}
+                  />
+                </div>
+                <div className="tEvoDay">Day {s.day}</div>
+                <div className="tEvoName">{s.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="tEvoFoot">
+          Slip a day? The journey just pauses — your dragon waits for you, it never resets to zero.
+        </p>
+      </section>
+
       {/* ── Feature bento ── */}
       <section className="tSection">
         <p className="tKicker">More than a checkbox</p>
@@ -318,6 +351,23 @@ function bullet(label: string, pro = false): string {
 }
 
 /**
+ * The evolution journey shown on the landing. Uses ONE species (16 = Ancient
+ * Verdant, a nature legendary — on-brand green) across all five real stages so
+ * the payoff is honest: stage 0 is the species egg, stages 1–4 are the dragon
+ * growing (matching the in-app "grows via display size" model). Day labels are
+ * the real STAGE_THRESHOLDS [0,3,7,14,30] → Day 1/3/7/14/30, so the timeline is
+ * a truthful promise, not marketing fiction.
+ */
+const EVO_SPECIES = 16;
+const EVO_STAGES: { stage: number; name: string; day: number; size: number }[] = [
+  { stage: 0, name: "Egg", day: 1, size: 40 },
+  { stage: 1, name: "Hatchling", day: 3, size: 50 },
+  { stage: 2, name: "Whelp", day: 7, size: 62 },
+  { stage: 3, name: "Drake", day: 14, size: 76 },
+  { stage: 4, name: "Elder", day: 30, size: 92 },
+];
+
+/**
  * Objection-handling FAQ — the top reasons someone hesitates before signing up,
  * answered plainly and warmly (2026 conversion best practice: 6 concise items,
  * risk acknowledged then mitigated). Answers allow inline <b>/<a> markup.
@@ -412,6 +462,22 @@ const CSS = `
 .tCardTitle{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin:0 0 6px;}
 .tCardBody{font-size:14px;line-height:1.55;color:rgba(0,0,0,0.6);margin:0;}
 
+/* evolution journey */
+.tEvoSection{padding-bottom:36px;}
+.tEvoIntro{font-size:15px;line-height:1.55;color:rgba(0,0,0,0.6);text-align:center;max-width:480px;margin:-16px auto 30px;}
+.tEvoScroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:6px 0 4px;}
+.tEvoScroll::-webkit-scrollbar{display:none;}
+.tEvoRail{position:relative;display:flex;align-items:flex-end;gap:4px;width:max-content;min-width:100%;justify-content:space-between;padding:0 4px;}
+.tEvoGround{position:absolute;left:0;right:0;bottom:52px;height:3px;border-radius:3px;background:linear-gradient(90deg,rgba(46,158,91,0.12),rgba(46,158,91,0.5) 55%,rgba(245,166,35,0.6));z-index:0;}
+.tEvoStage{position:relative;z-index:1;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:54px;}
+.tEvoPod{height:104px;display:flex;align-items:flex-end;justify-content:center;}
+.tEvoSprite{object-fit:contain;filter:drop-shadow(0 8px 12px rgba(31,122,70,0.2));animation:tFloat 4s ease-in-out infinite;}
+.tEvoStageLast .tEvoSprite{filter:drop-shadow(0 10px 18px rgba(245,166,35,0.4)) drop-shadow(0 0 14px rgba(245,166,35,0.35));}
+.tEvoDay{margin-top:16px;font-size:11px;font-weight:700;letter-spacing:0.3px;color:#fff;background:linear-gradient(135deg,var(--g),var(--gd));padding:3px 9px;border-radius:100px;box-shadow:0 2px 6px rgba(46,158,91,0.28);}
+.tEvoStageLast .tEvoDay{background:linear-gradient(135deg,#F5A623,#E08A00);box-shadow:0 2px 6px rgba(245,166,35,0.35);}
+.tEvoName{margin-top:7px;font-family:'Fraunces',serif;font-size:13px;font-weight:600;color:${INK};line-height:1.15;}
+.tEvoFoot{text-align:center;font-size:13.5px;color:rgba(0,0,0,0.55);margin:26px auto 0;max-width:440px;line-height:1.5;}
+
 /* showcase (dark) */
 .tShowcase{position:relative;z-index:1;background:linear-gradient(160deg,#122019,#0B1510);padding:52px 24px;margin-top:24px;text-align:center;overflow:hidden;}
 .tShowcaseSub{font-size:14.5px;color:rgba(255,255,255,0.5);max-width:420px;margin:0 auto 30px;line-height:1.5;}
@@ -481,12 +547,14 @@ const CSS = `
   .tSteps{grid-template-columns:repeat(3,1fr);}
   .tBento{grid-template-columns:repeat(2,1fr);}
   .tCardWide{grid-column:span 1;}
+  .tEvoIntro{font-size:16px;}
+  .tEvoRail{max-width:660px;margin:0 auto;padding:0 12px;}
   .tPlans{grid-template-columns:1fr 1fr;max-width:640px;}
   .tStickyBar{display:none;}
   .tFooter{padding-bottom:40px;}
   .tDragonStrip{justify-content:center;flex-wrap:wrap;overflow-x:visible;}
 }
 @media(prefers-reduced-motion:reduce){
-  .tHeroDragon,.tHeroEgg,.tStepSprite,.tDragonChip{animation:none!important;}
+  .tHeroDragon,.tHeroEgg,.tStepSprite,.tDragonChip,.tEvoSprite{animation:none!important;}
 }
 `;
