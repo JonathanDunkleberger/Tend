@@ -63,3 +63,6 @@ next-env.d.ts
 /scripts/nextstart*
 
 scripts/.nextpid
+
+# transient next-start logs from the file:// QA pipeline
+scripts/.nextstart.*
