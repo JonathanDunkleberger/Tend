@@ -267,6 +267,23 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── FAQ (objection handling — pure-CSS accordion, zero JS) ── */}
+      <section className="tSection tFaqSection">
+        <p className="tKicker">Before you start</p>
+        <h2 className="tH2">The gentle questions</h2>
+        <div className="tFaq">
+          {FAQS.map(({ q, a }) => (
+            <details key={q} className="tFaqItem">
+              <summary className="tFaqQ">
+                {q}
+                <span aria-hidden className="tFaqMark" />
+              </summary>
+              <p className="tFaqA" dangerouslySetInnerHTML={{ __html: a }} />
+            </details>
+          ))}
+        </div>
+      </section>
+
       {/* ── Final CTA ── */}
       <section className="tFinal">
         <h2 className="tFinalH">Your garden is waiting.</h2>
@@ -299,6 +316,38 @@ function bullet(label: string, pro = false): string {
   const c = pro ? "#F5A623" : GREEN;
   return `<span class="tBulletCheck" style="color:${c}">✓</span><span>${label}</span>`;
 }
+
+/**
+ * Objection-handling FAQ — the top reasons someone hesitates before signing up,
+ * answered plainly and warmly (2026 conversion best practice: 6 concise items,
+ * risk acknowledged then mitigated). Answers allow inline <b>/<a> markup.
+ */
+const FAQS: { q: string; a: string }[] = [
+  {
+    q: "What happens if I miss a day?",
+    a: "Nothing scary. A slip gently pauses your egg — it never shames you or wipes your progress. And <b>grace tokens</b>, earned free at streak milestones, quietly protect a streak the first time life gets in the way. Tend assumes the best in you.",
+  },
+  {
+    q: "Is Tend really free?",
+    a: "Yes — free forever. Three dragon eggs, the full daily check-in, streaks, coins, and every wellness tool cost nothing. <b>Tend+</b> only unlocks more eggs, deeper insights, and garden décor when you’re ready. The whole emotional loop is free.",
+  },
+  {
+    q: "Will it feel good on my phone?",
+    a: "That’s the whole point. Tend is built mobile-first — thumb-friendly, fast, and beautiful on a small screen. You can add it to your home screen and open it like any app, no app store required.",
+  },
+  {
+    q: "I’ve abandoned habit apps before. Why is this different?",
+    a: "Most trackers are cold checklists that guilt you. Tend is a little garden you <b>want</b> to open — your habits are dragon eggs that visibly warm, hatch, and evolve as you tend them. The reward is emotional, not a red streak counter.",
+  },
+  {
+    q: "What happens to my data?",
+    a: "Your data is yours. We never sell it, and it exists to help <i>you</i> understand your own patterns — best days, momentum, what’s working. Export or delete it whenever you like.",
+  },
+  {
+    q: "Can I cancel Tend+ anytime?",
+    a: "Anytime, in a tap. If you downgrade you keep every dragon you’ve hatched and every day you’ve grown — nothing you tended disappears.",
+  },
+];
 
 const CSS = `
 :root{ --g:${GREEN}; --gd:${GREEN_DEEP}; }
@@ -389,6 +438,22 @@ const CSS = `
 .tPlanList{list-style:none;padding:0;margin:16px 0 20px;display:flex;flex-direction:column;gap:9px;}
 .tPlanList li{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:rgba(0,0,0,0.62);}
 .tBulletCheck{font-weight:800;flex-shrink:0;}
+
+/* faq — native <details> accordion, no JS */
+.tFaqSection{max-width:680px;padding-top:24px;}
+.tFaq{display:flex;flex-direction:column;gap:10px;}
+.tFaqItem{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:2px 18px;box-shadow:0 1px 2px rgba(0,0,0,0.03);transition:border-color .2s;}
+.tFaqItem[open]{border-color:rgba(46,158,91,0.35);}
+.tFaqQ{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;list-style:none;padding:16px 0;font-family:'Fraunces',serif;font-size:16.5px;font-weight:600;color:${INK};line-height:1.3;}
+.tFaqQ::-webkit-details-marker{display:none;}
+.tFaqQ:focus-visible{outline:2px solid ${GREEN};outline-offset:3px;border-radius:6px;}
+.tFaqMark{position:relative;flex-shrink:0;width:16px;height:16px;}
+.tFaqMark::before,.tFaqMark::after{content:"";position:absolute;top:50%;left:50%;width:12px;height:2px;border-radius:2px;background:${GREEN};transform:translate(-50%,-50%);transition:transform .25s ease;}
+.tFaqMark::after{transform:translate(-50%,-50%) rotate(90deg);}
+.tFaqItem[open] .tFaqMark::after{transform:translate(-50%,-50%) rotate(0deg);}
+.tFaqA{margin:0 0 16px;font-size:14.5px;line-height:1.6;color:rgba(0,0,0,0.66);}
+.tFaqA b{color:${GREEN_DEEP};font-weight:700;}
+.tFaqA i{font-style:italic;}
 
 /* final */
 .tFinal{position:relative;z-index:1;text-align:center;background:linear-gradient(160deg,#1F7A46,#13512F);margin-top:8px;padding:60px 24px 72px;color:#fff;}

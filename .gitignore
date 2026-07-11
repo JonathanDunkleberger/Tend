@@ -53,3 +53,4 @@ next-env.d.ts
 /scripts/shots/*
 !/scripts/shots/landing-fold.png
 !/scripts/shots/preview-fold.png
+!/scripts/shots/faq-open.png

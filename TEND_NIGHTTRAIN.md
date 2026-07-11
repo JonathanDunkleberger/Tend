@@ -231,6 +231,21 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
+0aa. ✅ **[SHIFT 10] Landing conversion polish — added an objection-handling FAQ + fixed pricing-copy
+   drift.** The landing is the one surface verifiable in this sandbox (server component → `file://`), and
+   it's literally "what makes someone pay," so shift 10 strengthened it. **New FAQ section** (`app/page.tsx`,
+   between Pricing and Final CTA): 6 warm, on-brand objection-handlers ("what if I miss a day?" → grace
+   tokens/never-shaming, "is it really free?", "will it feel good on my phone?", "why is this different
+   from apps I abandoned?" → dragons/emotional payoff, "what happens to my data?", "can I cancel
+   anytime?"), built as a **pure-CSS `<details>`/`<summary>` accordion** (zero client JS — keeps the
+   landing a static server component AND makes it `file://`-verifiable; accessible + `:focus-visible`
+   ring by default; animated +/− mark). Research-backed (2026 SaaS/mobile conversion playbooks: 6–8
+   concise FAQs, accordion on mobile, acknowledge-then-mitigate risk). Also **fixed the pricing double-
+   statement**: `/pricing` card said "Save $20/year" while its toggle already said "Save 33%" (redundant
+   + drifting phrasing) → card now shows the effective monthly "Just $3.33/mo, billed yearly" (a stronger
+   annual nudge, no redundancy). Numbers left at $4.99/$39.99 (Stripe-tied; §13's $5.99 change still
+   needs new Stripe price IDs → out of safe scope). Build GREEN.
+
 0. ✅ **[SHIFT 9] Actually BROWSER-VERIFIED the app via a headless-Chromium `file://` pipeline —
    and pinned down the hard limit of what can be verified in this sandbox.** The prize this shift:
    **the real landing page has now been rendered in a browser and eyeballed** (see DoD "landing" ✅

@@ -44,7 +44,7 @@ export default function PricingPage() {
       name: "Tend+",
       price: annual ? "$39.99" : "$4.99",
       period: annual ? "/year" : "/month",
-      savings: annual ? "Save $20/year" : null,
+      savings: annual ? "Just $3.33/mo, billed yearly" : null,
       features: [
         "Unlimited habit eggs",
         "Choose your dragon egg & species",
