@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
 import { NextResponse } from "next/server";
 import { FREE_HABIT_LIMIT } from "@/lib/constants";
-import { rollDragonSpecies } from "@/lib/sprites";
+import { suggestSpeciesForHabit } from "@/lib/sprites";
 
 export async function GET() {
   const { userId } = await auth();
@@ -54,9 +54,11 @@ export async function POST(request: Request) {
       color: body.color || "#6366f1",
       icon_name: body.icon_name || "Target",
       category: body.category || "general",
+      // A themed dragon that fits the habit (fire for a workout, water for
+      // hydration, …) instead of a purely random roll — a meaningful collection.
       creature_type: (typeof body.creature_type === "number" && body.creature_type >= 1 && body.creature_type <= 36)
         ? body.creature_type
-        : rollDragonSpecies(),
+        : suggestSpeciesForHabit(name, body.category || "general"),
     })
     .select()
     .single();

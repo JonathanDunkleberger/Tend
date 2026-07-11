@@ -49,7 +49,7 @@ import {
   QUIT_PRESETS, SHOP_ITEMS,
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
-import { getDragonSprite } from "@/lib/sprites";
+import { getDragonSprite, suggestSpeciesForHabit } from "@/lib/sprites";
 import { migrateLocalStorageToServer } from "@/lib/migrate-local-data";
 import { apiCall, apiSync } from "@/lib/api";
 import type { LucideIcon } from "lucide-react";
@@ -1077,9 +1077,10 @@ export function TendApp({
   /** Route habit creation through egg picker for pro users */
   const startAddHabit = (name: string, color: string, iconName: string, cat: string = "general", dailyCost: number = 0) => {
     if (isTendPlus()) {
-      // Pro: show egg picker first
+      // Pro: show egg picker first, pre-selecting the dragon that thematically
+      // fits the habit (they can still pick any other). A smart, on-brand default.
       setPendingHabit({ name, color, iconName, cat, dailyCost });
-      setPickedEgg(null);
+      setPickedEgg(suggestSpeciesForHabit(name, cat));
     } else {
       // Free: random egg, create immediately
       addHabit(name, color, iconName, cat, dailyCost);

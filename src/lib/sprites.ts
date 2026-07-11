@@ -117,6 +117,58 @@ export function deriveDragonFromId(habitId: string): number {
   return (Math.abs(hash) % DRAGON_COUNT) + 1;
 }
 
+/* ═══════════ SPECIES-BY-HABIT-TYPE (thematic mapping) ═══════════ */
+
+/**
+ * Keyword → element rules, checked in order; the FIRST rule with a matching
+ * keyword (substring, case-insensitive) wins. Order encodes priority where a
+ * habit could plausibly match two elements (e.g. "write" reads as focused
+ * mental work → storm before cosmic). Tuned so the common habit vocabulary lands
+ * on a dragon whose vibe fits the habit — a running habit hatches a Fire dragon,
+ * hydration a Water dragon, meditation a Light dragon — so the collection you
+ * grow actually *means* something instead of being random.
+ */
+const HABIT_ELEMENT_RULES: { element: DragonElement; keywords: string[] }[] = [
+  { element: "fire",   keywords: ["run", "jog", "gym", "workout", "work out", "exercise", "fitness", "lift", "weight", "cardio", "hiit", "sprint", "box", "muscle", "strength", "pushup", "push-up", "pull-up", "situp", "sit-up", "crossfit", "train", "spin class", "burpee", "squat"] },
+  { element: "water",  keywords: ["water", "hydrate", "hydration", "tea", "shower", "wash", "clean", "skincare", "floss", "brush teeth", "bath", "swim", "dishes", "laundry", "tidy"] },
+  { element: "storm",  keywords: ["work", "study", "code", "program", "write", "focus", "deep work", "task", "productiv", "practice", "piano", "guitar", "music", "project", "email", "deadline", "language", "duolingo", "revise", "homework"] },
+  { element: "cosmic", keywords: ["read", "book", "learn", "dream", "goal", "art", "draw", "paint", "create", "journal", "reflect", "sketch", "photo"] },
+  { element: "light",  keywords: ["meditat", "mindful", "gratitude", "pray", "breathe", "breath", "calm", "relax", "rest", "sleep", "bed", "wake", "morning", "sun", "stretch", "yoga", "affirm", "smile"] },
+  { element: "nature", keywords: ["walk", "hike", "outdoor", "nature", "garden", "plant", "tree", "vegetable", "veg", "fruit", "salad", "green", "cook", "meal", "eat", "nutrition", "diet", "grow", "vitamin", "supplement"] },
+];
+
+/**
+ * Pick the thematically-fitting dragon ELEMENT for a habit from its name +
+ * category. A keyword match always wins (works for build and quit alike); with
+ * no match, quit habits default to `shadow` — the dark loop you're taming into a
+ * dragon of your own — and everything else to `nature`, the "tend your garden"
+ * growth metaphor at Tend's core.
+ */
+export function suggestElementForHabit(name: string, category: string): DragonElement {
+  const n = (name || "").toLowerCase();
+  for (const rule of HABIT_ELEMENT_RULES) {
+    if (rule.keywords.some((k) => n.includes(k))) return rule.element;
+  }
+  return category === "quit" ? "shadow" : "nature";
+}
+
+/**
+ * Suggest a concrete dragon species (1-36) for a new habit: pick the fitting
+ * element, then a deterministic species WITHIN that element from a hash of the
+ * name — stable (same name → same dragon) yet varied across different habits of
+ * the same element. Used as the free-tier auto-assignment and the Pro egg-picker
+ * default. Falls back to a random roll only if an element somehow has no species.
+ */
+export function suggestSpeciesForHabit(name: string, category: string): number {
+  const element = suggestElementForHabit(name, category);
+  const pool = DRAGON_SPECIES.filter((d) => d.element === element);
+  if (pool.length === 0) return rollDragonSpecies();
+  let hash = 0;
+  const s = name || element;
+  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
+  return pool[Math.abs(hash) % pool.length].id;
+}
+
 /* ═══════════ SPRITE PATHS ═══════════ */
 
 /** Get the sprite path for a dragon. Stage 0 = egg, Stage 1+ = dragon. */
