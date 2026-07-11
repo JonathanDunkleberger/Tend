@@ -338,6 +338,28 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 17.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
+> only on a real miss, else confirm green + stop) — held clean, no miss (5th consecutive clean shift).
+> (a) Baseline re-verified GREEN: `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** /
+> `npm test` **129/129**; branch is **161 commits** ahead of `main`. (b) Re-ran the git-tracked audit —
+> read all 14 `VIEW_KEYS` from `preview/page.tsx` (garden/today/insights/detail/hatch/evolve/gallery/
+> onboarding/wellness/wrapped/you/breathe/nav/loading) and matched each against `git ls-files
+> scripts/shots/`: **every core surface has a git-tracked proof shot** (gallery=`preview-fold`,
+> garden=`preview-garden-full`, the rest by name, most light+dark). No untracked/gitignore gap. (c)
+> Applied "verify, don't assert" to FRESH evidence not recently checked — independently eyeballed the two
+> "make it beautiful" money surfaces: `preview-insights-full` (the frontier-#3 centerpiece — full rich
+> analytics: 97%-this-week headline hero + momentum curve + streak-journey + consistency-ring scoreboard +
+> polar-rose completion-by-day + synergy constellation + streak records + gratitude + closing quote) and
+> `preview-wrapped-fold` (ice-dragon hero + Fraunces serif "Your Tend Story" + warm "no numbers to fear"
+> copy on a starfield gradient) — **both render genuinely and gorgeously, not blank frames.** The
+> review-evidence trail is real AND complete across every core AND showcase surface. Nothing
+> sandbox-buildable/verifiable remains that isn't the churn the frontier forbids → confirmed green, closed
+> clean. Did NOT reopen a bug hunt, re-extract math, or re-beautify handsome surfaces. Mission's remaining
+> value is unchanged: Jonny's real-device eyeball + the merge. Successor: SAME discipline — audit
+> git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop. Do NOT write
+> NIGHT-TRAIN COMPLETE (§8's real-device gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 16.** Same frontier discipline (audit git-tracked-vs-claimed FIRST; act
 > only on a real miss, else confirm green + stop) — held clean, no miss. (a) Baseline re-verified GREEN:
 > `npm run build` ✅ / `npm run lint` 0-err/**5-intentional** / `npm test` **129/129**; branch is now
