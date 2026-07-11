@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { daysAgo } from "@/lib/utils";
+import { daysAgo, today } from "@/lib/utils";
 import type { HabitWithStats } from "@/types";
 import type { ThemeColors } from "@/lib/constants";
 
@@ -24,11 +24,13 @@ export function MultiHabitHeatmap({ habits, isDone, getCleanDays, th }: MultiHab
       const cleanDays = isQuit && getCleanDays ? getCleanDays(h.id) : 0;
       const days: { date: string; done: boolean; isToday: boolean; isFuture: boolean }[] = [];
 
+      const todayStr = today();
       for (let i = totalDays - 1; i >= 0; i--) {
         const date = daysAgo(i);
-        const now = new Date();
-        const d = new Date(date + "T12:00:00");
-        const isFuture = d > now;
+        // Compare LOCAL date strings, not a noon-anchored timestamp vs the clock —
+        // the old `new Date(date+"T12:00:00") > new Date()` marked today's cell
+        // "future" (rendered transparent) whenever the app was opened before noon.
+        const isFuture = date > todayStr;
         const isToday = i === 0;
         let done = false;
 

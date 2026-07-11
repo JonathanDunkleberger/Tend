@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { daysAgo, fmtDate } from "@/lib/utils";
+import { daysAgo, fmtDate, today } from "@/lib/utils";
 
 interface HeatmapProps {
   getData: (date: string) => number;
@@ -38,15 +38,19 @@ export function Heatmap({
 
   const cells = useMemo(() => {
     const result: Array<{ weekIdx: number; dow: number; date: string; val: number }> = [];
-    const now = new Date();
+    const todayStr = today();
     const totalDays = weeks * 7;
     const start = new Date();
     start.setDate(start.getDate() - totalDays + 1);
     const startDow = start.getDay();
     for (let i = 0; i < totalDays; i++) {
       const date = daysAgo(totalDays - 1 - i);
+      // Skip only genuinely-future dates. Compare LOCAL date strings — the old
+      // `new Date(date+"T12:00:00") > new Date()` anchored each cell to noon, so
+      // today's cell wrongly counted as "future" (and vanished) any time the app
+      // was opened before local noon.
+      if (date > todayStr) continue;
       const d = new Date(date + "T12:00:00");
-      if (d > now) continue;
       const dow = d.getDay();
       const weekIdx = Math.floor((i + startDow) / 7);
       result.push({ weekIdx, dow, date, val: getData(date) });
