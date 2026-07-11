@@ -1923,11 +1923,16 @@ export function TendApp({
                         ) : (
                           <div
                             className={`ck ${done ? "d" : ""}`}
+                            role="checkbox"
+                            aria-checked={done}
+                            aria-label={done ? `Mark ${h.name} as not done today` : `Mark ${h.name} done today`}
+                            tabIndex={0}
                             style={{
                               background: done ? h.color : "transparent",
                               borderColor: done ? "transparent" : th.checkBorder,
                             }}
                             onClick={(e) => { e.stopPropagation(); toggleCompletion(h.id); }}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggleCompletion(h.id); } }}
                           >
                             <Check size={14} color="white" strokeWidth={3} />
                           </div>

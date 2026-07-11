@@ -274,13 +274,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
     (Android/Chrome → native install) and shows Share → Add-to-Home-Screen steps on iOS Safari; renders
     nothing when already standalone or dismissed. Fixed the off-brand `manifest.json` (was "Habit &
     Recovery Tracker / Quit bad habits") to the dragon-garden identity + maskable icons + categories.
-14. **[PHASE 6 — NEXT] Remaining premium-polish pass.** The biggest still-open DoD bucket. Concrete
-    sub-items, pick any: (a) **a11y** — the app is inline-style + div-onClick heavy; add `aria-label`s,
-    real `<button>`s where divs handle taps, focus states, and check color contrast in both themes.
-    (b) **empty/error/loading states** — first-run empty garden, failed-API toasts, skeleton shimmer.
-    (c) **richer egg-progress-toward-hatch viz** on the garden home (frontier #7 leftover — the daily
-    "warming egg" ambient-progress idea in §11). (d) Consider a minimal **service worker** for offline
-    shell (SW no longer strictly required for install, so this is optional; watch for caching bugs).
+14. **[PHASE 6 — IN PROGRESS] Remaining premium-polish pass.** The biggest still-open DoD bucket.
+    Shift-5 progress: ✅ (c) **richer egg-progress viz** — ambient egg-warming bar on each garden build
+    row fills toward next hatch/evolution, glows+pulses (`eggWarm`) at ≥66% (commit `6f798ea`, §11
+    "egg incubation as ambient progress" done). ✅ (b-partial) **empty/error states** — warm on-brand
+    empty garden (floating egg + "Plant your first egg" CTA) + `syncError` toast replacing 5 silent
+    `router.refresh()` rollbacks (commit `d3776b7`). ✅ **reduced-motion** global guard in globals.css.
+    STILL OPEN: (a) **a11y** — app is inline-style + div-onClick heavy; add `aria-label`s, real
+    `<button>`s where divs handle taps, `:focus-visible` styles, check color contrast in both themes.
+    (b-rest) loading skeleton already exists (verified shift 5); consider per-view skeletons for Insights.
+    (d) minimal **service worker** for offline shell (optional; SW not required for install).
 15. **[PHASE 4] Wellness leftovers.** Persist gratitude server-side (currently localStorage
     `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
 16. **[PHASE 5 — OPTIONAL] Execute the §13 price change.** Only if desired: new Stripe price IDs
