@@ -569,7 +569,13 @@ export function TendApp({
       const h = habits.find((x) => x.id === hId);
       if (h?.category === "quit") {
         const qd = quitDataMap[hId];
-        return !!(qd?.quitDate && qd.quitDate <= todayStr);
+        // quitDate is a full ISO timestamp; todayStr is a date-only local key. An
+        // ISO string is lexically GREATER than its own date prefix, so the raw
+        // `quitDate <= todayStr` was false on the day a quit is started/reset —
+        // marking it "not done today" (wrong header count, mood, all-done
+        // celebration, and an unhappy creature) on a day the user is in fact clean.
+        // Compare date-only so the start/reset day reads as clean.
+        return !!(qd?.quitDate && qd.quitDate.slice(0, 10) <= todayStr);
       }
       return isComplete(hId, todayStr);
     },
@@ -642,7 +648,12 @@ export function TendApp({
   // Milestones that also gift a free grace token (the public "milestone rewards
   // → a grace token so one slip never stings" promise). Capped by MAX_GRACE.
   const GRACE_MILESTONE_DAYS = new Set([7, 21, 60]);
-  const checkMilestones = (habitId: string, streak: number) => {
+  const NO_GRACE_DAYS = new Set<number>();
+  // giftGrace defaults on for build habits. Pass false for QUIT habits: their
+  // "streak" is clean-days and never consumes streakFreezes (getStreak ignores
+  // them for quit, and the shield UI is build-only), so a gifted token would be
+  // invisible + unusable — a promised reward the user can never actually access.
+  const checkMilestones = (habitId: string, streak: number, giftGrace = true) => {
     const ne = { ...earned };
     // Durable dedup, localStorage-backed. WHY: build-habit milestones persist to
     // the server `milestones` table (via the log route) and rehydrate into
@@ -662,7 +673,7 @@ export function TendApp({
       streak,
       (days) => !!ne[`${habitId}:${days}`] || !!granted[`${habitId}:${days}`],
       MILESTONES,
-      GRACE_MILESTONE_DAYS,
+      giftGrace ? GRACE_MILESTONE_DAYS : NO_GRACE_DAYS,
     );
     for (const m of reached) {
       ne[`${habitId}:${m.days}`] = true;
@@ -741,7 +752,7 @@ export function TendApp({
     if (!mounted) return;
     habits.filter((h) => h.category === "quit").forEach((h) => {
       const cleanDays = getCleanDays(h.id);
-      if (cleanDays > 0) checkMilestones(h.id, cleanDays);
+      if (cleanDays > 0) checkMilestones(h.id, cleanDays, false); // quit: no grace gift
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, todayStr]);
@@ -1129,24 +1140,37 @@ export function TendApp({
     }
   };
 
-  // Bounce-back recovery: check once per day when any habit is completed
+  // Bounce-back recovery ramp: advance at most once per calendar day when any
+  // habit is completed. WHY the counter is sourced from localStorage and not the
+  // `bounceBackDay` React state: that state is session-scoped, so it reset to 0 on
+  // every reload — the day-1 (+3) reward re-granted EVERY day forever (an unbounded
+  // coin faucet), while the day-3 (+10) / day-7 (+25) tiers, which need a single
+  // session kept alive across midnights, were effectively unreachable. Persisting
+  // the counter (and the -1 "completed, never again" sentinel) like the other
+  // durable reward gates (shift 14) makes the ramp advance once/day and pay out
+  // exactly once, ever. `bounceBackDay` state now only drives the banner display.
   useEffect(() => {
-    if (!mounted || !habits.length || bounceBackDay < 0) return;
+    if (!mounted || !habits.length || typeof window === "undefined") return;
+    let storedBB: number;
+    try { storedBB = parseInt(localStorage.getItem("bb_day") || "0", 10); } catch { storedBB = 0; }
+    if (!Number.isFinite(storedBB) || storedBB < 0) return; // ramp already completed
     const anyDoneToday = habits.some((h) => isHappy(h.id));
-    if (anyDoneToday && bounceBackDay >= 0) {
-      const lastBBDate = typeof window !== "undefined" ? localStorage.getItem("bb_date") || "" : "";
-      if (lastBBDate !== todayStr) {
-        try { localStorage.setItem("bb_date", todayStr); } catch { /* noop */ }
-        const newBB = bounceBackDay + 1;
-        setBounceBackDay(newBB);
-        const recovery = BOUNCE_BACK.find((b) => b.d === newBB);
-        if (recovery) {
-          setCoins((p) => p + recovery.c);
-          setCoinToast({ msg: recovery.msg, icon: RefreshCw });
-          syncCoins(recovery.c);
-        }
-        if (newBB >= 7) setBounceBackDay(-1); // Recovery complete
-      }
+    if (!anyDoneToday) return;
+    let lastBBDate = "";
+    try { lastBBDate = localStorage.getItem("bb_date") || ""; } catch { /* noop */ }
+    if (lastBBDate === todayStr) return; // already advanced today
+    const newBB = storedBB + 1;
+    const nextBB = newBB >= 7 ? -1 : newBB; // -1 = ramp complete, never again
+    try {
+      localStorage.setItem("bb_date", todayStr);
+      localStorage.setItem("bb_day", String(nextBB));
+    } catch { /* noop */ }
+    setBounceBackDay(nextBB);
+    const recovery = BOUNCE_BACK.find((b) => b.d === newBB);
+    if (recovery) {
+      setCoins((p) => p + recovery.c);
+      setCoinToast({ msg: recovery.msg, icon: RefreshCw });
+      syncCoins(recovery.c);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habits, mounted, todayStr]);
@@ -1194,8 +1218,12 @@ export function TendApp({
 
   const overallHeatData = useCallback(
     (date: string) => {
-      if (!habits.length) return 0;
-      return habits.filter((h) => isComplete(h.id, date)).length / habits.length;
+      // Only build habits have per-day completion logs; quit habits never log a
+      // completion, so counting them in the denominator would permanently cap
+      // intensity below 100% (dead weight). Heatmap = build-habit activity.
+      const buildForHeat = habits.filter((h) => h.category !== "quit");
+      if (!buildForHeat.length) return 0;
+      return buildForHeat.filter((h) => isComplete(h.id, date)).length / buildForHeat.length;
     },
     [habits, isComplete]
   );
