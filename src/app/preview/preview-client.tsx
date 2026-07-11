@@ -42,6 +42,7 @@ import { Ceremony } from "@/components/ceremony";
 import { StreakFlame } from "@/components/streak-flame";
 import { AnimatedNumber } from "@/components/animated-number";
 import { TodayCardVisual } from "@/components/today-card";
+import GardenLoading from "@/app/(app)/garden/loading";
 
 /* ───────────────────────── mock data ───────────────────────── */
 
@@ -132,7 +133,7 @@ const wrappedProps = {
 
 export type View =
   | "garden" | "today" | "insights" | "detail" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
-  | "hatch" | "evolve";
+  | "hatch" | "evolve" | "loading";
 
 const VIEWS: { key: View; label: string }[] = [
   { key: "garden", label: "🌱 Garden" },
@@ -148,6 +149,7 @@ const VIEWS: { key: View; label: string }[] = [
   { key: "you", label: "👤 You screen" },
   { key: "breathe", label: "🌬 Breathe" },
   { key: "nav", label: "📱 Bottom nav" },
+  { key: "loading", label: "⏳ Loading" },
 ];
 
 /* ───────────────────────── page ───────────────────────── */
@@ -230,6 +232,7 @@ export function PreviewClient({ initialView = "garden", initialDark = false }: {
       </main>
 
       {/* Full-screen overlays render outside the phone stage */}
+      {view === "loading" && <GardenLoading />}
       {view === "hatch" && <CeremonyPreview kind="hatch" />}
       {view === "evolve" && <CeremonyPreview kind="evolve" />}
       {view === "wrapped" && <TendWrapped {...wrappedProps} onClose={() => setView("gallery")} />}

@@ -484,3 +484,19 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Route-level loading skeleton (garden/loading.tsx) ──
+   A single shimmering-block utility. Reuses the @keyframes shimmer above; the
+   reduced-motion rule freezes it to a soft static grey block automatically. */
+.tend-skel {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 25%,
+    rgba(0, 0, 0, 0.085) 37%,
+    rgba(0, 0, 0, 0.05) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}

@@ -59,6 +59,7 @@ next-env.d.ts
 !/scripts/shots/preview-garden-full.png
 !/scripts/shots/preview-insights-full.png
 !/scripts/shots/preview-insights-dark-fold.png
+!/scripts/shots/preview-loading-fold.png
 /scripts/srv.log
 /scripts/nextstart*
 
