@@ -227,22 +227,33 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    good-things gratitude) — also advances Phase 4. FAB lifted above nav. Build green, lint 0 errors.
    **NOT browser-verified** (renders behind Clerk auth) — a successor with keys should eyeball the nav +
    the 3 wellness tools + You screen once.
-7. **[PHASE 2 — NEXT] Core-loop polish: the assumes-best one-tap check-in.** This is the soul + a DoD
-   item. Study `morning-checkin.tsx` + the main garden in `tend-app.tsx` (the terrarium + per-habit
-   tap-to-complete). Make the daily tend feel *great*: a single "all good today ✓" affordance that
-   assumes the best (marks all active habits done in one satisfying tap w/ confetti + coin feedback),
-   gentle per-habit slip reporting, spring micro-interactions on check-off, clear egg-progress-toward-
-   hatch feedback. Research Finch/Forest daily-loop delight first. Commit per improvement.
-8. **[PHASE 3 — AFTER] Deep analytics + Wrapped.** The Insights tab currently = heatmap + constellation.
-   Elevate to genuinely insightful (best/worst days, momentum, per-habit consistency, correlations) +
-   a shareable "Tend Wrapped". `share-card.tsx` + `constellation.tsx` are the seeds.
-9. **[ongoing] Lint hygiene** — 32 warnings (unused vars + a few exhaustive-deps). Unused-var ones are
-   safe quick wins; exhaustive-deps in the monolith need care.
+7. ✅ **[PHASE 2] Assumes-best one-tap check-in.** DONE (shift 2, commit `0481ef3`). Garden now shows a
+   warm "Everything went well today" button that marks every remaining active build habit done in one
+   tap (success haptic + press pulse); flipping all-done reuses the existing celebration (confetti,
+   shooting star, banner, +10 coins). Copy assumes the best. Per-habit checkboxes stay for reporting a
+   slip. *(Remaining core-loop polish to pick up: richer egg-progress-toward-hatch visualization on the
+   garden, and the gentle time-of-day nudge is now slightly redundant with the one-tap button — consider
+   suppressing it when the button shows.)*
+8. **[PHASE 3 — NEXT] Deep analytics + Wrapped.** The Insights tab (bottom-nav 📊) currently renders
+   `MultiHabitHeatmap` + `Constellation`. Elevate to genuinely insightful & motivating: best/worst days,
+   momentum trend, per-habit consistency %, streak history, simple correlations, and a shareable **Tend
+   Wrapped** summary. `share-card.tsx` + `constellation.tsx` are the seeds. **Research first** (Finch/
+   Duolingo/Spotify-Wrapped analytics patterns) before building. This is the biggest remaining DoD gap.
+9. **[PHASE 4] Wellness suite — mostly banked (shift 2).** Breathe + grounding + urge-surf + gratitude
+   now live in `wellness-hub.tsx`. Remaining: persist gratitude server-side (currently localStorage
+   `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
+10. **[PHASE 5] Grace token / "one slip never stings"** is a PUBLIC promise (landing + onboarding) but
+    not yet real UX. `streak_freezes` exists in schema/profile — make it real and tie to coins.
+11. **[ongoing] Lint hygiene** — 32 warnings (unused vars + unused exhaustive-deps disables). NOTE:
+    `eslint --fix` on the monolith leaves ugly trailing-whitespace where it strips disable comments —
+    do these by hand (delete the whole comment line), don't --fix blindly.
 
-> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. Front door (landing + onboarding)
-> done. Bottom-nav shell + Wellness + You screens now DONE (shift 2). Biggest lever now = **core-loop
-> polish: the assumes-best one-tap daily check-in** (frontier #7) — the emotional heart of the product.
-> Read §6b audit + §10 decisions first. The `.env.local` + middleware notes in NEEDS EYES still stand.
+> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. Front door (landing + onboarding),
+> bottom-nav shell, Wellness + You screens, AND the assumes-best one-tap check-in are all DONE. Biggest
+> remaining DoD lever now = **Phase 3: deep Insights analytics + a shareable Tend Wrapped** (frontier #8)
+> — research first. NOTE: shift 2's new UI (nav, wellness tools, You, one-tap) is build-verified but
+> **NOT browser-verified** (auth-gated). Read §6b audit + §10 decisions first. `.env.local` + middleware
+> notes in NEEDS EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -300,6 +311,12 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   three-good-things gratitude ritual (saved to localStorage `tend_gratitude`). All self-contained,
   uplifting, non-clinical — banks a big chunk of Phase 4 early while giving the Wellness tab real
   substance from day one. Future: persist gratitude server-side + surface it in Insights.
+- *(shift 2)* **Assumes-best = an ADD, not a data-model inversion.** The soul says "each day defaults to
+  you did well; you only report slips." The built model is opt-in (tap each habit). Fully inverting to
+  default-done-unless-slip is deep + risky (streaks, milestones, quit logic all assume explicit logs), so
+  instead we added a one-tap "Everything went well today" button that batch-marks all remaining build
+  habits done. It delivers the assumes-best *feeling* and the one-tap convenience without touching the
+  logging model or the server contract. A future shift can revisit a true default-done model if desired.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
