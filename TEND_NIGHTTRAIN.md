@@ -215,7 +215,11 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       stages (Egg→Elder, Day 1→30) — the #1 emotional payoff was previously only described in words;
       browser-verified, all 5 stages fit in view on a phone. Proof: `scripts/shots/evo-journey.png`.)*
 - [x] A delightful **onboarding** that hatches the first egg in under a minute. *(shift 1: rebuilt
-      grow-first twilight-garden flow. NOT yet browser-verified — auth-gated.)*
+      grow-first twilight-garden flow. **run-2 shift 11: now BROWSER-VERIFIED light+dark via file://**
+      — converted the JS-gated `opacity: fadeIn?1:0` entrance to a pure-CSS `obEnter` animation (fixes a
+      progressive-enhancement blank-frame weakness AND unblocks offline verification), so the step-1
+      egg + "tend." wordmark + lede + "Plant your first egg" CTA now render in the sandbox. Proof:
+      `scripts/shots/preview-onboarding{,-dark}-fold.png`.)*
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
       progress, dragon evolution art showcased with animation. *(shift 2: one-tap assumes-best check-in.
       shift 5: ambient egg-warming progress bar per garden row. **run-2 shift 3: the dragon-art
@@ -358,6 +362,20 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 > content in `opacity: fadeIn?1:0` (a `useEffect` entrance fade), so the pre-hydration frame is legitimately
 > blank; that's the intended fade-in, not a bug, and it's build-verified only (real-device eyeball stays
 > Jonny's).
+>
+> **run-2 shift 11 (DONE) — that shift-9 FINDING was actually a mild DEFECT, now RESOLVED.** On a second
+> look, gating ALL onboarding content behind a JS-set `opacity` isn't just "unverifiable" — it's a
+> progressive-enhancement weakness: a slow or failed hydration shows a blank onboarding screen. Replaced
+> the `fadeIn` state + its `useEffect` with a pure-CSS entrance animation (`.obRoot{animation:obEnter
+> .45s ease both}`, reduced-motion-guarded), matching the landing's established "CSS-only motion,
+> static-first" rule. Content now lives in the SSR markup and fades in via CSS → robust to hydration
+> delay AND file://-verifiable. Screenshotted light+dark at 390px: the previously-blank frame now shows
+> the step-1 glowing dragon-egg + "tend." Fraunces wordmark + warm lede + green "Plant your first egg"
+> CTA — renders gorgeously (`scripts/shots/preview-onboarding{,-dark}-fold.png`, added to the pipeline
+> default set + whitelisted). LESSON: an "unverifiable because animation-gated" note can hide a real
+> progressive-enhancement bug — worth a second look before filing it as intended-and-untouchable. With
+> this, onboarding joins every other core surface as file://-verified; the offline vein is exhausted
+> again (for real this time), and the remaining §8 gates are Jonny's real-device eyeball + merge only.
 >
 > **run-2 shift 10 (DONE):** the shift-9 "every /preview-mountable surface that CAN be file://-verified
 > has been" claim was an OVERCLAIM — an audit of the `/preview` view keys vs the committed shots found
@@ -929,6 +947,22 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   client component with no server await (no gap) and `/settings` does one light `ensureProfile` read on a
   secondary screen — building skeletons for them would edge into churn, so only the primary daily route
   (the real gap) got one. This CLOSES the loading-shimmer DoD leftover.
+
+- *(run-2 shift 11)* **Onboarding's entrance fade moved from JS-gated opacity to a pure-CSS animation —
+  a real progressive-enhancement fix, not a verification nicety.** Shifts 9–10 filed the blank
+  pre-hydration onboarding frame as "animation-gated, intended, untouchable." Re-examined it: gating ALL
+  content behind `opacity: fadeIn?1:0` (flipped by a `setTimeout` in a `useEffect`) means a slow or
+  failed hydration leaves the user staring at an empty screen — a genuine robustness weakness, not just
+  an artifact of the offline pipeline. Fixed the same way the landing handles motion: content stays in
+  the SSR markup and a pure-CSS `.obRoot{animation:obEnter .45s ease both}` fades it in (reduced-motion
+  users get it fully present, no fade). This (a) removes the blank-on-slow-hydration failure mode, and
+  (b) as a free consequence makes onboarding file://-verifiable — screenshotted light+dark, renders
+  beautifully. Deliberately did NOT touch the step-4 staged `reveal` timers (they're genuinely
+  interactive JS state, only reached after user taps, and don't gate the first paint). Chose the minimal
+  surgical change over a wider onboarding refactor — one state var + one effect deleted, behaviour on a
+  healthy client byte-identical. LESSON worth keeping: "can't verify it here → leave it alone" can mask a
+  real defect; the honest move on an unverifiable surface is to ask WHY it's unverifiable, because the
+  answer here (content hidden until JS runs) WAS the bug.
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
