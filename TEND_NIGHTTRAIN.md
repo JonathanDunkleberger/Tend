@@ -246,30 +246,35 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 55 shipped landing structured data (#0ap): two schema.org JSON-LD blocks
-> (SoftwareApplication + FAQPage) so Google can render an app rich-card and surface the shift-10 FAQ
-> as a rich snippet. It was the last genuinely-verifiable landing lever — zero client JS, verified
-> end-to-end against `next start` (both blocks in the SSR HTML, valid JSON, offers Free=$0/Tend+=$4.99,
-> NEXT SHIFT — shift 56 shipped the last SEO surface the site was missing: `/robots.txt` +
-> `/sitemap.xml` (#0aq). The landing had structured data (JSON-LD #0ap) + an OG card (#0ab) but NO
-> crawl directives and NO sitemap — nothing told Google what to index or pointed it at the rich
-> landing. Added Next metadata routes (`app/robots.ts`, `app/sitemap.ts`) + made both public in
-> middleware (same auth-gotcha /opengraph-image hit). Verified end-to-end vs `next start` (both 200,
-> right content-types, valid urlset, correct allow/disallow). **The site's on-page + technical SEO is
-> now genuinely complete** (structured-data + OG + robots + sitemap), the file://-verifiable landing is
-> conversion + SEO complete, the cold-read bug vein is exhausted (shifts 49–53), and §12 is down to ONE
-> Jonny-only item. **Two deliberately-rejected levers (documented so a successor doesn't reflexively
-> retry):** (1) `next/font` conversion of the Google-Fonts `<link>` — `'Fraunces'`/`'DM Sans'` are
-> literal strings across ~94 sites → invasive + visually unverifiable here; a real win only on a
-> browser-capable shift. (2) A `manifest.webmanifest`-vs-`manifest.json` rename / PWA-icon audit — the
-> manifest is already on-brand (shift 4) and PWA install already works; no verifiable defect to fix.
-> **What's actually left is Jonny-only:** (a) run `migration-009` + `-008` in Supabase (atomicity +
-> gratitude — app falls back until then); (b) the §13/#16 Stripe price change (keyed — new price IDs);
-> (c) the bounce-back ramp fires for ALL users not just after a lapse (product call); (d) the
-> real-device / networked-browser eyeball of the auth-gated app (§14). Do NOT re-run the exhausted
-> cold-read hunt and do NOT manufacture churn — the honest conclusion two shifts running is that no
-> further sandbox-verifiable improvement of consequence remains. **This branch is mature and ready for
-> Jonny's review + merge.**
+> NEXT SHIFT — shift 57 REOPENED the cold-read bug vein that shifts 49–53 had declared "exhausted" and
+> found it was NOT: prior hunts concentrated on reward/celebration/optimistic-update/analytics + the
+> coins/inventory/stripe/urge API routes, but several surfaces had NEVER been deeply swept — the
+> data-lifecycle helpers (`migrate-local-data`, `ensure-profile`), the log/relapse/preferences/clerk-
+> webhook routes' date+integrity handling, and a batch of component internals. Two focused fan-out
+> hunters over that fresh territory surfaced **5 genuine, cold-verifiable bugs, all FIXED (#0ar):**
+> (1) both heatmaps dropped today's cell every morning before local noon (noon-anchored timestamp vs the
+> clock); (2) the one-shot localStorage→Supabase migration swallowed server 4xx/5xx (fetch doesn't
+> reject on them) and still set its done-flag → permanent silent data loss; (3) a transient `.single()`
+> read error in `ensureProfile` fell through to an upsert that reset a Pro user to free / wiped coins;
+> (4) the Clerk `user.updated` webhook could clobber a stored email with `""` (same class as shift-53's
+> Stripe fix); (5) the relapse route had an unguarded body parse + no intensity/note validation. build
+> GREEN, lint 0/5, test 99/99, 3 commits. **LESSON (see §10): "cold-read vein exhausted" was surface-
+> scoped, not codebase-wide — a successor CAN still hunt, but must aim at explicitly-unswept files, not
+> re-run the same surfaces.** **Two found-but-DEFERRED (see §12):** (a) the `habits/[id]/log` route
+> awards "streak" milestones off *total-days-logged*, not consecutive streak, and rehydrates into the
+> client's celebration-dedup — a real missed-celebration bug, but the correct fix needs server-side
+> streak logic that can't even match the client's grace-token-aware streak → design + DB verification
+> required (documented, not half-fixed). (b) the terrarium moon/planet-shadow SVG **SMIL** `<animate>`
+> nodes aren't gated by reduced-motion (CSS media query doesn't stop SMIL) — minor/subtle. **Still
+> Jonny-only:** run `migration-009` + `-008` in Supabase; §13/#16 Stripe price change (keyed); the
+> bounce-back ramp fires for ALL users not just after a lapse (product call); the real-device eyeball of
+> the auth-gated app (§14). The `next/font` conversion stays rejected (113 literal font refs → invasive +
+> visually unverifiable here). Remaining un-checked DoD items still hinge on Jonny's browser, not new code.
+
+> PRIOR POINTER (shift 56) — shipped `/robots.txt` + `/sitemap.xml` (#0aq), completing the site's
+> technical SEO (structured-data + OG + robots + sitemap). At the time the honest read was "no further
+> sandbox-verifiable improvement remains / branch is mature" — shift 57 corrected that re: the bug vein
+> (see above); the SEO/landing conclusion still holds (that surface IS complete).
 
 > PRIOR POINTER (shift 53) — re-triaged the §12 "for Jonny" list and banked the two that were actually
 > reasoning-verifiable guards (urge-entries habit-ownership check + Stripe email-clobber, #0an). Lesson
@@ -278,6 +283,33 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0ar. ✅ **[SHIFT 57] Fresh cold-read bug hunt on the NEVER-swept surfaces — FIXED 5 real bugs
+   (reasoning-verified, no DB/browser).** Shifts 49–53 declared the cold-read vein "exhausted," but that
+   was scoped to the surfaces THEY swept (reward/celebration/optimistic-update/analytics + coins/
+   inventory/stripe/urge routes). Two fan-out hunters aimed at genuinely-unswept territory — the data-
+   lifecycle helpers, the log/relapse/preferences/clerk-webhook routes, and 10 component internals —
+   found 5 genuine defects, each traced + verified before fixing. (1) **[insights] Both heatmaps dropped
+   today's cell before local noon.** `heatmap.tsx` + `multi-habit-heatmap.tsx` guarded future days with
+   `new Date(date+"T12:00:00") > new Date()` — the cell was anchored to NOON but compared to the actual
+   clock, so today counted as "future" any time the app opened before 12:00 (heatmap skipped it entirely;
+   multi-habit rendered it transparent), reappearing only after noon. Now compares LOCAL date strings vs
+   `today()` (never true for `daysAgo(i>=0)`). (2) **[data] One-shot migration swallowed server errors →
+   permanent data loss.** `migrate-local-data` `await`ed every fetch but ignored the response; fetch only
+   rejects on NETWORK errors, not 4xx/5xx, so a server failure was swallowed and `tend_data_migrated`
+   was still set — losing the user's quit dates / owned items forever (the file's own comment promised
+   "retry next load", which never fired). Routed through a `putJson()` helper that throws on `!res.ok`.
+   (3) **[data] `ensureProfile` could reset a Pro user to free / wipe coins.** The initial `.single()`
+   SELECT error was discarded; a transient read failure while the row exists made `existing` null →
+   fell through to an `onConflict: clerk_id` upsert of `{tier:"free", coins:250, streak_freezes:{}}` that
+   UPDATEs the live row. Now distinguishes PGRST116 (no rows → create) from a real error (return a
+   transient default WITHOUT writing). (4) **[api] Clerk `user.updated` email-clobber** — email fell back
+   to `""` and upserted over a real address (same class as shift-53's Stripe fix); now only written when
+   Clerk provides one. (5) **[api] Relapse route hardening** — unguarded `req.json()` (empty body → 500)
+   now try/caught; `intensity` clamped to 1–10, `note` capped at 500 chars. build GREEN, lint 0/5, test
+   99/99, 3 commits. **DEFERRED (documented, not half-fixed — see §12 #5/#6):** the log-route milestone
+   uses total-days-logged not consecutive-streak (real, but the fix needs server-side grace-aware streak
+   logic + DB verification), and the terrarium SMIL `<animate>` nodes ignore reduced-motion (minor).
 
 0aq. ✅ **[SHIFT 56] robots.txt + sitemap.xml — the last missing technical-SEO surface.** The landing
    carried structured data (JSON-LD #0ap) and an OG card (#0ab), but the site had NO `robots.txt` and NO
@@ -942,6 +974,17 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   in `quit.test.ts` (92→94). This also proves shift 13's "pure-code test lever exhausted" note was about
   *coverage-for-coverage's-sake* — extracting math to FIX a real behavioural bug is still high-value.
 
+- *(shift 57)* **"Cold-read vein exhausted" was surface-scoped, not codebase-wide — a successor CAN
+  still hunt, just aim at explicitly-unswept files.** Shifts 49–53 concluded the bug hunt was done, and
+  shifts 54–56 respected that and pivoted to SEO. But those hunts had only swept the reward/celebration/
+  optimistic-update/analytics client code + the coins/inventory/stripe/urge routes. Shift 57 pointed two
+  hunters at the never-touched surfaces — `migrate-local-data`, `ensure-profile`, the log/relapse/clerk-
+  webhook routes, and 10 component internals — and found 5 genuine bugs (heatmap noon-cell, migration
+  silent-data-loss, ensureProfile Pro-clobber, clerk email-clobber, relapse validation) plus 2 real
+  deferred ones. LESSON for successors: before declaring a codebase clean, list which FILES were actually
+  read; "exhausted" claims inherited from a prior shift are only as broad as that shift's file set. The
+  honest move when the landing/SEO levers are done is a fresh hunt on unswept files — NOT manufacturing
+  churn, but also NOT rubber-stamping "mature" on the strength of someone else's partial sweep.
 - *(shift 53)* **Not every "deferred" bug is actually DB-gated — re-triage before punting.** Shift 14
   lumped four bugs into §12 as "all need a running DB/Stripe → for Jonny," and shifts since treated the
   whole list as untouchable in this sandbox. On a fresh read two of them (urge-entries ownership, Stripe
@@ -967,6 +1010,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **Widget-style "today" hero** you could screenshot to a phone home screen.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
+
+- **DEFERRED BUG (shift 57) #5 — the `habits/[id]/log` route awards "streak" milestones off
+  total-days-logged, not consecutive streak.** `totalDays = count(habit_logs)` counts DISTINCT days ever
+  logged (schema has `unique(habit_id, log_date)`), then inserts a `milestones` row with
+  `milestone_type:"streak", value: totalDays` when it hits a MILESTONE_DAYS value. That table rehydrates
+  into the client's `initialEarned` celebration-dedup (`garden/page.tsx` → `earned[habit_id:value]`), so
+  a user who logs sporadically to 7 total days gets a "7-day streak" row that then SUPPRESSES the real
+  7-day-streak celebration later. **Not fixed** because the correct fix (compute the consecutive run
+  server-side) still wouldn't match the client's streak, which bridges gaps with grace tokens the server
+  doesn't know about — it needs a small design decision (drive milestones purely client-side, or teach
+  the server about grace) + live-DB verification. Flagged for a keyed/design shift.
+- **DEFERRED BUG (shift 57) #6 — terrarium SMIL animations ignore reduced-motion (minor).** The moon
+  `<g>`'s `<animate>` (r/opacity) and the planet-shadow `<animate ry>` in `terrarium-scene.tsx` aren't
+  gated by the `tc.*` tier flags, and the global `@media (prefers-reduced-motion)` CSS rule only stops
+  CSS `animation`/`transition` — NOT SVG SMIL. So a reduced-motion user still sees the moon subtly pulse
+  + the shadow throb. Low impact; fix = gate those SMIL nodes on the reduced-motion tier. Left for a
+  browser-verifiable shift (the visual effect can't be eyeballed here).
 
 - **PRODUCT CALL (shift 49) — the bounce-back "recovery" ramp fires for ALL users, not just after a
   real lapse.** Shift 49 fixed the *exploit* (it was an unbounded +3-coins/day faucet — see frontier
