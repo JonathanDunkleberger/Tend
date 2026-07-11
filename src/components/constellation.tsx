@@ -5,7 +5,7 @@ import {
   Sparkles, TrendingUp, Shield, Flame, Heart, Calendar,
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
-import { seed, daysAgo, daysBetween } from "@/lib/utils";
+import { seed, daysAgo, daysBetween, today } from "@/lib/utils";
 import { computeConsistency, computeSynergies } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
@@ -44,7 +44,10 @@ export function Constellation({
   const quitHabits = habits.filter((h) => h.category === "quit");
 
   // ── Overview stats ──
-  const todayStr = new Date().toISOString().slice(0, 10);
+  // Use the app-wide LOCAL date convention (today()) — completions are keyed by
+  // local date via today()/daysAgo(), so a UTC toISOString() slice would look up
+  // the wrong day every evening for users west of UTC (0-of-N false negatives).
+  const todayStr = today();
   const totalHabitsOnTrack = habits.filter((h) => {
     if (h.category === "quit") return getCleanDays ? getCleanDays(h.id) > 0 : getStreak(h.id) > 0;
     return isDone(h.id, todayStr);

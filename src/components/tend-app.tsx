@@ -239,8 +239,11 @@ export function TendApp({
         setShowOnboarding(true);
       }
 
-      // Morning check-in — show once per day if user has habits
-      const todayNow = new Date().toISOString().slice(0, 10);
+      // Morning check-in — show once per day if user has habits.
+      // Must use the LOCAL date (today()) to match what onDismiss persists as
+      // last_checkin_date; a UTC slice here re-shows the check-in the same
+      // evening for users west of UTC (todayNow rolls to tomorrow before they do).
+      const todayNow = today();
       const lastCheckin = initialPreferences.lastCheckinDate || localStorage.getItem("tend_checkin_date");
       if (lastCheckin !== todayNow && initialHabits.length > 0 && onboardingDone) {
         setShowMorningCheckin(true);

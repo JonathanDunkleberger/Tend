@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Wind, Sparkles, Waves, Heart, ChevronLeft, Check, Moon, X } from "lucide-react";
 import type { ThemeColors } from "@/lib/constants";
-import { haptic } from "@/lib/utils";
+import { haptic, today } from "@/lib/utils";
 
 interface WellnessHubProps {
   th: ThemeColors;
@@ -33,7 +33,11 @@ const AFFIRMATIONS = [
  */
 export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: WellnessHubProps) {
   const [tool, setTool] = useState<Tool | null>(null);
-  // Stable-per-render affirmation without Math.random (SSR-safe): pick by minute-of-day.
+  // Rotate the affirmation by local hour-of-day. This hub only mounts client-side
+  // (the app's initial page is "main"/garden — the Wellness tab renders it after a
+  // tap), so it's never in the SSR/hydration paint and a lazy initializer can read
+  // local time freely without any hydration mismatch. Lazy-init keeps it flicker-
+  // free and needs no effect.
   const [affirmation] = useState(
     () => AFFIRMATIONS[new Date().getHours() % AFFIRMATIONS.length]
   );
@@ -346,7 +350,9 @@ function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void
 
   const save = () => {
     haptic("success");
-    const entry = { date: new Date().toISOString().slice(0, 10), items: items.filter((s) => s.trim()) };
+    // Stamp with the LOCAL date (today()) — the app keys everything by local
+    // date, so a UTC slice would label a late-evening entry as tomorrow.
+    const entry = { date: today(), items: items.filter((s) => s.trim()) };
     if (onSave) {
       // Parent persists to server (+ localStorage cache) and dedupes by day
       onSave(entry);

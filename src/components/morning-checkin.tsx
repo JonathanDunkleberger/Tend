@@ -89,7 +89,10 @@ export function MorningCheckin({
   const dayName = DAY_NAMES[new Date().getDay()];
   const msgIdx = todayStr.split("-").reduce((s, n) => s + parseInt(n), 0) % MORNING_MESSAGES.length;
 
+  const dismissedRef = useRef(false);
   const handleDismiss = useCallback(() => {
+    if (dismissedRef.current) return; // guard: tap can bubble from the CTA too
+    dismissedRef.current = true;
     setDismissing(true);
     setTimeout(onDismiss, 350);
   }, [onDismiss]);
@@ -120,6 +123,7 @@ export function MorningCheckin({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onClick={handleDismiss}
       style={{
         position: "fixed", inset: 0, zIndex: 9990,
         background: "linear-gradient(180deg, #0a0e1a 0%, #121828 40%, #1a2040 100%)",
