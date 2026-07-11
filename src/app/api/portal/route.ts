@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await getStripe().billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
     return_url: `${origin}/garden`,
   });

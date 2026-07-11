@@ -44,7 +44,7 @@ export default async function GardenPage() {
   // ── New: fetch quit_progress, user_inventory, user_preferences ──
 
   // Quit progress → convert DB rows to quitDataMap keyed by habit_id
-  let initialQuitData: Record<string, QuitData> = {};
+  const initialQuitData: Record<string, QuitData> = {};
   {
     const { data: qpRows } = await supabase
       .from("quit_progress")

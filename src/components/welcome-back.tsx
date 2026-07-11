@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowRight, RefreshCw, CloudMoon, Clock, Moon } from "lucide-react";
 import { WELCOME_MSGS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
@@ -11,7 +12,8 @@ interface WelcomeBackProps {
 }
 
 export function WelcomeBack({ daysAway, onClose, th }: WelcomeBackProps) {
-  const msg = WELCOME_MSGS[Math.floor(Math.random() * WELCOME_MSGS.length)];
+  // Pick one welcome message once per mount (lazy initializer keeps render pure).
+  const [msg] = useState(() => WELCOME_MSGS[Math.floor(Math.random() * WELCOME_MSGS.length)]);
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(12px)",

@@ -48,12 +48,11 @@ export function CreatureNamingModal({
     requestAnimationFrame(() => setEntered(true));
   }, []);
 
-  // Pick 6 random suggestions for this creature
-  const suggestions = useRef(
-    NAME_SUGGESTIONS
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 6)
-  ).current;
+  // Pick 6 random suggestions once per mount (lazy initializer keeps render
+  // pure; copy the source array first so we never mutate the shared constant).
+  const [suggestions] = useState(() =>
+    [...NAME_SUGGESTIONS].sort(() => 0.5 - Math.random()).slice(0, 6)
+  );
 
   const handleSubmit = () => {
     const trimmed = name.trim();
