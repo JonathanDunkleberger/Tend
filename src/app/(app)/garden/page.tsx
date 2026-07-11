@@ -11,21 +11,29 @@ export default async function GardenPage() {
   if (!userId) return null;
   const supabase = await createServerSupabaseClient();
 
-  // Fetch habits
-  const { data: habits } = await supabase
+  // Fetch habits. A TRANSIENT read failure here must NOT silently render a
+  // false-empty garden ("all my habits vanished!") — throw so the route's
+  // error boundary (error.tsx) shows a reassuring, retryable state instead.
+  const { data: habits, error: habitsError } = await supabase
     .from("habits")
     .select("*")
     .eq("user_id", userId)
     .eq("is_archived", false)
     .order("sort_order", { ascending: true });
 
+  if (habitsError) throw new Error(`Failed to load habits: ${habitsError.message}`);
+
   const habitIds = (habits || []).map((h: Habit) => h.id);
 
-  // Fetch logs (last 90 days — sufficient for heatmaps and streak calc)
+  // Fetch logs (last 90 days — sufficient for heatmaps and streak calc). Same
+  // reasoning: a transient failure would render every streak at 0 (the emotional
+  // core looking reset) — throw to the boundary rather than show wrong data.
   const logWindow = daysAgo(90);
-  const { data: logs } = habitIds.length > 0
+  const { data: logs, error: logsError } = habitIds.length > 0
     ? await supabase.from("habit_logs").select("*").in("habit_id", habitIds).gte("log_date", logWindow)
-    : { data: [] };
+    : { data: [], error: null };
+
+  if (logsError) throw new Error(`Failed to load habit logs: ${logsError.message}`);
 
   // True LIFETIME completion count per habit. The 90-day window above is only for
   // heatmaps/streaks, but the client derives a build habit's "total days" AND its
