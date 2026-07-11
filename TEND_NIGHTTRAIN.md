@@ -254,7 +254,49 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 61 aimed hunters at the surfaces shift 60 named as still-unswept (settings-client,
+> NEXT SHIFT — shift 62 hunted the surfaces shift 61 named as still-thin-but-unswept (the quit/relapse/
+> urge CLIENT internals + the deeper tend-app monolith effect wiring beyond shift 59) and it PAID OFF
+> AGAIN: **7 genuine reasoning-verified bugs FIXED (#0aw, 3 commits), two on the quit-mode emotional
+> core.** THE BIG ONE — **evening quitters were under-counted by up to a full day, and the detail hero
+> showed "N minutes clean" 24h+ into a quit.** Root cause: `computeCleanDays` compared the stored quit
+> timestamp (`new Date().toISOString()`, UTC) against today-at-noon, so a 6pm quitter read 0 clean days
+> for ~two calendar days — delaying money-saved, the 24h/72h/7d celebration gates, and the dragon-stage
+> floor — and because `cleanD` (noon-anchored) and the live `timer` (exact) disagreed about crossing day
+> 1, the hero's `cleanD===0 && totalHours<24` branch fell through to the giant "minutes clean" number
+> 27h in. FIX: anchor the quit date to its LOCAL calendar day (matching tend-app's `isStarted` slice +
+> the whole app's date-keying) in computeCleanDays/computeTotalSaved/computeQuitStage → morning & evening
+> quitters now agree, and `cleanD===0` ⟺ same calendar day ⟺ totalHours<24 so the minutes branch can only
+> fire under an hour (+dropped the redundant `<24` hero guard as belt-and-suspenders). +1 regression test.
+> **RELAPSE RE-ARM** — resetQuit restarted the clean run at 0 but left the per-habit dedup flags set
+> (tend_quit_celebrations / tend_7day_shown / tend_granted_milestones + in-session earned badges), so a
+> rebuilt run got NO encouragement toasts, no 7-day nudge, and no streak milestones EVER again after a
+> single slip — the opposite of the soul ("recovery is a spiral, you're still moving upward"); now clears
+> this habit's entries on reset (re-earning needs real re-accumulated clean days → not farmable). Plus 4
+> monolith fixes: (a) **dead `hasHydrated` guard** — set by its own effect defined BEFORE the two guarded
+> effects, so passive-effect ordering made the mount-skip always-true → every page load re-PUT preferences
+> (echoing just-hydrated props to the server); replaced with per-effect first-run refs. (b) **two bare
+> JSON.parse** in the quit-celebration effect would throw on a corrupt value and PERMANENTLY suppress the
+> 24h/72h/7d celebrations + their coin grants → now try/caught like every other read. (c) **daily Tend+
+> +5 never re-granted across midnight** in a long-lived session (deps `[mounted,isPro]`, no date) → added
+> `today()` to the deps. (d) **relapse-modal creature used a lone `Math.floor(cleanDays/5)`** (5/10/15/20)
+> vs the shared getStage 3/7/14/30 → delegates to getStage. build GREEN, lint 0/5, **test 108/108**.
+> **Considered + deliberately LEFT (not churned):** urge-support/relapse-modal CSS `animation`/`transition`
+> are ALREADY reduced-motion-gated by the global `@media` rule in globals.css (that rule neutralizes CSS
+> animation on `*` — it's only SMIL + canvas rAF that escape it, and those were fixed shifts 58/59) → the
+> quit hunter's "modal a11y gap" was a FALSE POSITIVE; and updateQuitData/logUrge call apiSync inside the
+> setState updater (an impurity) but it's a full-object idempotent PUT, so a StrictMode/replay double-invoke
+> just re-writes identical data — benign, and adding a ref to "fix" it is churn+risk for zero real effect.
+> **The honest read for the successor:** shifts 57/60/61/62 have now each proven "cold-read vein exhausted"
+> is SURFACE-scoped — but the quit-client + monolith-effect-wiring surfaces are NOW genuinely swept twice
+> over (shift 59 + shift 62). What's left is truly thin: the remaining API routes are atomic/guarded, the
+> analytics/reward/celebration math is regression-locked + hunted, and the server-hydration path is fixed.
+> A successor CAN still hunt any file not yet read, but expect diminishing returns — the meaningful
+> un-checked DoD items hinge on Jonny's browser, not new code. **Still Jonny-only (unchanged):** run
+> `migration-009` + `-008` in Supabase; §13/#16 Stripe price change (keyed); verify-subscription 10-session
+> fallback (real Stripe volume); bounce-back ramp fires for ALL users not just after a lapse (product
+> call); the real-device eyeball of the auth-gated app (§14).
+
+> PRIOR POINTER — shift 61 aimed hunters at the surfaces shift 60 named as still-unswept (settings-client,
 > onboarding→save handoff, webhook edge cases) AND fixed the shift-60-documented garden error-swallowing
 > with a real error boundary. It PAID OFF: **6 genuine reasoning-verified bugs FIXED (#0av, 5 fix
 > commits), several on the money/auth path.** (1) **garden had NO error boundary anywhere** — a transient
@@ -374,6 +416,58 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0aw. ✅ **[SHIFT 62] Hunted the quit/relapse/urge CLIENT internals + the deeper monolith effect wiring
+   (shift-61's named-thin surfaces) — 7 real reasoning-verified bugs FIXED (no DB/browser), two on the
+   quit-mode emotional core.** Two fan-out hunters. **(1) [quit] Evening quitters under-counted + hero
+   showed "N minutes clean" 24h+ in.** `computeCleanDays` compared the stored quit timestamp
+   (`new Date().toISOString()`, UTC) against today-at-noon, so a 6pm quitter read 0 clean days for ~two
+   calendar days — under-crediting money-saved, the 24h/72h/7d celebration gates, and the dragon-stage
+   floor. And because `cleanD` (noon-anchored) disagreed with the live `timer` (exact) about crossing
+   day 1, the detail-hero branch `cleanD===0 && totalHours>=1 && totalHours<24` fell through to the
+   56px "minutes clean" number ~27h into a quit ("14 minutes clean" while the list said "27h clean").
+   FIX: anchor the quit date to its LOCAL calendar day (the app keys everything by local date; matches
+   tend-app's `isStarted` slice) in computeCleanDays/computeTotalSaved/computeQuitStage → morning &
+   evening quitters agree, AND `cleanD===0` now ⟺ same calendar day ⟺ `totalHours<24`, so the minutes
+   branch can only fire under an hour; also dropped the redundant `<24` hero guard (belt-and-suspenders:
+   even a lagged cleanD now shows "N hours clean", never minutes). Note the stored timestamp is UTC, so
+   the normalizer extracts the LOCAL date via `new Date(iso)` (date-only inputs anchored to noon so a UTC
+   parse can't roll them back a day). +1 regression test; existing loose `>=9` ISO test still green.
+   **(2) [quit] Relapse permanently killed future encouragement.** `resetQuit` restarted the clean run at
+   0 but left this habit's per-milestone dedup flags set (`tend_quit_celebrations` `[1,3,7]`,
+   `tend_7day_shown`, `tend_granted_milestones` `${hId}:${days}`, + in-session `earned` badges), so a
+   rebuilt run got NO "24 hours clean" toast, no SevenDayCelebration, and no streak-milestone coins ever
+   again for that habit — the exact opposite of the soul (self-healing, never-shaming; the RelapseModal
+   itself promises "recovery is a spiral, you're still moving upward"). Now clears this habit's entries on
+   reset; re-earning requires genuinely re-accumulating clean days → not farmable. **Monolith effect
+   wiring:** (3) **dead `hasHydrated` guard** — it was set in its OWN `useEffect` defined BEFORE the two
+   guarded prefs-sync effects, and passive effects run in definition order, so on the first commit the flag
+   was already true when the guards checked it → the mount-skip never fired → every page load re-PUT
+   `/api/preferences` (echoing the just-hydrated props back to the server; a stale/partial mount snapshot
+   could clobber, though shift 61's server-side merge now mitigates the append-only fields). Replaced with
+   per-effect first-run refs flipped AFTER each effect's own first run. (4) **two bare `JSON.parse`** in
+   the quit-celebration mount effect (`tend_quit_celebrations`, `tend_7day_shown`) would throw on a corrupt
+   value and — since it re-throws every mount — PERMANENTLY suppress the 24h/72h/7d celebrations + their
+   +5/+10/+25 coin grants + the 7-day Tend+ nudge; now try/caught like every other JSON read in the file.
+   (5) **daily Tend+ +5 never re-granted across midnight** in a long-lived session — the effect keyed on
+   `[mounted, isPro]` with no date dep (unlike the quit-milestone/bounce-back effects that key on the
+   date); added `today()` to the deps (the `lastBonusDate !== todayVal` gate still blocks same-day double
+   grants; `today()` is a primitive compared by value, only changing at the midnight rollover the 10s
+   `liveNow` tick re-renders past). (6) **relapse-modal creature stage** used a lone
+   `Math.floor(cleanDays/5)` (5/10/15/20) vs the shared `getStage` 3/7/14/30 used on every other quit
+   surface → delegates to `getStage`. build GREEN, lint 0/5, **test 107→108**, 3 fix commits. **Considered
+   + deliberately LEFT (documented, not churned):** (a) the quit hunter flagged urge-support/relapse-modal
+   CSS `animation`/`transition` as ungated for reduced-motion, but that's a FALSE POSITIVE — globals.css
+   has a global `@media (prefers-reduced-motion: reduce)` rule that neutralizes CSS `animation-duration`/
+   `transition-duration` on `*`/`::before`/`::after`; only SMIL `<animate>` + canvas rAF escape it, and
+   those were already fixed in shifts 58/59. (b) `updateQuitData`/`logUrge` call `apiSync` INSIDE the
+   `setQuitDataMap` updater (an impurity that double-fires under StrictMode/replay), but both PUT the full
+   quit object idempotently, so a double-invoke just re-writes identical data — benign; adding a ref mirror
+   to "fix" it is churn + risk for zero real-world effect (the shift-59 don't-churn-load-bearing rule).
+   **Hunter CONFIRMED clean (traced):** urge-trend 8-week bucketing, reason-editor, healing-timeline
+   day/hour granularity + isNext selection, the urge-support breathing loop's cycle counting + interval
+   cleanup, and the buyItem/removeHabit-undo/checkMilestones/markAllGood/togglePause paths (all
+   shift-49–59 fixes still hold).
 
 0av. ✅ **[SHIFT 61] Swept the surfaces shift 60 named as unswept (settings-client, onboarding→save,
    webhook edge cases) + fixed the documented garden error-swallowing — 6 real bugs FIXED, several on
