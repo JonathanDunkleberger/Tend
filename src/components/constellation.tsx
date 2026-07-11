@@ -714,9 +714,22 @@ export function Constellation({
             <defs>
               <filter id="cgl"><feGaussianBlur stdDeviation="2.5" /></filter>
               <radialGradient id="cbg" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.04" />
+                <stop offset="0%" stopColor="#4ade80" stopOpacity="0.05" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
+              {/* Each synergy line is a gradient between the two habits it connects —
+                  lovelier + more meaningful than a single off-brand purple. */}
+              {synergies.map((syn, i) => {
+                const from = positions[syn.a], to = positions[syn.b];
+                if (!from || !to) return null;
+                return (
+                  <linearGradient key={`sg${i}`} id={`syn-grad-${i}`} gradientUnits="userSpaceOnUse"
+                    x1={from.x} y1={from.y} x2={to.x} y2={to.y}>
+                    <stop offset="0%" stopColor={buildHabits[syn.a].color} />
+                    <stop offset="100%" stopColor={buildHabits[syn.b].color} />
+                  </linearGradient>
+                );
+              })}
             </defs>
             <rect width="320" height="280" fill="url(#cbg)" />
             {Array.from({ length: 25 }).map((_, i) => {
@@ -726,13 +739,16 @@ export function Constellation({
             {synergies.map((syn, i) => {
               const from = positions[syn.a], to = positions[syn.b];
               if (!from || !to) return null;
+              // Floor the visibility so even a faint synergy still reads as a thread.
+              const glow = 0.12 + syn.strength * 0.22;
+              const core = 0.4 + syn.strength * 0.45;
               return (
                 <g key={`syn${i}`}>
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke="#8B5CF6" strokeWidth={2 + syn.strength * 3} opacity={syn.strength * 0.15} filter="url(#cgl)" />
+                    stroke={`url(#syn-grad-${i})`} strokeWidth={3 + syn.strength * 3} opacity={glow} filter="url(#cgl)" />
                   <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                    stroke="#8B5CF6" strokeWidth={0.8 + syn.strength * 1.2} opacity={syn.strength * 0.5} strokeLinecap="round">
-                    {!prefersReducedMotion && <animate attributeName="opacity" values={`${syn.strength * 0.3};${syn.strength * 0.6};${syn.strength * 0.3}`} dur={`${3 + i}s`} repeatCount="indefinite" />}
+                    stroke={`url(#syn-grad-${i})`} strokeWidth={1.2 + syn.strength * 1.3} opacity={core} strokeLinecap="round">
+                    {!prefersReducedMotion && <animate attributeName="opacity" values={`${core * 0.65};${core};${core * 0.65}`} dur={`${3 + i}s`} repeatCount="indefinite" />}
                   </line>
                 </g>
               );
@@ -757,9 +773,11 @@ export function Constellation({
             <div style={{ padding: "0 14px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
               {[...synergies].sort((a, b) => b.strength - a.strength).slice(0, 3).map((syn, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 8, background: th.hoverBg }}>
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#8B5CF6", opacity: syn.strength }} />
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+                    background: `linear-gradient(90deg, ${buildHabits[syn.a].color}, ${buildHabits[syn.b].color})`,
+                    opacity: 0.55 + syn.strength * 0.45 }} />
                   <div style={{ flex: 1, fontSize: 11, color: th.text, fontWeight: 500 }}>{syn.label}</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: "#8B5CF6", opacity: 0.7 }}>{syn.coCount}d together</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: th.textSub }}>{syn.coCount}d together</div>
                 </div>
               ))}
             </div>
