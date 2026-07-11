@@ -249,10 +249,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       ≥4.5:1 AA. **run-2 shift 7: the micro-interaction clause is now genuinely rich** — hatch/evolution
       ceremonies, the check-off ring burst, the streak flame, the coin-counter roll, direction-aware page
       transitions, AND a new sound-optional soft-chime layer (`lib/sound.ts`, off by default, You-tab
-      toggle) — all reduced-motion/opt-in gated + composition-verified via file://. Remaining: optional
-      per-view skeletons + service worker (SW deliberately skipped until browser-verifiable) — all minor.
-      The real gate here is a real-device eyeball (the live audio + hydrated motion can't be
-      file://-verified).)*
+      toggle) — all reduced-motion/opt-in gated + composition-verified via file://. **run-2 shift 8: the
+      loading-shimmer leftover is now shipped for the primary route** — `(app)/garden/loading.tsx`, a
+      route-level Suspense skeleton that fills the blank-screen gap while the garden's 6+ Supabase reads
+      resolve (a real gap on a phone, worst on a free-tier Supabase cold-start). Mirrors the loaded shape
+      (persistent "tend." wordmark + shimmer data-pills, terrarium hero with a soft egg silhouette, habit
+      rows, static bottom nav Garden-highlighted → near-zero hydration shift). New `.tend-skel` shimmer
+      util reuses the pre-existing `@keyframes shimmer`; freezes static under reduced-motion via the
+      global rule. Browser-verified light+dark via a new `/preview?view=loading`
+      (`scripts/shots/preview-loading-fold.png`). `/pricing` (client, no server await) + `/settings`
+      (one light read, secondary screen) deliberately skipped as sub-gap. Remaining: service worker
+      (deliberately skipped until browser-verifiable) — minor. The real gate here is a real-device
+      eyeball (the live audio + hydrated motion can't be file://-verified).)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
       rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
       Landing/onboarding/manifest already on-brand. **shift 60 swept the remaining recovery-first drift**:
@@ -319,18 +327,23 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
-> **STATE AS OF run-2 shift 7 — READ THIS.** Queue items **#1–#4 are all DONE**: the `/preview` harness
+> **STATE AS OF run-2 shift 8 — READ THIS.** Queue items **#1–#4 are all DONE**: the `/preview` harness
 > covers every core surface; the premium-motion pass is complete (ceremonies + ring burst + streak flame
 > + coin roll + page transitions + soft chime); the deep-analytics beautification is complete (momentum,
 > headline hero, consistency rings, best-day rose, streak journey, synergy constellation); and the parked
-> SURPRISE-ME ideas are all shipped or pruned. **The sandbox-verifiable feature vein is genuinely mined
-> out this run** — every buildable, file://-verifiable design item the frontier scoped is banked.
-> **What remains is NOT more building — it's #5 (a DoD re-audit) and then Jonny's real-device eyeball +
-> merge (§9.3).** A successor should NOT manufacture churn (no reflexive bug-hunts — the cold-read vein
-> is well-swept, see §10; no re-beautifying already-handsome surfaces). If you genuinely spot a real gap
-> or a fresh product insight, act on it and verify via `/preview`; otherwise the honest move is to keep
-> the build green, tidy the docs, and leave the merge call to Jonny. Don't declare COMPLETE (§8 has
-> real-device gates only Jonny can close).
+> SURPRISE-ME ideas are all shipped or pruned. **Shift 8 did the #5 DoD re-audit and it PAID OFF once
+> more:** the audit surfaced the last named sandbox-verifiable premium-polish gap — no route-level
+> loading state anywhere, so the data-heavy garden route showed a blank screen during its Supabase reads.
+> Shipped `(app)/garden/loading.tsx` (browser-verified via a new `/preview?view=loading`) → the DoD
+> "loading shimmer / per-view skeletons" leftover is now CLOSED for the primary route. **With that, the
+> sandbox-verifiable feature vein is genuinely mined out this run** — every buildable, file://-verifiable
+> design item the frontier scoped is banked. **What remains is NOT more building — it's Jonny's
+> real-device eyeball + merge (§9.3).** A successor should NOT manufacture churn (no reflexive bug-hunts —
+> the cold-read vein is well-swept, see §10; no re-beautifying already-handsome surfaces; the loading gap
+> is now filled — don't re-skin it or add speculative skeletons to the light /pricing + /settings routes,
+> a deliberate scope call in §10). If you genuinely spot a NEW real gap or a fresh product insight, act on
+> it and verify via `/preview`; otherwise the honest move is to keep the build green, tidy the docs, and
+> leave the merge call to Jonny. Don't declare COMPLETE (§8 has real-device gates only Jonny can close).
 
 1. **Expand the `/preview` harness to the remaining CORE surfaces.** *(run-shift-1: DONE for the two
    biggest — the **Garden daily-tend home** (real TerrariumScene + faithful today's-tend rows w/
@@ -432,10 +445,17 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    this list.
 
 5. **Re-audit the DoD (§8)** and only tick the core-loop / premium-polish / analytics items once their
-   surfaces are **visually verified via `/preview`**. Keep this queue tight (3–6 items) — when you
-   finish one, replace it with what you learned should come next. **Do not declare COMPLETE** until §8
-   is genuinely all-true AND build/lint/test are green; the meaningful remaining gates are design
-   quality, not more bug-hunting.
+   surfaces are **visually verified via `/preview`**. *(run-2 shift 8: DID this audit. The premium-polish
+   item's own "Remaining:" clause named `loading shimmer / per-view skeletons` — the audit confirmed there
+   was NO route-level loading state anywhere and the garden route (6+ Supabase reads) had a real
+   blank-screen gap on a phone. Shipped `(app)/garden/loading.tsx`, browser-verified via
+   `/preview?view=loading` light+dark. That closes the loading-shimmer leftover; the only DoD polish item
+   still open is a service worker — deliberately skipped until it's browser-verifiable, and minor. So §8's
+   remaining unchecked boxes are now gated ONLY on Jonny's real-device eyeball (hydrated motion/audio) +
+   the merge decision — NOT on more building.)* Keep this queue tight — when you finish one, replace it
+   with what you learned should come next. **Do not declare COMPLETE** until §8 is genuinely all-true AND
+   build/lint/test are green; the meaningful remaining gates are design quality + Jonny's device, not more
+   bug-hunting.
 
 ### 9.3 NOT THIS RUN — Jonny-only (do NOT attempt; surface, don't touch)
 
@@ -856,6 +876,28 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   extend the streak past `_streak`, so the journey read 42d while the scoreboard read 41d for the same
   habit — pinned the mock's run to exactly `_streak` (real app: both derive from the same logs, so they
   always agree; the mock had two independent sources).
+
+- *(run-2 shift 8)* **The garden loading skeleton is a plain SERVER component, always LIGHT-garden, and
+  MIRRORS the loaded shape — three deliberate calls.** Found during the §9.2 #5 DoD re-audit: the garden
+  route (`(app)/garden/page.tsx`) awaits 6+ Supabase reads before rendering anything, so a phone —
+  worst on a free-tier Supabase auto-pause cold-start (§13a notes it hits quiet apps immediately) — got a
+  blank white screen, the one remaining sandbox-verifiable premium-polish gap the DoD named ("loading
+  shimmer / per-view skeletons"). (1) **Plain server component, no client JS** (like the landing) so its
+  full markup is file://-verifiable AND it can't itself fail to render (dependency-free bar the static
+  lucide nav icons). (2) **Always light-garden palette**, because the user's theme is DB-stored and
+  unknown until the fetch resolves — the SAME call `error.tsx` made; a skeleton can't know dark-mode, and
+  guessing wrong would flash then correct, which is worse than a consistent neutral. (3) **Mirror the
+  loaded shape, don't just spin** — persistent "tend." wordmark (brand stays), shimmer pills only for the
+  data-dependent coin/streak counters, a terrarium-sized hero with a soft egg silhouette (evokes the
+  dragon egg that's loading), habit-row cards, and a STATIC copy of the real BottomNav with Garden
+  pre-highlighted, so hydration swaps the real nav in with near-zero layout shift. The `.tend-skel`
+  shimmer util reuses the pre-existing-but-unused `@keyframes shimmer` and freezes to a static block
+  under `prefers-reduced-motion` via the global rule (so it's accessible by default, no extra gating).
+  Mounted a `/preview?view=loading` view purely so the file:// pipeline can screenshot a Suspense
+  fallback (otherwise unreachable by URL); browser-verified light+dark. **Scope call:** `/pricing` is a
+  client component with no server await (no gap) and `/settings` does one light `ensureProfile` read on a
+  secondary screen — building skeletons for them would edge into churn, so only the primary daily route
+  (the real gap) got one. This CLOSES the loading-shimmer DoD leftover.
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
