@@ -67,6 +67,8 @@ next-env.d.ts
 !/scripts/shots/preview-you-dark-full.png
 !/scripts/shots/preview-nav-fold.png
 !/scripts/shots/preview-breathe-fold.png
+!/scripts/shots/preview-onboarding-fold.png
+!/scripts/shots/preview-onboarding-dark-fold.png
 /scripts/srv.log
 /scripts/nextstart*
 

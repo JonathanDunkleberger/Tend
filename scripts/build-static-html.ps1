@@ -31,7 +31,9 @@ param(
     "preview-you|preview?view=you",
     "preview-you-dark|preview?view=you&dark=1",
     "preview-nav|preview?view=nav",
-    "preview-breathe|preview?view=breathe"
+    "preview-breathe|preview?view=breathe",
+    "preview-onboarding|preview?view=onboarding",
+    "preview-onboarding-dark|preview?view=onboarding&dark=1"
   )
 )
 $ErrorActionPreference = "Stop"

@@ -41,7 +41,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [step, setStep] = useState(1);
   const [quitPick, setQuitPick] = useState<{ name: string; color: string; iconName: string; cost: number } | null>(null);
   const [buildPick, setBuildPick] = useState<{ name: string; color: string; iconName: string } | null>(null);
-  const [fadeIn, setFadeIn] = useState(false);
   const [reveal, setReveal] = useState(0); // staged reveal on final step
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,11 +52,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     const ok = await onComplete(quitPick, buildPick);
     if (ok === false) setSubmitting(false); // on success the overlay unmounts
   };
-
-  useEffect(() => {
-    const t = setTimeout(() => setFadeIn(true), 40);
-    return () => clearTimeout(t);
-  }, []);
 
   // Final-step staged reveal
   useEffect(() => {
@@ -88,12 +82,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   return (
     <div
+      className="obRoot"
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "radial-gradient(120% 90% at 50% 8%, #16261C 0%, #0C1610 55%, #08110C 100%)",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "'DM Sans',-apple-system,sans-serif",
-        opacity: fadeIn ? 1 : 0, transition: "opacity .45s ease",
         overflowY: "auto",
       }}
     >
@@ -197,6 +191,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 }
 
 const OB_CSS = `
+.obRoot{animation:obEnter .45s ease both;}
+@keyframes obEnter{from{opacity:0}to{opacity:1}}
 .obGlow{position:absolute;top:6%;left:50%;transform:translateX(-50%);width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(74,222,128,0.10),transparent 70%);pointer-events:none;}
 .obDots{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;}
 .obDot{height:7px;border-radius:100px;transition:all .3s ease;}
@@ -227,5 +223,5 @@ const OB_CSS = `
 @keyframes obFloatA{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes obPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.85;transform:scale(1.06)}}
 @keyframes obSparkA{0%,100%{opacity:0}50%{opacity:.9}}
-@media(prefers-reduced-motion:reduce){.obFloat,.obEggGlow,.obSpark{animation:none!important;}}
+@media(prefers-reduced-motion:reduce){.obRoot,.obStep,.obFloat,.obEggGlow,.obSpark{animation:none!important;}}
 `;
