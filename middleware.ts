@@ -10,9 +10,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
  *
  * Public routes: landing (/), sign-in, sign-up, Stripe/Clerk webhooks (verified
  * by signature, not a Clerk session), the auth-free `/preview` QA/showcase
- * harness (mock data only, no secrets — see src/app/preview/page.tsx), and the
- * dynamically-generated `/opengraph-image` share card (social crawlers fetch it
- * unauthenticated, so it MUST be public). Everything else requires a signed-in user.
+ * harness (mock data only, no secrets — see src/app/preview/page.tsx), the
+ * dynamically-generated `/opengraph-image` share card, and the SEO metadata
+ * routes `/robots.txt` + `/sitemap.xml` (search crawlers fetch all three
+ * unauthenticated, so they MUST be public — their extensions aren't in the
+ * static-asset skip list below, so without this they'd hit auth.protect()).
+ * Everything else requires a signed-in user.
  */
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -20,6 +23,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/preview(.*)",
   "/opengraph-image(.*)",
+  "/robots.txt",
+  "/sitemap.xml",
   "/api/webhooks(.*)",
 ]);
 
