@@ -6,7 +6,7 @@ import {
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
 import { seed, daysAgo, daysBetween } from "@/lib/utils";
-import { computeConsistency } from "@/lib/progress";
+import { computeConsistency, computeSynergies } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
 import type { HabitWithStats } from "@/types";
@@ -134,24 +134,24 @@ export function Constellation({
 
   // ── Synergies ──
   const synergies = useMemo<Synergy[]>(() => {
-    const result: Synergy[] = [];
-    if (buildHabits.length < 2) return result;
+    if (buildHabits.length < 2) return [];
     const last30 = Array.from({ length: 30 }, (_, i) => daysAgo(i));
-    for (let i = 0; i < buildHabits.length; i++) {
-      for (let j = i + 1; j < buildHabits.length; j++) {
-        const a = buildHabits[i], b = buildHabits[j];
-        let coCount = 0;
-        last30.forEach((d) => { if (isDone(a.id, d) && isDone(b.id, d)) coCount++; });
-        if (coCount >= 3) {
-          const name = getSynergyName(a.name, b.name);
-          result.push({
-            a: i, b: j, strength: Math.min(coCount / 20, 1), coCount, name,
-            label: name || `${a.name.slice(0, 8)} \u00d7 ${b.name.slice(0, 8)}`,
-          });
-        }
-      }
-    }
-    return result;
+    // Pairing + \u22653-day threshold + strength ramp live in the tested kernel
+    // (lib/progress.ts); here we only supply the co-completion count per pair.
+    const coCountOf = (i: number, j: number) => {
+      const a = buildHabits[i], b = buildHabits[j];
+      let c = 0;
+      last30.forEach((d) => { if (isDone(a.id, d) && isDone(b.id, d)) c++; });
+      return c;
+    };
+    return computeSynergies(buildHabits.length, coCountOf).map(({ a: i, b: j, coCount, strength }) => {
+      const a = buildHabits[i], b = buildHabits[j];
+      const name = getSynergyName(a.name, b.name);
+      return {
+        a: i, b: j, strength, coCount, name,
+        label: name || `${a.name.slice(0, 8)} \u00d7 ${b.name.slice(0, 8)}`,
+      };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habits, isDone]);
 

@@ -88,3 +88,37 @@ export function selectNewCoinTiers<T extends { key: string; days: number; hours:
   }
   return { newKeys, highest };
 }
+
+export interface SynergyPair {
+  a: number;
+  b: number;
+  coCount: number;
+  strength: number;
+}
+
+/**
+ * Habit "synergies" — the analytics insight that two habits are being built
+ * together ("you journal more on days you sleep well"). Enumerates every unordered
+ * pair of `count` habits, keeps pairs completed together on at least `minDays` of
+ * the window, and grades each pair's `strength` as a 0–1 ramp that saturates at
+ * `strengthWindow` co-days. The caller supplies `coCountOf(i, j)` (the number of
+ * window days both habit i and j were done) so this stays free of dates/isDone.
+ */
+export function computeSynergies(
+  count: number,
+  coCountOf: (i: number, j: number) => number,
+  opts: { minDays?: number; strengthWindow?: number } = {},
+): SynergyPair[] {
+  const minDays = opts.minDays ?? 3;
+  const strengthWindow = opts.strengthWindow ?? 20;
+  const pairs: SynergyPair[] = [];
+  for (let i = 0; i < count; i++) {
+    for (let j = i + 1; j < count; j++) {
+      const coCount = coCountOf(i, j);
+      if (coCount >= minDays) {
+        pairs.push({ a: i, b: j, coCount, strength: Math.min(coCount / strengthWindow, 1) });
+      }
+    }
+  }
+  return pairs;
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeConsistency, selectNewMilestones, selectNewCoinTiers } from "./progress";
+import { computeConsistency, selectNewMilestones, selectNewCoinTiers, computeSynergies } from "./progress";
 
 // isDone(n) predicate from a boolean array indexed by "days ago".
 const fromDays = (days: boolean[]) => (n: number) => days[n] ?? false;
@@ -153,5 +153,44 @@ describe("selectNewCoinTiers", () => {
     const r = selectNewCoinTiers(COIN_TIERS, { isQuit: false, days: 0, earnedKeys: [] });
     expect(r.newKeys).toHaveLength(0);
     expect(r.highest).toBeNull();
+  });
+});
+
+describe("computeSynergies", () => {
+  it("finds no pairs with fewer than two habits", () => {
+    expect(computeSynergies(1, () => 30)).toHaveLength(0);
+    expect(computeSynergies(0, () => 30)).toHaveLength(0);
+  });
+
+  it("enumerates every unordered pair", () => {
+    // 3 habits, all strongly paired → C(3,2) = 3 pairs
+    const pairs = computeSynergies(3, () => 10);
+    expect(pairs.map((p) => [p.a, p.b])).toEqual([
+      [0, 1],
+      [0, 2],
+      [1, 2],
+    ]);
+  });
+
+  it("keeps only pairs at or above the min-days threshold", () => {
+    // pair (0,1) shares 2 days (below 3) → dropped; pair (0,2) shares 5 → kept
+    const co: Record<string, number> = { "0,1": 2, "0,2": 5, "1,2": 3 };
+    const pairs = computeSynergies(3, (i, j) => co[`${i},${j}`]);
+    expect(pairs.map((p) => [p.a, p.b])).toEqual([
+      [0, 2],
+      [1, 2],
+    ]);
+  });
+
+  it("grades strength as a 0–1 ramp saturating at strengthWindow (20)", () => {
+    expect(computeSynergies(2, () => 10)[0].strength).toBe(0.5); // 10/20
+    expect(computeSynergies(2, () => 20)[0].strength).toBe(1); // 20/20
+    expect(computeSynergies(2, () => 40)[0].strength).toBe(1); // capped at 1
+  });
+
+  it("honours custom minDays + strengthWindow", () => {
+    // minDays 5 drops a 4-day pair; strengthWindow 10 → 4/10 would-be... but dropped
+    expect(computeSynergies(2, () => 4, { minDays: 5 })).toHaveLength(0);
+    expect(computeSynergies(2, () => 5, { minDays: 5, strengthWindow: 10 })[0].strength).toBe(0.5);
   });
 });
