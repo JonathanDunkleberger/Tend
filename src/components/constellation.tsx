@@ -6,6 +6,7 @@ import {
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
 import { seed, daysAgo, daysBetween } from "@/lib/utils";
+import { computeConsistency } from "@/lib/progress";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
 import type { HabitWithStats } from "@/types";
@@ -92,13 +93,11 @@ export function Constellation({
         const stage = getStage ? getStage(h.id) : 0;
         // Consistency % — completions over the habit's life, capped to a fair
         // 30-day window so young habits aren't punished by a large denominator.
+        // Delegates to the tested computeConsistency kernel (see lib/progress.ts).
         let consistency = 0;
         if (h.category !== "quit") {
           const age = daysBetween(h.created_at.slice(0, 10), todayStr) + 1;
-          const window = Math.min(30, Math.max(1, age));
-          let done = 0;
-          for (let d = 0; d < window; d++) if (isDone(h.id, daysAgo(d))) done++;
-          consistency = Math.round((done / window) * 100);
+          consistency = computeConsistency((n) => isDone(h.id, daysAgo(n)), age);
         }
         return { habit: h, streak, best, total, stage, consistency };
       })

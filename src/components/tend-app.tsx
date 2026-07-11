@@ -40,6 +40,7 @@ import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, daysBetween, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
+import { selectNewMilestones, selectNewCoinTiers } from "@/lib/progress";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
@@ -650,18 +651,19 @@ export function TendApp({
   // → a grace token so one slip never stings" promise). Capped by MAX_GRACE.
   const GRACE_MILESTONE_DAYS = new Set([7, 21, 60]);
   const checkMilestones = (habitId: string, streak: number) => {
-    let nc = 0;
-    let graceGift = 0;
     const ne = { ...earned };
-    for (const m of MILESTONES) {
-      const key = `${habitId}:${m.days}`;
-      if (streak >= m.days && !ne[key]) {
-        ne[key] = true;
-        nc += m.coins;
-        if (GRACE_MILESTONE_DAYS.has(m.days)) graceGift++;
-        const Ic = getIcon(m.iconName);
-        setCoinToast({ msg: `${m.label} +${m.coins}`, icon: Ic });
-      }
+    // Pure kernel decides which milestones are newly reached + their coin/grace
+    // rewards (see lib/progress.ts); the loop below just fires the side effects.
+    const { reached, coins: nc, graceGifts: graceGift } = selectNewMilestones(
+      streak,
+      (days) => !!ne[`${habitId}:${days}`],
+      MILESTONES,
+      GRACE_MILESTONE_DAYS,
+    );
+    for (const m of reached) {
+      ne[`${habitId}:${m.days}`] = true;
+      const Ic = getIcon(m.iconName);
+      setCoinToast({ msg: `${m.label} +${m.coins}`, icon: Ic });
     }
     if (nc > 0) {
       haptic("medium");
@@ -684,30 +686,23 @@ export function TendApp({
   // Check AA-style milestone coins
   const checkMilestoneCoins = useCallback((habitId: string, habitName: string, isQuitHabit: boolean, days: number, hours?: number) => {
     const current = earnedMilestoneCoins[habitId] || [];
-    const coinsToCheck = isQuitHabit
-      ? MILESTONE_COINS
-      : MILESTONE_COINS.filter((c) => c.days > 0);
+    // Pure kernel picks the newly-unlocked tiers + the highest for celebration
+    // (see lib/progress.ts). Build habits ignore sub-day tiers; quit habits use
+    // hours when available.
+    const { newKeys, highest: newlyEarned } = selectNewCoinTiers(MILESTONE_COINS, {
+      isQuit: isQuitHabit,
+      days,
+      hours,
+      earnedKeys: current,
+    });
 
-    let newlyEarned: CoinTier | null = null;
-    const updated = [...current];
-
-    for (const coin of coinsToCheck) {
-      if (current.includes(coin.key)) continue;
-      const earned = isQuitHabit
-        ? (hours !== undefined ? hours >= coin.hours : days >= coin.days)
-        : days >= coin.days;
-      if (earned) {
-        updated.push(coin.key);
-        newlyEarned = coin; // keep track of latest new coin for celebration
-      }
-    }
-
-    if (updated.length > current.length) {
+    if (newKeys.length > 0) {
+      const updated = [...current, ...newKeys];
       setEarnedMilestoneCoins((prev) => ({ ...prev, [habitId]: updated }));
       // Show celebration for the highest newly earned coin
       if (newlyEarned) {
         // Map coin tier to a coin reward (use the existing MILESTONES coin value if matching, otherwise 0)
-        const matchingMilestone = MILESTONES.find((m) => m.days === newlyEarned!.days);
+        const matchingMilestone = MILESTONES.find((m) => m.days === newlyEarned.days);
         setMilestoneCelebration({
           tier: newlyEarned,
           habitName,
