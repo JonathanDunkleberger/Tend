@@ -41,6 +41,7 @@ import { TerrariumScene } from "@/components/terrarium-scene";
 import { Ceremony } from "@/components/ceremony";
 import { StreakFlame } from "@/components/streak-flame";
 import { AnimatedNumber } from "@/components/animated-number";
+import { TodayCardVisual } from "@/components/today-card";
 
 /* ───────────────────────── mock data ───────────────────────── */
 
@@ -129,11 +130,12 @@ const wrappedProps = {
 };
 
 export type View =
-  | "garden" | "insights" | "detail" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
+  | "garden" | "today" | "insights" | "detail" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
   | "hatch" | "evolve";
 
 const VIEWS: { key: View; label: string }[] = [
   { key: "garden", label: "🌱 Garden" },
+  { key: "today", label: "📅 Today card" },
   { key: "detail", label: "🐣 Habit detail" },
   { key: "insights", label: "📊 Insights" },
   { key: "hatch", label: "🥚 Hatch" },
@@ -205,6 +207,7 @@ export function PreviewClient({ initialView = "garden", initialDark = false }: {
       {/* Phone-width stage so it reads like the real mobile product */}
       <main style={{ maxWidth: 460, margin: "0 auto", padding: "18px 14px 120px" }}>
         {view === "garden" && <GardenPreview th={th} dark={dark} />}
+        {view === "today" && <TodayPreview th={th} />}
         {view === "detail" && <DetailPreview th={th} />}
         {view === "insights" && <InsightsPreview th={th} dark={dark} />}
         {view === "gallery" && <DragonGallery th={th} />}
@@ -370,6 +373,37 @@ function GardenPreview({ th, dark }: { th: (typeof THEME)["light"]; dark: boolea
       </div>
       <p style={{ fontSize: 11, color: th.textMuted, marginTop: 12, textAlign: "center" }}>
         Preview approximation of the daily-tend rows — the live app renders these from the monolith.
+      </p>
+    </div>
+  );
+}
+
+/* ── Today card: the shareable, screenshot-to-home-screen daily hero ── */
+function TodayPreview({ th }: { th: (typeof THEME)["light"] }) {
+  const build = MOCK_HABITS.filter((h) => h.category !== "quit");
+  const tended = build.filter((h) => h.completedToday).length;
+  const hero = [...MOCK_HABITS].sort((a, b) => b._streak - a._streak)[0];
+  const dragonCount = MOCK_HABITS.filter((h) => h._stage >= 1).length;
+  return (
+    <div style={{ animation: "fadeUp .3s ease", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+      <TodayCardVisual
+        width={340}
+        data={{
+          date: new Date("2026-07-11T09:00:00"),
+          tended,
+          total: build.length,
+          heroStage: hero._stage,
+          heroColor: hero.color,
+          heroCreatureType: hero.creature_type,
+          heroName: "Ember",
+          heroHabitName: hero.name,
+          bestStreak: hero._streak,
+          dragonCount,
+        }}
+      />
+      <p style={{ fontSize: 11, color: th.textMuted, textAlign: "center", maxWidth: 300 }}>
+        A shareable snapshot of your day — screenshot it to your home screen or share it.
+        The card is always dark by design (share cards read best dark).
       </p>
     </div>
   );

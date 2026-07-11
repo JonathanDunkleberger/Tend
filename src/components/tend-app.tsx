@@ -40,6 +40,7 @@ import { Ceremony } from "@/components/ceremony";
 import { StreakFlame } from "@/components/streak-flame";
 import { AnimatedNumber } from "@/components/animated-number";
 import { ShareCard } from "@/components/share-card";
+import { TodayCard, type TodayCardData } from "@/components/today-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
@@ -205,6 +206,8 @@ export function TendApp({
     creatureType?: number | null;
     habitId?: string;
   } | null>(null);
+  // Shareable "Today" card overlay (whole-garden daily snapshot).
+  const [showToday, setShowToday] = useState(false);
 
   // ── Tend+ tier state (server-verified via profiles.tier) ──
   const [isPro, setIsPro] = useState(initialIsPro);
@@ -705,6 +708,27 @@ export function TendApp({
   const totalToday = activeHabits.filter((h) => isHappy(h.id)).length;
   const todayPct = activeHabits.length ? totalToday / activeHabits.length : 0;
   const allDone = todayPct >= 1 && activeHabits.length > 0;
+
+  // ── Shareable "Today" card data (whole-garden daily snapshot) ──
+  // Featured dragon = the habit with the longest current streak (clean days for
+  // quit habits). Derived from live state each render — cheap, no memo needed.
+  const buildTodayData = (): TodayCardData | null => {
+    if (activeHabits.length === 0) return null;
+    const scoreOf = (h: HabitWithStats) => (h.category === "quit" ? getCleanDays(h.id) : getStreak(h.id));
+    const hero = activeHabits.reduce((best, h) => (scoreOf(h) > scoreOf(best) ? h : best), activeHabits[0]);
+    return {
+      tended: totalToday,
+      total: activeHabits.length,
+      heroStage: getStageForId(hero.id),
+      heroColor: hero.color,
+      heroCreatureType: hero.creature_type,
+      heroHabitId: hero.id,
+      heroName: hero.creature_name,
+      heroHabitName: hero.name,
+      bestStreak: Math.max(0, ...activeHabits.map(scoreOf)),
+      dragonCount: habits.filter((h) => getStageForId(h.id) >= 1).length,
+    };
+  };
 
   // Which bottom-nav tab reads as "active" for the current page
   const navActiveTab: NavTab | null =
@@ -1531,6 +1555,12 @@ export function TendApp({
         <ShareCard {...shareCardData} onClose={() => setShareCardData(null)} />
       )}
 
+      {/* Shareable "Today" card — whole-garden daily snapshot */}
+      {showToday && (() => {
+        const d = buildTodayData();
+        return d ? <TodayCard data={d} onClose={() => setShowToday(false)} /> : null;
+      })()}
+
       {/* Egg picker (Pro feature) — new habit creation */}
       {pendingHabit && (
         <EggPicker
@@ -1736,6 +1766,19 @@ export function TendApp({
             </h1>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {page === "main" && activeHabits.length > 0 && (
+              <button
+                onClick={() => setShowToday(true)}
+                aria-label="Share your day"
+                style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  width: 28, height: 28, borderRadius: 100, cursor: "pointer",
+                  border: "none", background: th.progressBg, color: th.textSub,
+                }}
+              >
+                <Share2 size={13} />
+              </button>
+            )}
             {page === "main" && habits.length > 0 && (
               <span style={{
                 fontSize: 11, fontWeight: 700,

@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 // Kept in the SERVER module (not imported from the "use client" harness): a value
 // imported across the client boundary is a reference proxy, not a real array.
 const VIEW_KEYS: View[] =
-  ["garden", "insights", "detail", "hatch", "evolve", "gallery", "onboarding", "wellness", "wrapped", "you", "breathe", "nav"];
+  ["garden", "today", "insights", "detail", "hatch", "evolve", "gallery", "onboarding", "wellness", "wrapped", "you", "breathe", "nav"];
 
 export default async function PreviewPage({
   searchParams,
