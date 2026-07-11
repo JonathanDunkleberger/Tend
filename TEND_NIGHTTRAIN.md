@@ -218,20 +218,31 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    `onComplete(quitPick, buildPick)` contract so tend-app is untouched. **NOT yet visually verified in
    a browser** (it renders only behind Clerk auth, which needs real keys) — a successor with keys, or
    a temporary throwaway preview route, should eyeball the 4 steps + the reveal beat once.
-6. **[PHASE 2 — NEXT] Build the mobile bottom-nav shell** (🌱 Garden · 📊 Insights · 🧘 Wellness ·
-   🐉 You) — thumb-first, safe-area, 4 large tap targets. Then begin carving views out of the
-   2808-line `tend-app.tsx` monolith one at a time (start by extracting the "You"/profile + shop and
-   the wellness surfaces, which are the least entangled). Do it incrementally, building+committing per
-   extraction so a mid-way death is safe. This is the structural unlock for Phases 3–4.
-7. **[PHASE 2/6] Core-loop polish + lint hygiene** as you go: the assumes-best one-tap check-in,
-   satisfying micro-interactions, and clearing the 32 lint warnings (mostly unused vars + a few
-   exhaustive-deps in the monolith — the unused-var ones are safe quick wins; exhaustive-deps need
-   care).
+6. ✅ **[PHASE 2] Mobile bottom-nav shell + Wellness/You screens.** DONE (shift 2, commit `bfb3b5c`).
+   New `bottom-nav.tsx` (🌱 Garden · 📊 Insights · 🧘 Wellness · 🐉 You), thumb-first, safe-area,
+   spring active states, haptic taps. Retired the slide-out hamburger menu + `menuOpen` state; its
+   contents now live in the new **`you-screen.tsx`** (identity, stats, Tend+ upgrade/manage, Collection/
+   Shop/Settings rows, dark toggle, season picker, sign out). New **`wellness-hub.tsx`** surfaces
+   Breathe (shared timer) + 3 self-contained tools (5-4-3-2-1 grounding, 90s urge-surf wave, three-
+   good-things gratitude) — also advances Phase 4. FAB lifted above nav. Build green, lint 0 errors.
+   **NOT browser-verified** (renders behind Clerk auth) — a successor with keys should eyeball the nav +
+   the 3 wellness tools + You screen once.
+7. **[PHASE 2 — NEXT] Core-loop polish: the assumes-best one-tap check-in.** This is the soul + a DoD
+   item. Study `morning-checkin.tsx` + the main garden in `tend-app.tsx` (the terrarium + per-habit
+   tap-to-complete). Make the daily tend feel *great*: a single "all good today ✓" affordance that
+   assumes the best (marks all active habits done in one satisfying tap w/ confetti + coin feedback),
+   gentle per-habit slip reporting, spring micro-interactions on check-off, clear egg-progress-toward-
+   hatch feedback. Research Finch/Forest daily-loop delight first. Commit per improvement.
+8. **[PHASE 3 — AFTER] Deep analytics + Wrapped.** The Insights tab currently = heatmap + constellation.
+   Elevate to genuinely insightful (best/worst days, momentum, per-habit consistency, correlations) +
+   a shareable "Tend Wrapped". `share-card.tsx` + `constellation.tsx` are the seeds.
+9. **[ongoing] Lint hygiene** — 32 warnings (unused vars + a few exhaustive-deps). Unused-var ones are
+   safe quick wins; exhaustive-deps in the monolith need care.
 
 > HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. Front door (landing + onboarding)
-> is rebuilt & on-brand. Biggest lever now = the bottom-nav shell + starting to decompose
-> `tend-app.tsx`. Read §6b audit + §10 decisions first. Don't forget the `.env.local` + middleware
-> notes in NEEDS EYES.
+> done. Bottom-nav shell + Wellness + You screens now DONE (shift 2). Biggest lever now = **core-loop
+> polish: the assumes-best one-tap daily check-in** (frontier #7) — the emotional heart of the product.
+> Read §6b audit + §10 decisions first. The `.env.local` + middleware notes in NEEDS EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -277,6 +288,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - *(shift 1)* **Grace token / "one slip never stings" is now a public promise** (stated on the landing
   + onboarding). There's already `streak_freezes` in the schema/profile — Phase 2/5 should make the
   grace-token UX real and tie it to coins so we don't over-promise. (Promoted from SURPRISE-ME.)
+- *(shift 2)* **Bottom nav is now the primary navigation; slide-out hamburger menu retired.** Built
+  `bottom-nav.tsx` (Garden/Insights/Wellness/You) + moved all menu contents into a real `you-screen.tsx`.
+  Rationale: a thumb-first bottom bar is the mobile-native pattern (the product IS a phone app); a
+  slide-out menu buried nav and wasted the thumb zone. The nav is presentational + THEME-driven so it's
+  reusable as we decompose the monolith. Two new `page` values (`wellness`, `you`) added to the existing
+  in-component page state — deliberately did NOT rip out the page-state machine yet (too risky in one
+  shift); the nav rides on top of it. Gallery + Shop map under the "You" tab; detail maps under Garden.
+- *(shift 2)* **Wellness is a real hub, not just breathing.** `wellness-hub.tsx` ships 4 tools: Breathe
+  (reuses the shared `BreathingTimer`), 90s urge-surf "ride the wave" timer, 5-4-3-2-1 grounding, and a
+  three-good-things gratitude ritual (saved to localStorage `tend_gratitude`). All self-contained,
+  uplifting, non-clinical — banks a big chunk of Phase 4 early while giving the Wellness tab real
+  substance from day one. Future: persist gratitude server-side + surface it in Insights.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
