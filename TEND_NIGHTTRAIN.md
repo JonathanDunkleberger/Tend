@@ -246,23 +246,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 54 shipped the atomic-coins fix (#0ao), clearing the non-atomic coins/inventory
-> race — the last §12 deferred bug that WASN'T purely for Jonny. Key insight (same lesson as shift 53's
-> re-triage): the race was deferred as "needs a running DB," but that was only needed to *observe* the
-> race, not to *express the fix*. The fix is standard atomic SQL (single-statement UPDATEs under a row
-> lock) shipped as `migration-009-atomic-coins.sql` — exactly the migration-008 pattern (a SQL file
-> Jonny runs) — and both routes call the new RPCs via `supabase.rpc()` with a **graceful fallback to the
-> existing read-then-write path** so the app keeps working before/without the migration. Reasoning-
-> verifiable + build/lint/test green. **The §12 list is now down to ONE genuinely-blocked item:**
-> `verify-subscription`'s 10-session global-pagination fallback needs real Stripe volume to verify the
-> proper fix (look up by Clerk metadata) → for Jonny / a keyed shift. **What's actually left for a
-> successor is thin and honest:** (a) NEW NEEDS-EYES for Jonny — run `migration-009` (and still `-008`)
-> in Supabase to activate atomicity/gratitude; (b) the §13/#16 Stripe price change (keyed — new price
-> IDs); (c) the bounce-back ramp fires for ALL users not just after a lapse (product call). Do NOT
-> re-run the exhausted cold-read hunt (shifts 49–53 swept it) and do NOT manufacture churn. **Every
-> remaining DoD gate now hinges on a real-device / networked-browser eyeball on Jonny's machine** (§14).
-> If no genuinely-verifiable improvement is available next shift, say so plainly rather than churning —
-> this branch is mature and ready for Jonny's review + merge.
+> NEXT SHIFT — shift 55 shipped landing structured data (#0ap): two schema.org JSON-LD blocks
+> (SoftwareApplication + FAQPage) so Google can render an app rich-card and surface the shift-10 FAQ
+> as a rich snippet. It was the last genuinely-verifiable landing lever — zero client JS, verified
+> end-to-end against `next start` (both blocks in the SSR HTML, valid JSON, offers Free=$0/Tend+=$4.99,
+> all 6 FAQ answers plain-text). This is the honest floor now: the file://-verifiable landing surface
+> is **conversion + SEO complete** (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff/structured-
+> data all done), the cold-read bug vein is exhausted (shifts 49–53), and the §12 deferred list is down
+> to ONE Jonny-only item (verify-subscription 10-session Stripe fallback — needs real volume). **A
+> deliberately-rejected lever this shift:** converting the landing's Google-Fonts `<link>` to `next/font`
+> — would remove one render-blocking request, but the family names `'Fraunces'`/`'DM Sans'` are literal
+> strings across **94 sites**, so a full conversion is invasive AND the visual result can't be verified
+> in this sandbox → not worth the regression risk (documented so a successor doesn't reflexively retry;
+> it's a real win only on a shift that can browser-verify). **What's actually left is Jonny-only:**
+> (a) run `migration-009` + `-008` in Supabase (atomicity + gratitude — app falls back until then);
+> (b) the §13/#16 Stripe price change (keyed — new price IDs); (c) the bounce-back ramp fires for ALL
+> users not just after a lapse (product call); (d) the real-device / networked-browser eyeball of the
+> auth-gated app (§14). Do NOT re-run the exhausted cold-read hunt and do NOT manufacture churn — if no
+> genuinely-verifiable improvement remains next shift, say so plainly. **This branch is mature and ready
+> for Jonny's review + merge.**
 
 > PRIOR POINTER (shift 53) — re-triaged the §12 "for Jonny" list and banked the two that were actually
 > reasoning-verifiable guards (urge-entries habit-ownership check + Stripe email-clobber, #0an). Lesson
@@ -271,6 +273,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0ap. ✅ **[SHIFT 55] Landing structured data (schema.org JSON-LD) — the search-rich-results lever.**
+   The landing (the one file://-verifiable, conversion-critical surface) had ZERO structured data, so
+   Google couldn't render a SoftwareApplication rich-card and — despite shift 10 building a real FAQ
+   accordion — couldn't surface those Q&As as an FAQ rich snippet. A free SEO/conversion lever left on
+   the floor. Added two server-rendered `<script type="application/ld+json">` blocks to `app/page.tsx`
+   (right after the `<style>` inject, before the auth-null render path): (1) **SoftwareApplication**
+   (name/`applicationCategory: HealthApplication`/OS/url + two `Offer`s — Free $0 and Tend+ $4.99,
+   matching the on-page pricing card); (2) **FAQPage** built by mapping the existing `FAQS` array →
+   Question/acceptedAnswer, with the inline `<b>`/`<i>` markup **stripped to plain text** so the JSON-LD
+   mirrors the visible copy (Google's requirement) and carries no leaked HTML. Zero client JS (stays a
+   static server component); `<` escaped to `<` so a future `</script>` in copy can't break out of
+   the tag. **Verified end-to-end against `next start`** (not just cold-read): fetched the landing HTML,
+   both blocks present, both parse as valid JSON, offers read Free=$0 / Tend+=$4.99, FAQPage has all 6
+   questions with plain-text answers (`htmlInText: false`). build GREEN, lint 0/5, test 99/99, 1 commit.
+   **This closes the last genuinely-verifiable landing lever** — the file:// surface is now conversion +
+   SEO complete. (Rejected this shift: a `next/font` conversion of the Google-Fonts `<link>` — 94 literal
+   `'Fraunces'`/`'DM Sans'` usages make it invasive + visually unverifiable here → deferred to a
+   browser-capable shift, see NEXT SHIFT note.)
 
 0ao. ✅ **[SHIFT 54] Atomic coin mutations — killed the non-atomic coins/inventory read-then-write
    lost-update race (§12 deferred #1).** This was parked for months as "needs a running DB → for
