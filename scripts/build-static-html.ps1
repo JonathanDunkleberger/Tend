@@ -33,7 +33,10 @@ param(
     "preview-nav|preview?view=nav",
     "preview-breathe|preview?view=breathe",
     "preview-onboarding|preview?view=onboarding",
-    "preview-onboarding-dark|preview?view=onboarding&dark=1"
+    "preview-onboarding-dark|preview?view=onboarding&dark=1",
+    "preview-hatch|preview?view=hatch",
+    "preview-hatch-dark|preview?view=hatch&dark=1",
+    "preview-evolve|preview?view=evolve"
   )
 )
 $ErrorActionPreference = "Stop"
