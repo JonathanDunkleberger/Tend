@@ -3,9 +3,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tend — Habit & Recovery Tracker",
-  description: "Quit bad habits. Grow new ones. Tend helps you through recovery with guided breathing, urge support, and creatures that grow with your progress.",
-  keywords: ["habit tracker", "self improvement", "habit building", "creature evolution", "quit tracker", "recovery"],
+  title: "Tend — Grow habits, hatch dragons",
+  description: "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.",
+  keywords: ["habit tracker", "habit building", "self improvement", "dragon eggs", "gamified habits", "streaks", "wellness", "breathing"],
   manifest: "/manifest.json",
   icons: {
     icon: [

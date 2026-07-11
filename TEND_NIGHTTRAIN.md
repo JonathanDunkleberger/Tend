@@ -208,15 +208,19 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 2. ✅ **[PHASE 0] Honest audit.** DONE (shift 1). See §6b.
 3. ✅ **[PHASE 0] Product spine + IA decided.** DONE (shift 1). See §10 (dragon-garden re-center;
    quitting stays a mode) and §10 IA proposal (mobile bottom nav: Garden · Insights · Wellness · You).
-4. **[PHASE 1 — NEXT] Rebuild the landing page (`app/page.tsx`).** This is the single highest-leverage
-   change: it's off-brand and thin. Build a stunning, mobile-first, on-brand (dragon/egg/garden)
-   conversion page: living-dragon hero using the real sprites, the emotional promise (assumes-best,
-   tend daily, hatch & evolve), a peek at analytics + wellness, crisp Free/Tend+ pricing, strong CTA.
-   Web-research 2026 mobile SaaS/app landing best practices first. Keep Clerk sign-up CTA working.
-5. **[PHASE 1] Rebuild onboarding** into a 60-second "hatch your first egg" that showcases a REAL
-   dragon (not the colored blob) and lets you name it. Re-center copy on tending, not just quitting.
-6. **[PHASE 6, quick win] Clear the 33 lint warnings** (unused eslint-disable directives + unused
-   vars) so lint is spotless — do opportunistically, not before Phase 1.
+4. ✅ **[PHASE 1] Landing page rebuilt.** DONE (shift 1). New `app/page.tsx`: mobile-first, on-brand
+   (dragon/egg/garden), living-dragon hero w/ real sprites, how-it-works, feature bento, dark dragon
+   showcase strip, never-shaming promise, Free/Tend+ pricing, repeated CTAs + mobile sticky bar,
+   safe-area + reduced-motion. Server component, zero client JS, CSS-only motion. Verified 200 + all
+   content + sprites serve. Also fixed the missing Clerk middleware (see §10 / NEEDS EYES).
+5. **[PHASE 1 — NEXT] Rebuild onboarding** (`src/components/onboarding.tsx`) into a delightful
+   ~60-second "hatch your first egg" flow that showcases a REAL dragon sprite (not the colored
+   `Creature` blob on a tiny CSS planet) and lets you name it. Re-center copy on *tending/growing*
+   with quitting as an optional path, matching the new landing's warmth. Verify the hatch moment feels
+   great. (Onboarding is triggered from `tend-app.tsx` when `initialHabits.length === 0`.)
+6. **[PHASE 2] Then:** build the mobile bottom-nav shell (Garden · Insights · Wellness · You) and start
+   carving views out of the 2808-line `tend-app.tsx` monolith as each is polished.
+7. **[PHASE 6, quick win]** Clear the 33 lint warnings opportunistically (don't block features).
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -242,6 +246,12 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   gratitude/calm) · **🐉 You** (profile, collection/gallery, shop, settings, Tend+). Replaces the
   current slide-out-menu + in-component page state. Build the nav shell in Phase 2; don't block Phase 1
   landing on it. *(Revisit tab set as features land.)*
+- *(shift 1)* **CRITICAL FIX — added the missing Clerk middleware (`src/middleware.ts`).** The repo
+  had NO middleware/proxy file anywhere (not in tree or git history). Clerk v6 App Router *requires*
+  `clerkMiddleware()` — without it every server-side `auth()` throws "clerkMiddleware() was not run"
+  and every page 500s. Verified: landing was 500 → 200 after adding it. This almost certainly means
+  the **live site's auth was broken too** (or main has a middleware that never made it here). FLAGGED
+  in NEEDS EYES. Public routes: `/`, sign-in, sign-up, webhooks; everything else `auth.protect()`.
 - *(shift 1)* **Build without real secrets via a gitignored `.env.local` of dummy placeholders.**
   Clerk needs a publishable key (public) to prerender; Stripe/Supabase get obvious placeholders and are
   lazy so never hit at build. Keeps `npm run build` green for every successor shift without any real
@@ -267,6 +277,11 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   NOT be part of any merge (it's gitignored). Your real keys stay in Vercel / your own local env. If
   you ever run the app for real on this branch, drop in real keys. Nothing to action unless you want
   to verify — just so you're not surprised to see it locally.
+- **⚠️ MISSING CLERK MIDDLEWARE — was the live site's auth broken? (shift 1).** This branch had NO
+  `middleware.ts`/`proxy.ts` at all, which makes Clerk `auth()` 500 on every page. Shift 1 added
+  `src/middleware.ts` (standard `clerkMiddleware`) and verified the landing now returns 200. **Please
+  confirm** whether `origin/main` / the Vercel deploy has its own middleware — if not, production auth
+  is broken and this fix needs to ship. If main DOES have one, reconcile the two before merging.
 - **Product direction check (shift 1).** Shift 1 decided to re-center on the dragon-egg garden and
   demote the quit/recovery framing to a first-class *mode* (see §10). If you actually want Tend to BE
   a recovery-first app, say so and the frontier flips — otherwise the night train proceeds
