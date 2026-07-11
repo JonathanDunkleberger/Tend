@@ -238,45 +238,53 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       browser-verifiable) — all minor. The real gate here is a real-device eyeball.)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
       rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
-      Landing/onboarding/manifest already on-brand. Remaining: eyeball in-app copy on a real device;
-      the pricing route still uses "terrarium" décor labels — cosmetic, verify tone.)*
+      Landing/onboarding/manifest already on-brand. **shift 60 swept the remaining recovery-first drift**:
+      the `/settings` route ("all recovery features" → "all wellness tools", + indigo→green + fixed its
+      broken `className="card"`), the Tend+ paywall ("matters to your recovery" / "free recovery tools" →
+      garden/wellness framing), welcome-back ("coins for recovery" → "for showing up"). The old
+      "pricing route uses terrarium labels" note was STALE — grep-verified "terrarium" now appears only
+      in internal identifiers (component name/comments), never user-facing copy; /pricing reads "All
+      garden décor & themes". Quit-mode "recovery" copy (healing timelines, relapse modal) is correctly
+      left in-context. Remaining: a real-device eyeball of the full in-app copy.)*
 - [ ] This doc + DECISIONS reflect the final state so Jonny can review and merge with confidence.
 
 ---
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 59 applied shift-57's lesson to the two surfaces shift 58 flagged as still-unswept
-> and it PAID OFF: two fan-out hunters (A: the tend-app monolith's DEEP effect wiring; B: the 13 smaller
-> never-swept components) found + FIXED 6 genuine bugs, all reasoning-verified (#0at, 3 fix commits).
-> Monolith (A): (1) **syncError was a no-op** — it showed "bringing you back in sync" then called
-> `router.refresh()`, but ALL server data is `useState(initial…)` seeded once at mount and never
-> reconciled from props (no `setHabits(initialHabits)` anywhere; TendApp has no `key`), so a soft
-> re-render silently dropped the fresh props and left the FAILED optimistic state on screen (inflated
-> totals/streak, even a false all-done) until a manual reload → switched to `window.location.reload()`,
-> the only thing that truly resyncs. (2) **hatch-naming re-nag** — the 0→1 stage detector re-popped the
-> "Name your creature" modal every time a build total dipped below 3 (uncheck) + re-crossed it if naming
-> was SKIPPED → added a session `namingOfferedRef` so it's offered once/habit. (3) **pause fired the
-> all-done celebration** — `allDone` excludes paused habits, so pausing the last undone habit flipped it
-> true → confetti + the once-daily +10 grant (banking the reward without finishing) → added a
-> `pauseToggledRef` + a reconcile effect (runs before the celebration effect) that adopts the new
-> baseline without celebrating. Components (B): (4) **confetti rAF ignored reduced-motion** (canvas rAF
-> isn't stopped by the CSS media rule — same class as shift 58's SMIL) → gated on `useReducedMotion`.
-> (5) **urge-support "Breathe" card said "5-minute"** but the session is 5×14s = ~70s → "One minute of
-> guided breathing". (6) **the Tend+ "Restore purchase" button was inert** (no onClick/prop) → wired an
-> optional `onRestore` to re-run the existing idempotent `/api/verify-subscription`. build GREEN, lint
-> 0/5, **test 107/107**. Independently re-confirmed shift 58's terrarium reduced-motion fix is complete
-> (every SMIL cluster gated by a `tc.*` flag `false` in the minimal tier). **Remaining component findings
-> DELIBERATELY NOT fixed (benign / load-bearing):** milestone-coin + toast auto-dismiss timers reset on
-> every parent re-render (safe today because the only fast re-render source, the 10s `liveNow` tick, is
-> slower than the 2.5–5s timers; the agent warned the toast's unstable-callback identity is what keeps
-> rapid message-replace resetting correctly → touching it risks a truncated undo window). **Still
-> Jonny-only (unchanged):** run `migration-009` + `-008` in Supabase; §13/#16 Stripe price change (keyed);
-> verify-subscription 10-session fallback (needs real Stripe volume); bounce-back ramp fires for ALL users
-> not just after a lapse (product call); the real-device eyeball of the auth-gated app (§14). Honest read:
-> the two big never-swept surfaces (monolith effect wiring + the small components) are now swept and
-> productive-but-shrinking; a future hunter has genuinely thin territory left. Remaining un-checked DoD
-> items still hinge on Jonny's browser, not new code.
+> NEXT SHIFT — shift 60 stopped reflexively re-hunting the client/API surfaces (11 shifts deep, thin)
+> and instead aimed a fresh hunter at the ONE genuinely-never-swept surface: the SERVER data-hydration
+> path (garden/page.tsx → props → TendApp). It PAID OFF with a real, high-value CONFIRMED bug plus a
+> branding sweep (#0au, 5 commits). **THE BIG ONE — build dragons silently de-evolved to eggs.**
+> `garden/page.tsx` ships only the last 90 days of `habit_logs` (correct for heatmaps/streaks), but the
+> client's `getTotal` for a build habit returned `h.logs.length` — that SAME windowed array — and
+> `getStageForId` derives the dragon stage from `getStage(getTotal)`. So (a) "total days" was capped at
+> ~90 everywhere it shows (gallery, detail, Wrapped, constellation), and (b) a build habit whose logs are
+> ALL older than 90 days (active months, then away >90 days) → getTotal 0 → **a fully-grown stage-4
+> dragon rendered as a stage-0 EGG** — the #1 emotional pillar, destroyed on return. FIX: server now
+> computes the TRUE lifetime count per habit via an exact count query (head:true, avoids Supabase's
+> 1000-row select cap; falls back to the windowed count on a transient error so a total is never
+> spuriously 0); client folds in the immutable pre-window remainder (`preWindowTotals[id] =
+> initial.totalDays − initial.logs.length`, memoized from the mount snapshot) so `getTotal = live
+> logs.length + offset` — lifetime totals + stage are correct AND still track today's optimistic
+> check/uncheck (today is strictly in the window, never double-counted; new mid-session habits get offset
+> 0). Also this shift: **branding sweep** — the standalone `/settings` route (reached from the You screen)
+> had cards using `className="card"` (a class that DOESN'T EXIST → fully unstyled/broken) + "all recovery
+> features" copy + off-palette indigo accent → fixed to real card styling + "all wellness tools" + garden
+> green; the **Tend+ paywall** (shown to ALL users) said "matters to your recovery" / "free recovery
+> tools" → garden/wellness framing; welcome-back "coins for recovery" → "for showing up". Also new users
+> now get the real current season (was hardcoded "summer" even in December). build GREEN, lint 0/5,
+> **test 107/107**. **Hunter findings NOT fixed (documented, low/transient):** every query in
+> garden/page.tsx swallows its Supabase error (destructures only `{data}`), so a TRANSIENT failure on the
+> habits query renders a false empty garden / on logs renders streaks 0 — alarming but self-healing on
+> reload, no data loss; the proper fix is an error-state UX (needs browser design), so left per the
+> don't-half-fix discipline (see §12). **Still Jonny-only (unchanged):** run `migration-009` + `-008` in
+> Supabase; §13/#16 Stripe price change (keyed); verify-subscription 10-session fallback (real Stripe
+> volume); bounce-back ramp fires for ALL users not just after a lapse (product call); the real-device
+> eyeball of the auth-gated app (§14). **Honest read for the successor:** the server-hydration surface is
+> now swept too. The remaining hunt territory is genuinely thin — a future hunter's best untouched angle
+> is the settings-client / onboarding→save handoff internals, or the API webhook edge cases — but expect
+> thin returns. The meaningful un-checked DoD items still hinge on Jonny's browser, not new code.
 
 > PRIOR POINTER — shift 58 CLOSED BOTH of shift 57's found-but-deferred bugs (they were more
 > reasoning-verifiable than the deferral implied), then ran a fresh hunter on the least-swept surfaces
@@ -336,6 +344,40 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0au. ✅ **[SHIFT 60] Hunted the never-swept SERVER data-hydration path — FIXED a high-value dragon
+   de-evolution bug + a branding sweep (reasoning-verified, no DB/browser).** Prior hunts (49–59) swept
+   the client monolith + API routes; the server components that fetch from Supabase and assemble TendApp's
+   props had NEVER been a hunt focus. A fan-out hunter there found one CONFIRMED, high-value defect.
+   **(1) Build dragons silently de-evolved to eggs / lifetime totals undercounted.** `garden/page.tsx`
+   ships only the last 90 days of `habit_logs` (correct for heatmaps/streaks), but the client's `getTotal`
+   for a build habit returned `h.logs.length` — the same windowed array — and `getStageForId` derives the
+   evolution stage from `getStage(getTotal)`. So "total days" was capped ~90 in the gallery/detail/Wrapped/
+   constellation, and — worse — a build habit whose completions are ALL older than 90 days (active months,
+   then away >90 days) got `getTotal` 0 → `getStage(0)` → a fully-grown **stage-4 dragon rendered as a
+   stage-0 egg** (build totals are cumulative and must never shrink — this is the emotional payoff
+   collapsing on return). FIX: server computes the TRUE lifetime count per habit via an exact count query
+   (`{count:"exact", head:true}` per habit — avoids Supabase's 1000-row select cap; falls back to the
+   windowed count on a transient error so a total is never spuriously 0); client folds in the immutable
+   pre-window remainder (`preWindowTotals[id] = initial.totalDays − initial.logs.length`, memoized from the
+   mount snapshot) → `getTotal = live logs.length + offset`, which stays correct AND tracks today's
+   optimistic check/uncheck (today is strictly in-window → never double-counted; a habit added mid-session
+   has no offset → 0, correct). **(2) Branding sweep** (the "branding-consistent as Tend" DoD item): the
+   standalone `/settings` route (reached from the You screen via `router.push("/settings")`) had its two
+   cards on `className="card"` — a class that does NOT exist in globals.css (the app uses `.cd`) → they
+   rendered fully unstyled (no bg/border/shadow, looking broken); replaced with a real inline CARD style.
+   Its copy "Free: 3 habits, all recovery features" → "3 habit eggs, all wellness tools"; off-palette
+   indigo `#6366f1` accent → garden green `#2e7d32`. The **Tend+ paywall** (shown to ALL users, not just
+   quitters) said "Track everything that matters to your recovery" + "free recovery tools for everyone" →
+   garden/wellness framing; welcome-back "bonus coins for recovery!" → "for showing up!". **(3)** New users
+   now get the real current season (`getSeason()`) instead of a hardcoded `"summer"` that masked the
+   client's month-based auto-detect (a December signup saw a summer terrarium). build GREEN, lint 0/5,
+   **test 107/107**, 5 commits. **Hunter findings NOT fixed (documented, see §12):** every Supabase query
+   in `garden/page.tsx` swallows its error (destructures only `{data}`) → a TRANSIENT failure renders a
+   false empty garden (habits query) or streaks-0 (logs query); alarming but self-healing on reload, no
+   data loss — the right fix is an error-state UX (needs browser design), left per the don't-half-fix rule.
+   The quit-mode "recovery" copy (healing timelines, relapse modal) is CORRECTLY left — that's the
+   first-class quit mode, in-context.
 
 0at. ✅ **[SHIFT 59] Swept the two surfaces shift 58 flagged as still-unswept — FIXED 6 real bugs
    (reasoning-verified, no DB/browser).** Shift 58 said the monolith's deeper effect wiring + any
@@ -1150,6 +1192,27 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   the reset would truncate the undo window on rapid replacement. So this was deliberately left as-is and
   documented, not churned. Lesson reaffirmed (shift 57/58 line): a hunter finding ≠ an automatic fix —
   weigh whether the "fix" regresses a working behaviour.
+
+- *(shift 60)* **Lifetime total = server exact-count + client pre-window offset, not a wider log ship.**
+  The 90-day `logs` window was serving double duty: heatmap/streak (needs recent dated rows) AND the
+  client's lifetime `getTotal`/dragon-stage (needs the full cumulative count). Three fixes were possible:
+  (a) drop the window and ship ALL logs — rejected, the payload grows unboundedly with tenure for no
+  heatmap benefit; (b) ship a wider window — rejected, just moves the cliff; (c) keep the 90-day window
+  for dates but ship a separate TRUE lifetime count. Chose (c). The server count uses `{count:"exact",
+  head:true}` per habit (a handful of habits) specifically to dodge Supabase's 1000-row default select cap
+  — a `select("habit_id")`-and-count would silently undercount a >1000-log power user, reintroducing the
+  bug in miniature. The client derives an immutable per-habit offset = `initial.totalDays −
+  initial.logs.length` (the count of logs older than the window, which never changes in-session) and adds
+  it to the live windowed `logs.length`; this keeps today's optimistic check/uncheck exact (today is
+  always in the window, so it's counted once via `logs`, never via the offset) and needs no threading of a
+  new mutable field through the 4 optimistic-update sites. The server also floors `totalDays` at the
+  windowed count and the client floors the offset at 0, so a transient count-query error degrades to the
+  OLD windowed behaviour (self-healing) rather than a spurious 0 / de-evolution. **Lesson:** the
+  "cold-read vein is thin" claim inherited from shifts 49–59 was again SURFACE-scoped (client + API) — the
+  server-hydration path was never a hunt focus and held the single most emotionally-damaging bug in the
+  app (the dragon art, the #1 pillar, collapsing to an egg on return). Confirms the shift-57 rule: before
+  trusting "well-swept," enumerate which FILES were actually read.
+
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
@@ -1164,6 +1227,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **Widget-style "today" hero** you could screenshot to a phone home screen.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
+
+- **DOCUMENTED, NOT FIXED (shift 60) — `garden/page.tsx` swallows every Supabase query error.** All six
+  data-fetch calls destructure only `{ data }` (habits :14, logs :~40, milestones, quit, inventory, prefs),
+  so a TRANSIENT failure yields `null` → `(x || [])` → empty. A blip on the **habits** query renders a
+  false "you have zero habits" garden; a blip on **logs** renders every habit at streak 0 / (pre-fix) an
+  egg. No bad data is written (writes are client-driven; coins are atomic) so it self-heals on reload — but
+  the momentary "my habits vanished / streaks reset" is alarming. `ensureProfile` is the only query that
+  correctly distinguishes a transient error from genuine "no rows." The right fix is an error-state UX
+  (retry affordance), which needs a real-device design pass — left per the don't-half-fix discipline rather
+  than swallow the error differently. Low priority: transient + self-healing + no data loss.
 
 - **✅ FIXED (shift 58) — DEFERRED BUG #5, the log-route milestone keying.** Was: the `habits/[id]/log`
   route inserted a `milestone_type:"streak", value: totalDays` row where `totalDays = count(habit_logs)`
