@@ -357,9 +357,24 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 > default routes. FINDING: **onboarding is animation-gated, not file://-verifiable** — it wraps its whole
 > content in `opacity: fadeIn?1:0` (a `useEffect` entrance fade), so the pre-hydration frame is legitimately
 > blank; that's the intended fade-in, not a bug, and it's build-verified only (real-device eyeball stays
-> Jonny's). With Wrapped + wellness now shot, **every /preview-mountable surface that CAN be file://-verified
-> has been** — the offline-verifiable design vein is genuinely exhausted this run. Successor: don't
-> re-shoot handsome surfaces; the remaining §8 gates are Jonny's real-device eyeball + merge only.
+> Jonny's).
+>
+> **run-2 shift 10 (DONE):** the shift-9 "every /preview-mountable surface that CAN be file://-verified
+> has been" claim was an OVERCLAIM — an audit of the `/preview` view keys vs the committed shots found
+> THREE mounted surfaces never screenshotted: the **You tab** (`?view=you` — the whole profile /
+> collection / World Shop / Settings / Tend+-upgrade / dark-mode+sound toggles / season screen), the
+> **bottom nav** (`?view=nav`), and the **Breathe** wellness overlay (`?view=breathe`). Shot all three
+> light+dark via the offline pipeline: **all render beautifully** — You is a clean profile hero + a
+> coins/dragons/best-streak stat row + a green Tend+ banner + tidy Collection/Shop/Settings rows +
+> toggles, dark parity confirmed; the BottomNav is crisp + thumb-first (Garden active green, the You
+> badge dot shows); Breathe showcases a glowing fire-dragon in a ring with warm "cravings peak and pass
+> in ~3 min" copy — the dragon art landing in a wellness context. No flaws → banked durable proof shots
+> (`preview-{you-full,you-dark-full,nav-fold,breathe-fold}.png`) + added the 4 routes to the pipeline
+> default set. NOW the offline-verifiable vein is genuinely exhausted (audited, not asserted). LESSON:
+> "vein exhausted" claims are only as broad as the surfaces actually enumerated — same shape as run-1's
+> shift-57 "cold-read exhausted was surface-scoped" note. The remaining §8 gates are Jonny's real-device
+> eyeball + merge only. Successor: don't re-shoot handsome surfaces; if you suspect another gap, audit
+> the view-keys/component list against the shots FIRST, then act only on a real miss.
 
 1. **Expand the `/preview` harness to the remaining CORE surfaces.** *(run-shift-1: DONE for the two
    biggest — the **Garden daily-tend home** (real TerrariumScene + faithful today's-tend rows w/
