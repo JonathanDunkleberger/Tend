@@ -378,9 +378,15 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    `suggestSpeciesForHabit` in lib/sprites.ts (pure, 16 unit tests) map a habit's name+category to a
    thematically-fitting dragon element (fire←workout, water←hydrate, storm←deep-work, cosmic←read,
    light←meditate/sleep, nature←default/growth, shadow←quit), wired into the API free-tier fallback +
-   the Pro egg-picker default. The collection now MEANS something.)* **Still parked:** a **garden-wide
-   night re-theme** (CSS, `file://`-verifiable) and a **widget-style "Today" hero** a user could
-   screenshot to their home screen. Prune any idea that doesn't earn its complexity.
+   the Pro egg-picker default. The collection now MEANS something.)* *(run-2 shift 5: the
+   **widget-style "Today" hero** is SHIPPED — `components/today-card.tsx`, a shareable/screenshottable
+   daily card: the longest-streak dragon nested in a progress ring that fills as you tend + streak
+   flame + dragons-hatched + a warm one-liner + the Tend wordmark. Always-dark "garden at night"
+   surface by design (share cards read best dark); Web Share API + clipboard fallback. Wired into the
+   garden header (a share button on `page===main` w/ active habits) and mounted at `/preview?view=today`,
+   browser-verified light+dark via file:// — `scripts/shots/preview-today{,-dark}-fold.png`.)* **Still
+   parked:** a **garden-wide night re-theme** (CSS, `file://`-verifiable). Prune any idea that doesn't
+   earn its complexity.
 
 5. **Re-audit the DoD (§8)** and only tick the core-loop / premium-polish / analytics items once their
    surfaces are **visually verified via `/preview`**. Keep this queue tight (3–6 items) — when you
@@ -771,6 +777,23 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   just frozen (no flicker keyframes) — the flame still communicates, nothing jitters. Unlit at streak 0
   is a deliberate grey ember (not hidden) so the element's slot is stable as a streak starts/breaks.
 
+- *(run-2 shift 5)* **The "Today" card is an always-DARK, self-contained share surface — not a
+  theme-aware in-app panel — and its data is derived, not memoized.** Two calls worth recording. (1)
+  **Always dark by design.** A shareable/screenshot-to-home-screen card reads best on a rich dark
+  "garden at night" gradient regardless of the user's in-app theme (this matches the existing
+  `share-card.tsx` convention), so `TodayCardVisual` owns its own palette and ignores `THEME`. The
+  upside for verification: light+dark file:// snapshots render the card identically, so a single
+  composition proof covers both — the surrounding `/preview` chrome is the only thing that changes.
+  The starfield is a hardcoded position list (no `Math.random`) so the SSR snapshot is byte-stable.
+  (2) **`buildTodayData()` is a plain function invoked only inside the `{showToday && …}` block, not a
+  render-time memo** — the whole-garden summary (featured dragon = longest current streak via
+  `getStreak`/`getCleanDays`, `bestStreak`, `dragonCount`) is cheap and only needed when the overlay is
+  open, so computing it lazily on open avoids any per-render cost in the hot garden path. It degrades
+  gracefully for a brand-new user (0 streaks → unlit flame ember, `dayLine` handles 0%, name falls back
+  to the habit name). Split into `TodayCardVisual` (pure, file://-verifiable) + `TodayCard` (overlay +
+  Web Share) for the same reason the ceremony has a `previewPhase` — the pure piece is what the offline
+  pipeline can screenshot.
+
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
 - ~~**Dragon personality from your habits:** the species/color you hatch reflects the habit type
@@ -781,7 +804,10 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   (a full-screen overlay, not a garden re-theme — see §10). A garden-wide night re-theme is still open.
 - **Streak insurance / grace token** earned by coins — protects against one slip so it never feels
   punishing (retention gold, monetizable).
-- **Widget-style "today" hero** you could screenshot to a phone home screen.
+- ~~**Widget-style "today" hero** you could screenshot to a phone home screen.~~ ✅ SHIPPED run-2
+  shift 5 as `components/today-card.tsx` — a shareable daily card (dragon-in-a-progress-ring + streak
+  flame + dragons + warm one-liner + Tend wordmark), wired into the garden header share button + Web
+  Share; browser-verified light+dark via file://.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
 
