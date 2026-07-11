@@ -27,61 +27,84 @@ export async function POST(req: Request) {
 
   const supabase = createAdminSupabaseClient();
 
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const clerkId = session.metadata?.clerk_id;
-      if (!clerkId) break;
+  // Any DB write that fails must return a non-2xx so Stripe RETRIES the event.
+  // Previously every write's error was swallowed and the handler always returned
+  // 200 → Stripe marked the event delivered and never retried, permanently
+  // stranding a paying customer on the free tier on any transient blip.
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const clerkId = session.metadata?.clerk_id;
+        if (!clerkId) break;
 
-      // Use upsert — profile may not exist yet if Clerk webhook didn't fire.
-      // Only include email when Stripe actually provides one, so an upsert into an
-      // existing profile never clobbers a real stored email with an empty string.
-      const email = session.customer_details?.email;
-      await supabase
-        .from("profiles")
-        .upsert(
-          {
-            clerk_id: clerkId,
-            ...(email ? { email } : {}),
-            stripe_customer_id: session.customer as string,
-            stripe_subscription_id: session.subscription as string,
-            tier: "pro",
-          },
-          { onConflict: "clerk_id" }
-        );
-      break;
+        const email = session.customer_details?.email;
+        const proFields = {
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          tier: "pro" as const,
+        };
+
+        // UPDATE-first (email omitted → never clobbers a real stored address),
+        // then INSERT only if the profile doesn't exist yet (Clerk webhook /
+        // ensureProfile hasn't run). On INSERT `email` is NOT NULL, so fall back
+        // to "" — the same placeholder ensureProfile uses — never to a missing
+        // column (which would poison-retry against the constraint forever).
+        const { data: updated, error: updErr } = await supabase
+          .from("profiles")
+          .update({ ...proFields, ...(email ? { email } : {}) })
+          .eq("clerk_id", clerkId)
+          .select("id");
+        if (updErr) throw updErr;
+
+        if (!updated || updated.length === 0) {
+          const { error: insErr } = await supabase
+            .from("profiles")
+            .insert({ clerk_id: clerkId, email: email || "", ...proFields });
+          if (insErr) throw insErr;
+        }
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = subscription.customer as string;
+
+        // Keep the user Pro through the dunning window: `past_due` means Stripe is
+        // still retrying a failed renewal charge and may recover it. Only a
+        // terminal state (canceled / unpaid / incomplete_expired — anything not in
+        // this set) drops them to free, and true cancellation also arrives as
+        // subscription.deleted below. Yanking access on the first failed charge
+        // for a recoverable blip would be needlessly harsh.
+        const status = subscription.status;
+        const tier =
+          status === "active" || status === "trialing" || status === "past_due"
+            ? "pro"
+            : "free";
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({ tier, stripe_subscription_id: subscription.id })
+          .eq("stripe_customer_id", customerId);
+        if (error) throw error;
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = subscription.customer as string;
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({ tier: "free", stripe_subscription_id: null })
+          .eq("stripe_customer_id", customerId);
+        if (error) throw error;
+        break;
+      }
     }
-
-    case "customer.subscription.updated": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
-
-      const status = subscription.status;
-      const tier = status === "active" || status === "trialing" ? "pro" : "free";
-
-      await supabase
-        .from("profiles")
-        .update({
-          tier,
-          stripe_subscription_id: subscription.id,
-        })
-        .eq("stripe_customer_id", customerId);
-      break;
-    }
-
-    case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
-
-      await supabase
-        .from("profiles")
-        .update({
-          tier: "free",
-          stripe_subscription_id: null,
-        })
-        .eq("stripe_customer_id", customerId);
-      break;
-    }
+  } catch (err) {
+    console.error("Stripe webhook DB write failed:", err);
+    return NextResponse.json({ error: "Database write failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
