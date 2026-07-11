@@ -81,12 +81,11 @@ export default async function GardenPage() {
     darkMode: boolean;
     season: string;
     earnedMilestoneCoins: Record<string, string[]>;
-    stageDrops: Record<string, number>;
     onboardingComplete: boolean;
     lastCheckinDate: string | null;
     lastBonusDate: string | null;
     gratitudeEntries: { date: string; items: string[] }[];
-  } = { darkMode: false, season: "summer", earnedMilestoneCoins: {}, stageDrops: {}, onboardingComplete: false, lastCheckinDate: null, lastBonusDate: null, gratitudeEntries: [] };
+  } = { darkMode: false, season: "summer", earnedMilestoneCoins: {}, onboardingComplete: false, lastCheckinDate: null, lastBonusDate: null, gratitudeEntries: [] };
   {
     const { data: prefs } = await supabase
       .from("user_preferences")
@@ -98,7 +97,6 @@ export default async function GardenPage() {
         darkMode: prefs.dark_mode ?? false,
         season: prefs.season ?? "summer",
         earnedMilestoneCoins: (prefs.earned_milestone_coins as Record<string, string[]>) ?? {},
-        stageDrops: (prefs.stage_drops as Record<string, number>) ?? {},
         onboardingComplete: prefs.onboarding_complete ?? false,
         lastCheckinDate: prefs.last_checkin_date ?? null,
         lastBonusDate: prefs.last_bonus_date ?? null,

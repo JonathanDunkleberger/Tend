@@ -42,24 +42,35 @@ export function computeQuitBest(cleanDays: number, priorBest: number | undefined
   return Math.max(cleanDays, priorBest ?? 0);
 }
 
-/** Apply the relapse stage-drop penalty — never below the egg (stage 0). Shared by build + quit habits. */
+/** Lower a stage by a whole number of tiers — never below the egg (stage 0). */
 export function applyStageDrop(rawStage: number, drops: number | undefined): number {
   return Math.max(0, rawStage - (drops || 0));
 }
 
 /**
- * Dragon evolution stage for a quit habit. The best-ever clean streak (not the current one)
- * drives the stage, so a single relapse gently drops the dragon one tier via `drops` rather
- * than wiping progress. Returns 0 (egg) before the habit is ever started.
+ * Dragon evolution stage for a quit habit — gentle and self-healing by design.
+ *
+ * The stage is the higher of:
+ *   • what the CURRENT clean run has earned (heals fully as you rebuild), and
+ *   • a floor one tier below your ALL-TIME-BEST clean run (a relapse never wipes
+ *     the dragon back to an egg — it only ever slips one gentle tier below its peak).
+ *
+ * A relapse resets the current run to 0, so the dragon visibly drops one tier the
+ * moment you slip, then climbs back as you tend it again — and no matter HOW many
+ * times you slip it is never worse than one tier below your best. This is why we no
+ * longer track a running `stageDrops` counter: an accumulating penalty could pin the
+ * dragon at an egg forever after a handful of slips, which contradicts Tend's soul
+ * (assumes the best in you; never shaming). Returns 0 (egg) before the habit starts.
  */
 export function computeQuitStage(
   quitDate: string | undefined,
   priorBest: number | undefined,
   today: string,
-  drops: number = 0,
 ): number {
   if (!quitDate) return 0;
   const cleanDays = daysBetween(quitDate, today);
+  const currentStage = getStage(cleanDays);
   const best = computeQuitBest(cleanDays, priorBest);
-  return applyStageDrop(getStage(best), drops);
+  const floor = applyStageDrop(getStage(best), 1);
+  return Math.max(currentStage, floor);
 }

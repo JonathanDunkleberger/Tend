@@ -122,21 +122,33 @@ describe("computeQuitStage", () => {
     expect(computeQuitStage("2026-06-11", 0, "2026-07-11")).toBe(4);
   });
 
-  it("evolves off the best-ever run even after a relapse reset the clean count", () => {
-    // Relapsed today (0 clean days) but a 30-day best keeps the dragon evolved…
-    expect(computeQuitStage("2026-07-11", 30, "2026-07-11")).toBe(4);
+  it("a relapse gently slips exactly ONE tier below the peak — never wipes to an egg", () => {
+    // Relapsed today (0 clean days) after a 30-day (Elder/stage-4) peak → Drake/stage-3.
+    expect(computeQuitStage("2026-07-11", 30, "2026-07-11")).toBe(3);
   });
 
-  it("…softened by the relapse stage drop (30-day best, one drop → stage 3)", () => {
-    expect(computeQuitStage("2026-07-11", 30, "2026-07-11", 1)).toBe(3);
+  it("is never worse than one tier below the best, no matter how many relapses", () => {
+    // Repeated slips from the same peak are idempotent — no accumulating penalty.
+    expect(computeQuitStage("2026-07-11", 30, "2026-07-11")).toBe(3);
+    expect(computeQuitStage("2026-07-11", 30, "2026-07-11")).toBe(3);
+  });
+
+  it("holds at one-below-peak while the clean run is still rebuilding", () => {
+    // 5 clean days (stage 1) but a 30-day best floors it at Drake/stage-3.
+    expect(computeQuitStage("2026-07-06", 30, "2026-07-11")).toBe(3);
+  });
+
+  it("heals fully back to the peak once the clean run re-reaches it", () => {
+    // Rebuilt to 30 clean days again → back to Elder/stage-4.
+    expect(computeQuitStage("2026-06-11", 30, "2026-07-11")).toBe(4);
   });
 
   it("uses whichever is larger — current clean run or prior best", () => {
-    // 14 clean days (stage 3) beats a stale 5-day best (stage 1).
+    // 14 clean days (stage 3) beats a stale 5-day best (floor stage 0) → 3.
     expect(computeQuitStage("2026-06-27", 5, "2026-07-11")).toBe(3);
   });
 
-  it("a heavy penalty can knock even a grown dragon back to an egg", () => {
-    expect(computeQuitStage("2026-06-11", 0, "2026-07-11", 9)).toBe(0);
+  it("a fresh quitter with no history is an egg", () => {
+    expect(computeQuitStage("2026-07-11", 0, "2026-07-11")).toBe(0);
   });
 });

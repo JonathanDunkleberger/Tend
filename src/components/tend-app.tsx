@@ -41,7 +41,7 @@ import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
 import { selectNewMilestones, selectNewCoinTiers } from "@/lib/progress";
-import { computeCleanDays, computeMoneySaved, computeTotalSaved, computeQuitBest, computeQuitStage, applyStageDrop } from "@/lib/quit";
+import { computeCleanDays, computeMoneySaved, computeTotalSaved, computeQuitBest, computeQuitStage } from "@/lib/quit";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
@@ -70,7 +70,6 @@ interface TendAppProps {
     darkMode: boolean;
     season: string;
     earnedMilestoneCoins: Record<string, string[]>;
-    stageDrops: Record<string, number>;
     onboardingComplete: boolean;
     lastCheckinDate: string | null;
     lastBonusDate: string | null;
@@ -93,7 +92,6 @@ export function TendApp({
   const [streakFreezes, setStreakFreezes] = useState<Record<string, number>>(initialStreakFreezes);
   const [pausedHabits, setPausedHabits] = useState<Record<string, boolean>>(initialPausedHabits);
   const [earnedMilestoneCoins, setEarnedMilestoneCoins] = useState<Record<string, string[]>>(initialPreferences.earnedMilestoneCoins);
-  const [stageDrops, setStageDrops] = useState<Record<string, number>>(initialPreferences.stageDrops);
   const [milestoneCelebration, setMilestoneCelebration] = useState<{ tier: CoinTier; habitName: string; coinReward: number } | null>(null);
   const [darkMode, setDarkMode] = useState(initialPreferences.darkMode);
   const [season, setSeason] = useState<SeasonKey>((initialPreferences.season as SeasonKey) || getSeason());
@@ -285,17 +283,15 @@ export function TendApp({
     localStorage.setItem("tend_paused_habits", JSON.stringify(pausedHabits));
   }, [pausedHabits]);
 
-  // Persist preferences (milestone coins, stage drops) → server + localStorage
+  // Persist preferences (milestone coins) → server + localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("tend_milestone_coins", JSON.stringify(earnedMilestoneCoins));
-    localStorage.setItem("tend_stage_drops", JSON.stringify(stageDrops));
     if (!hasHydrated.current) return;
     apiSync("/api/preferences", "PUT", {
       earned_milestone_coins: earnedMilestoneCoins,
-      stage_drops: stageDrops,
     });
-  }, [earnedMilestoneCoins, stageDrops]);
+  }, [earnedMilestoneCoins]);
 
   // Persist dark mode & season → server + localStorage
   useEffect(() => {
@@ -580,15 +576,15 @@ export function TendApp({
   const getStageForId = useCallback(
     (hId: string) => {
       const h = habits.find((x) => x.id === hId);
-      const drops = stageDrops[hId] || 0;
       if (h?.category === "quit") {
         const qd = quitDataMap[hId];
-        // Best-ever clean run drives evolution; a relapse gently drops one stage, never below egg.
-        return computeQuitStage(qd?.quitDate, qd?.bestStreak, todayStr, drops);
+        // Best-ever clean run drives evolution; a relapse gently slips one tier below the
+        // peak and heals as the current clean run rebuilds (see computeQuitStage).
+        return computeQuitStage(qd?.quitDate, qd?.bestStreak, todayStr);
       }
-      return applyStageDrop(getStage(getTotal(hId)), drops);
+      return getStage(getTotal(hId));
     },
-    [getTotal, habits, quitDataMap, todayStr, stageDrops]
+    [getTotal, habits, quitDataMap, todayStr]
   );
 
   const buildHabits = habits.filter((h) => h.category !== "quit");
@@ -1381,9 +1377,9 @@ export function TendApp({
           cleanDays={getCleanDays(relapseHabit.id)}
           bestStreak={quitDataMap[relapseHabit.id]?.bestStreak}
           onConfirm={() => {
-            // Creature drops one stage on relapse
+            // The dragon gently slips one tier below its peak (handled by computeQuitStage:
+            // resetQuit zeroes the current clean run) and heals as the run rebuilds.
             const hId = relapseHabit.id;
-            setStageDrops((prev) => ({ ...prev, [hId]: (prev[hId] || 0) + 1 }));
             resetQuit(hId);
             setRelapseHabit(null);
             // +5 coins for honesty
