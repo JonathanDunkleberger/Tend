@@ -190,9 +190,13 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 - [x] `npm run build` + `npm run lint` pass clean on the `night-train` branch. *(green every shift;
       re-verified shift 6 — build ✅, lint 0 errors / **5 warnings** (down from 27, all intentional).
-      **shift 11: added a real test runner + suite** — `npm test` (vitest) now runs **30/30 green**,
+      **shift 11: added a real test runner + suite** — `npm test` (vitest) now runs green,
       covering the pure core-loop math (streak/grace/best-streak) + dragon-evolution stage thresholds +
-      quit-day math. The repo had ZERO tests before; this is the first automated regression net.)*
+      quit-day math. The repo had ZERO tests before; this is the first automated regression net.
+      **shift 12: extended the net to the reward + analytics math** — extracted `lib/progress.ts`
+      (`computeConsistency` / `selectNewMilestones` / `selectNewCoinTiers` / `computeSynergies`) out of
+      constellation + the tend-app monolith and added 24 more cases, so `npm test` is now **54/54 green**
+      covering consistency %, milestone coin+grace-token grants, AA coin-tier unlocks, and synergy grading.)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
       new `app/page.tsx`, on-brand, verified 200. **shift 9: BROWSER-VERIFIED** — rendered the real
       page in headless Chromium at a 390px phone viewport and eyeballed it end-to-end (Fraunces serif
@@ -233,6 +237,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 ---
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
+
+0ad. ✅ **[SHIFT 12] Extended the regression net to the REWARD + ANALYTICS math (the other logic that
+   can't be browser-verified here).** Shift 11 locked the streak/grace/best-streak kernel; shift 12
+   applied the identical extract-delegate-test pattern to the three remaining progress-derived numbers
+   that were buried inline and trusted only by cold-read: **per-habit consistency %** (was inline in
+   `constellation.tsx`), **streak-milestone coin + free-grace-token grants** (`checkMilestones` in the
+   monolith — this MUTATES coins + grace tokens, so correctness matters), and the **AA-style coin-tier
+   unlocks** (`checkMilestoneCoins`). Also lifted the **habit-synergy** analytics rule (pairing +
+   ≥3-day threshold + 0–1 strength ramp). New pure kernel **`src/lib/progress.ts`**
+   (`computeConsistency` / `selectNewMilestones` / `selectNewCoinTiers` / `computeSynergies`,
+   framework-free — callers pass their own milestone/tier lists + predicates), both components now
+   **delegate** to it (behaviour identical, build-verified), and **`src/lib/progress.test.ts` adds 24
+   cases**: young-habit fair-window consistency + cap + rounding; milestone coin summing + grace gifting
+   at 7/21/60 + already-earned filtering; coin-tier build-vs-quit thresholds (sub-day tiers ignored for
+   build, hours for quit) + highest-for-celebration; synergy pair enumeration + threshold + strength cap.
+   `npm test` **30 → 54 green**, build GREEN, lint 0 errors / 5 intentional warnings, 2 commits. Same
+   rationale as shift 11: this is the exact reward/analytics logic that can't be eyeballed in this
+   sandbox — a high-value, browser-free correctness lever, and another safe step of the monolith
+   decomposition.
 
 0ac. ✅ **[SHIFT 11] First automated test suite — the core-loop math is now regression-locked.** The
    daily-loop math (consecutive streaks, "one slip never stings" grace-token bridging, historical best
@@ -449,6 +472,15 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > surface) is now conversion-complete; remaining DoD gates are still the auth-gated in-app eyeball on
 > Jonny's machine. Note: shift 10 `npm install playwright --no-save`'d to screenshot — it's NOT in
 > package.json (browser binary is cached from shift 9's `npx playwright install chromium`).
+> **NEW in shift 12 (#0ad): extended the regression net to the reward + analytics math.** Same
+> extract-delegate-test pattern as shift 11, now applied to the logic that MUTATES coins + grace tokens
+> (which cold-reading can't verify): new pure `src/lib/progress.ts` (`computeConsistency` /
+> `selectNewMilestones` / `selectNewCoinTiers` / `computeSynergies`), constellation + the tend-app
+> monolith delegate to it, and `progress.test.ts` adds 24 cases → **`npm test` 30 → 54 green**. Build
+> GREEN, lint unchanged (0 errors / 5 intentional). Remaining pure-code levers are now genuinely thin
+> (per-view skeletons, garden night re-theme, the §13/#16 Stripe price change) — the meaningful
+> un-checked DoD items all still hinge on a real-device / networked-browser eyeball on Jonny's machine
+> (see §14 for why that can't happen in this sandbox).
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -597,6 +629,14 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   of cold-reading could. Kept the `Math.max(historical, currentStreak)` composition and all quit-habit
   branches in the component (they need live state) — only the pure kernel moved. Added vitest as the
   runner (zero-config, TS-native); the repo had no test tooling at all before.
+
+- *(shift 12)* **`lib/progress.ts` is framework-free by passing lists + predicates, not importing them.**
+  The reward/analytics kernels deliberately do NOT `import { MILESTONES }` / `MILESTONE_COINS` (which live
+  in a client component) — callers pass their milestone/tier arrays + an `isDone(n)`/`coCountOf(i,j)`
+  predicate. Rationale: keeps `progress.ts` pure + import-cycle-free + testable with tiny fixture data
+  (the tests mirror the real MILESTONES/COIN_TIERS locally), exactly like `streak.ts`'s `isDone`
+  predicate. The delegation is behaviour-identical — the components still own all side effects (toasts,
+  haptics, `setCoins`/`setStreakFreezes`, celebration); only the pure "which/how-much" decision moved.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
