@@ -243,22 +243,47 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 50 ran TWO cold-read bug hunts and FIXED 6 real client bugs total (see #0aj + #0ak).
-> Pass 1 (#0aj): quit-detail hero rendered the WRONG evolution stage; simultaneous grace-milestone
-> crossings DURABLY dropped a gifted token; bounce-back banner promised coins decoupled from the real
-> ramp. Pass 2 (#0ak): delete "Undo" couldn't actually undo (immediate unconditional DELETE → permanent
-> data loss); the all-done celebration replayed on every reload + auto-fired for quit-only users; parallel
-> milestone grants clobbered each other's earned badges. All build/lint/test-verified. The cold-read vein
-> is now well-mined — TWO passes surfaced clean-tracing bugs but the obvious optimistic-update / reward /
-> celebration / stale-snapshot classes are largely swept. A successor could try ONE more hunt pointed at
-> untouched surfaces (constellation/wrapped derivations, the shop/gallery interactions, onboarding→save
-> handoff, settings persistence) but expect diminishing returns; if it comes back empty, pivot to a
-> `file://`-verifiable landing/OG/pricing-copy improvement instead. The remaining DEFERRED bugs in §12
+> NEXT SHIFT — shift 51 mined the ONE untouched vein the shift-50 pointer flagged (constellation/Wrapped
+> derivations + shop/gallery/onboarding/settings) and FIXED 3 real analytics bugs (see #0al): the
+> day-of-week chart counted pre-creation days as misses (fabricated a "you slip on Tuesdays" insight for
+> young habits); Insights (30d) and Wrapped (60d) disagreed on "best day of week"; and Wrapped had a
+> latent undefined-card crash. All three fixed via one shared tested kernel + a clamp; the hunter gave
+> shop/gallery/onboarding→save/settings a CLEAN bill (traced, not skipped — see #0al). **The cold-read
+> vein is now genuinely exhausted** — four passes across shifts 49–51 have swept the reward, celebration,
+> optimistic-update, stale-snapshot AND analytics-derivation classes; a fifth hunt will almost certainly
+> come back empty. **Successor: pivot AWAY from bug-hunting.** Best remaining moves, in order: (1) a
+> `file://`-verifiable landing/OG/pricing-copy improvement (the landing is the one sandbox-verifiable
+> surface + is literally "what makes someone pay" — e.g. a soft social-proof/"how it feels" section, a
+> sharper hero sub-headline, or an animated-egg-crack micro-story); (2) execute the §13/#16 Stripe price
+> change IF Jonny wants it (needs new price IDs — a keyed task). The remaining DEFERRED bugs in §12
 > (non-atomic coins/inventory race → Postgres RPC + migration; urge-entries ownership; Stripe
 > email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe or a keyed shift →
 > for Jonny; don't ship unrunnable SQL. Also open: the bounce-back ramp fires for ALL users, not just
 > after a real lapse (no lapse-detection wiring) — product call for Jonny (see §12). Do NOT extract math
 > for coverage's sake. See §14 for the sandbox limit.
+
+0al. ✅ **[SHIFT 51] Cold-read bug hunt on the untouched analytics surfaces — FIXED 3 real client bugs
+   (reasoning-verified, no DB/browser).** A fan-out hunter aimed at the surfaces prior shifts hadn't swept
+   (constellation/Wrapped derivations, shop, gallery, onboarding→save handoff, settings persistence)
+   found three genuine defects and cleared the rest. (1) **[mod] Insights "Completion by Day" counted
+   days BEFORE a habit existed as misses.** `dayOfWeekData` iterated a fixed 30-day window and did
+   `dayTotals[dayIdx]++` unconditionally per build habit — but the sibling consistency % right above it
+   (`computeConsistency`) explicitly caps by habit age "so young habits aren't punished." A 3-day-old
+   habit completed all 3 days read ~0% on every weekday (the ~27 pre-creation days were fake misses), and
+   the Pro insight card then asserted "You tend to slip on **Tuesdays** — plan ahead" from pure noise.
+   (2) **[mod] Insights (30-day) and Wrapped (60-day) disagreed on "best day of week."** Same concept,
+   same rate formula, different windows → the two surfaces could confidently name contradictory best days
+   for the same person. (3) **[low] Wrapped could render an `undefined` card and crash.** The card reel is
+   dynamic (streak/hero/bestday/clean cards are conditional on stats); `idx` was clamped only inside `go`
+   at tap time, so if the set shrank while open, `cards[idx]` was undefined → `current.bg` threw. **Fix:**
+   extracted a single tested kernel `computeDayOfWeekRates` (lib/progress.ts) with the pre-creation guard
+   baked in; constellation + Wrapped both delegate to it over the SAME 30-day window (resolves 1 + 2, one
+   source of truth); added a defensive `Math.min(idx, cards.length-1)` clamp in Wrapped (3). 5 new kernel
+   tests → `npm test` **94→99 green**, build GREEN, lint 0/5, 1 commit. **Cleared, not skipped** (hunter
+   traced fully): onboarding→`handleOnboardingComplete` never drops `buildPick` + the 250-coin absolute
+   write persists correctly; `settings-client` has no persistence logic (it lives in tend-app, hydration-
+   guarded); shop lock/afford/owned + Pro-downgrade survival correct; gallery stage indexing consistent
+   with Wrapped; progress/utils kernels internally consistent.
 
 0aj. ✅ **[SHIFT 50] Cold-read bug hunt — FIXED 3 more real client-side bugs (reasoning-verified, no
    DB/browser).** A fan-out bug-hunter agent + hand-trace surfaced three genuine defects. (1) **Quit
