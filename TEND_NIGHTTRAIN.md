@@ -243,12 +243,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 14 took the frontier's option (a): a fresh cold read that found + FIXED a real
-> latent bug (see #0af below). The browser-free pure-code test levers remain exhausted; do NOT extract
-> math for coverage's sake. Good next moves: keep cold-reading for ACTUAL bugs to fix (the API routes
-> have known non-atomic read-then-write races — see #0af "left for Jonny" — that need a Postgres RPC +
-> migration, deferred because they can't be DB-verified in this sandbox), or a `file://`-verifiable
-> landing/OG/pricing-copy improvement. See §14 for the sandbox limit.
+> NEXT SHIFT — shift 15 fixed a real SOUL-violating bug (see #0ag below): the relapse penalty pinned the
+> dragon at an egg forever after ~4 slips (accumulating `stageDrops`). Now it's a gentle, self-healing
+> one-tier dip. Good next moves for a successor: keep cold-reading for ACTUAL bugs to fix; the remaining
+> DEFERRED bugs in §12 (non-atomic coins/inventory race → needs a Postgres RPC + migration; urge-entries
+> ownership; Stripe email-clobber; verify-subscription 10-session fallback) all need a running DB/Stripe
+> or a keyed shift, so they're for Jonny — don't ship unrunnable SQL. Otherwise a `file://`-verifiable
+> landing/OG/pricing-copy improvement. Do NOT extract math for coverage's sake. See §14 for the sandbox limit.
+
+0ag. ✅ **[SHIFT 15] Cold-read bug hunt — FIXED the anti-soul relapse-penalty bug (§12 #2).** The quit
+   dragon's stage was `getStage(best-ever) − stageDrops`, where `stageDrops` incremented on every relapse
+   and was NEVER reset — so after ~4 slips the dragon pinned at Egg (stage 0) forever, even with a long
+   current clean run + big best streak. The app punished a *struggling* user hardest: the exact opposite
+   of Tend's "assumes the best in you / never shaming" soul. Made the product call (single-tier nudge that
+   recovers, per the soul) and rebuilt `computeQuitStage` = `max(stage(current clean run), stage(best) − 1)`
+   — a slip zeroes the current run so the dragon drops exactly one tier the instant you slip, heals back to
+   peak as it rebuilds, and is never worse than one tier below best no matter how many slips. Deleted the
+   `stageDrops` counter entirely (state/persistence/hydration; `stage_drops` column left dormant — GET/PUT
+   already treat it optional → no migration). Unit-tested heal-back + idempotence: `npm test` 92→94, build
+   GREEN, lint unchanged (0 errors / 5 intentional). See §10 decision. 1 feature commit.
 
 0af. ✅ **[SHIFT 14] Cold-read bug hunt — FIXED a deterministic coin-loss bug + a silent-purchase-
    failure bug.** Two fan-out bug-hunter agents (API routes + monolith) plus a hand cold-read surfaced
@@ -697,6 +710,19 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   correctness insurance. A future shift's better moves: a fresh cold read to find + FIX a real latent bug
   (not just cover one), or a server-component/`file://`-verifiable UX improvement. Recorded here so a
   successor doesn't reflexively continue the pattern past its point of value.
+- *(shift 15)* **Relapse penalty = a gentle, self-healing one-tier dip, NOT an accumulating counter.**
+  Made the product call that §12 bug #2 flagged (permanent-cumulative vs recovering). Chose recovering,
+  because the soul is explicit: assumes-best, never-shaming, "gently delays the egg's hatch." The old
+  model subtracted an ever-growing `stageDrops` from the stage and never reset it → the dragon pinned at
+  Egg forever after ~4 slips (the app literally punished a struggling user hardest — the exact opposite
+  of the brand). New model needs no mutable state: `computeQuitStage = max(stage(current clean run),
+  stage(best-ever) − 1)`. A slip zeroes the current run (via `resetQuit`) so the dragon drops exactly one
+  tier the instant you slip; it heals back to peak as the run rebuilds; and it's never worse than one
+  tier below your best no matter how many times you slip. Deleted the `stageDrops` state/persistence/
+  hydration entirely (the `stage_drops` DB column is left dormant — GET/PUT already treat it as optional,
+  so no migration is needed and old data simply stops being read). Unit-tested the heal-back + idempotence
+  in `quit.test.ts` (92→94). This also proves shift 13's "pure-code test lever exhausted" note was about
+  *coverage-for-coverage's-sake* — extracting math to FIX a real behavioural bug is still high-value.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
@@ -721,11 +747,15 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
      other → a lost increment or a lost spend. The real fix is a Postgres atomic-increment RPC
      (`coins = coins + delta` in one statement) + a migration; deferred so we don't ship SQL that can't
      be run/verified in this sandbox. Low real-world hit rate at current scale.
-  2. **`stageDrops` accumulates across relapses and is never reset** (`tend-app.tsx` ~1370;
-     `getStageForId` → `applyStageDrop`). After ~4 relapses the dragon is pinned at Egg (stage 0) even
-     with a long current clean run + big best-ever streak, contradicting the "gently drops ONE tier"
-     design. **Product call needed:** should a slip's penalty be permanent-cumulative (current) or a
-     single-tier nudge that recovers as the streak rebuilds? If the latter, cap/decay `stageDrops`.
+  2. ✅ **FIXED (shift 15) — the relapse penalty is now gentle + self-healing.** Was: `stageDrops`
+     accumulated across relapses and never reset, so after ~4 slips the dragon pinned at Egg forever
+     even with a long current clean run + big best-ever streak (anti-soul). The product call (made per
+     the soul: assumes-best, never-shaming) = **single-tier nudge that recovers as the streak rebuilds.**
+     Redesigned `computeQuitStage` = `max(stage(current clean run), stage(best-ever) − 1)` — a slip
+     resets the current run to 0 so the dragon visibly drops exactly one tier, then heals back to peak
+     as it rebuilds, and is NEVER worse than one tier below best no matter how many slips. Removed the
+     `stageDrops` counter entirely (state/persistence/hydration; `stage_drops` column left dormant, PUT/
+     GET already treat it optional). `npm test` 92→94, build GREEN, lint unchanged. See §10 decision.
   3. **`urge-entries` POST doesn't verify habit ownership** — writes `{user_id: me, habit_id}` with
      `habit_id` straight from the body; a user can create urge rows pointing at another user's habit_id
      (stamped with the attacker's own user_id, so no cross-user *read*, just referentially-bad data).
