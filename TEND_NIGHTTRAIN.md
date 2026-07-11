@@ -338,6 +338,27 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 ### 9.2 THE QUEUE (top = next) — ambitious, mobile-first, sandbox-verifiable
 
+> **STATE AS OF run-2 shift 14.** Ran the frontier-prescribed discipline (audit git-tracked-vs-claimed
+> FIRST, act only on a real miss, else confirm green + stop) — and this time it held clean, no miss.
+> (a) Re-verified baseline GREEN: build ✅ / lint 0-err-5-intentional / `npm test` **129/129**. (b)
+> Re-ran shift-13's git-tracked audit: enumerated all 14 `/preview` `VIEW_KEYS` (garden/today/insights/
+> detail/hatch/evolve/gallery/onboarding/wellness/wrapped/you/breathe/nav/loading) against `git ls-files
+> scripts/shots/` — **every one has a git-tracked proof shot** (most light+dark); the four un-shot views
+> (grounding/urge-surf/gratitude/wind-down) are correctly out of file:// scope (interactive tools, no
+> static verification value). No new gitignore/untracked gap. (c) Applied "verify, don't assert" to the
+> EVIDENCE itself (not just its existence): independently eyeballed the two highest-value money-shots
+> shift 13 committed — `preview-hatch-fold` ("Your dragon hatched!" green hatchling in a warm radial
+> glow + "+25 coins" + Continue) and `preview-detail-fold` (Ember/Drake + 41-day streak flame + the full
+> Egg→Hatchling→Whelp→Drake→Elder filmstrip + "20d to Elder Dragon" progress + streak-shield card) —
+> **both render genuinely and gorgeously, not blank frames.** So the review-evidence trail is real AND
+> complete. No sandbox-buildable/verifiable gap remains that isn't the churn the frontier forbids →
+> confirmed green and closed cleanly (the honest disciplined shift). Did NOT reopen a bug hunt or
+> re-beautify handsome surfaces. Mission's remaining value is unchanged: Jonny's real-device eyeball +
+> the merge of a now-159-commit branch. Successor: same discipline — audit git-tracked-vs-claimed FIRST,
+> act only on a real miss, else confirm green + stop. Do NOT write NIGHT-TRAIN COMPLETE (§8's real-device
+> gates are only Jonny's to close).
+>
+> --- prior state (kept for context) ---
 > **STATE AS OF run-2 shift 13.** Shift 13 did the frontier-prescribed audit (test the "exhausted"
 > claim, don't rubber-stamp) and it caught ONE real miss — not code, an EVIDENCE gap: shift 12's
 > view-keys-vs-shots audit said "every core surface is committed," but it compared against `ls`
