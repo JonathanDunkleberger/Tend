@@ -5,7 +5,7 @@ import {
   Sparkles, TrendingUp, Shield, Flame, Heart, Calendar,
   Crown, BarChart3, Trophy, Lock,
 } from "lucide-react";
-import { seed, daysAgo } from "@/lib/utils";
+import { seed, daysAgo, daysBetween } from "@/lib/utils";
 import { getSynergyName, STAGE_LABELS } from "@/lib/constants";
 import type { ThemeColors } from "@/lib/constants";
 import type { HabitWithStats } from "@/types";
@@ -43,7 +43,6 @@ export function Constellation({
 
   // ── Overview stats ──
   const todayStr = new Date().toISOString().slice(0, 10);
-  const buildDoneToday = buildHabits.filter((h) => isDone(h.id, todayStr)).length;
   const totalHabitsOnTrack = habits.filter((h) => {
     if (h.category === "quit") return getCleanDays ? getCleanDays(h.id) > 0 : getStreak(h.id) > 0;
     return isDone(h.id, todayStr);
@@ -80,7 +79,6 @@ export function Constellation({
       weeks.push({ label, pct, total, done });
     }
     return weeks;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habits, isDone, getCleanDays]);
 
   // ── Habit scoreboard ──
@@ -91,11 +89,21 @@ export function Constellation({
         const best = getBestStreak ? getBestStreak(h.id) : streak;
         const total = getTotal(h.id);
         const stage = getStage ? getStage(h.id) : 0;
-        return { habit: h, streak, best, total, stage };
+        // Consistency % — completions over the habit's life, capped to a fair
+        // 30-day window so young habits aren't punished by a large denominator.
+        let consistency = 0;
+        if (h.category !== "quit") {
+          const age = daysBetween(h.created_at.slice(0, 10), todayStr) + 1;
+          const window = Math.min(30, Math.max(1, age));
+          let done = 0;
+          for (let d = 0; d < window; d++) if (isDone(h.id, daysAgo(d))) done++;
+          consistency = Math.round((done / window) * 100);
+        }
+        return { habit: h, streak, best, total, stage, consistency };
       })
       .sort((a, b) => b.streak - a.streak);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [habits, getStreak, getBestStreak, getTotal, getStage]);
+  }, [habits, getStreak, getBestStreak, getTotal, getStage, isDone]);
 
   // ── Day-of-week completion rate (last 30 days) ──
   const dayOfWeekData = useMemo(() => {
@@ -276,6 +284,9 @@ export function Constellation({
         <div className="cd" style={{ padding: 14, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
           <div className="lb" style={{ marginBottom: 10, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
             <Trophy size={10} /> Habit Scoreboard
+            <span style={{ fontWeight: 500, textTransform: "none", letterSpacing: 0, color: th.textMuted, marginLeft: "auto", fontSize: 9 }}>
+              bar = 30-day consistency
+            </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {scoreboard.slice(0, isPro ? scoreboard.length : FREE_SCOREBOARD_LIMIT).map((s, i) => {
@@ -308,6 +319,22 @@ export function Constellation({
                       {s.habit.creature_name ? s.habit.name : stageLabel}
                       {s.habit.creature_name && stageLabel ? ` \u00b7 ${stageLabel}` : ""}
                     </div>
+                    {/* Consistency bar (build habits) */}
+                    {!isQuit && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
+                        <div style={{ flex: 1, height: 4, borderRadius: 3, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                          <div style={{
+                            height: "100%", borderRadius: 3,
+                            width: `${s.consistency}%`,
+                            background: s.consistency >= 70 ? "#4caf50" : s.consistency >= 40 ? "#f59e0b" : "#ef4444",
+                            transition: "width .4s ease",
+                          }} />
+                        </div>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: th.textMuted, minWidth: 26, textAlign: "right" }}>
+                          {s.consistency}%
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {/* Streak */}
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
