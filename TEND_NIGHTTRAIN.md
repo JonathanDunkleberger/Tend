@@ -211,9 +211,11 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       *(shift 4: PWA install prompt + on-brand manifest. shift 5: reduced-motion guard, `:focus-visible`
       ring, accessible role="checkbox" check-off, warm empty-garden state, `syncError` save-fail toasts,
       egg-warming viz. shift 6: `clickable()` a11y helper made the garden's primary tap targets
-      keyboard-operable (roles + Enter/Space + aria-labels). Remaining: colour-contrast check both
-      themes (needs browser/tooling), optional per-view skeletons + service worker — all minor. The
-      real gate here is a real-device eyeball.)*
+      keyboard-operable (roles + Enter/Space + aria-labels). shift 7: **WCAG contrast pass across all
+      three surfaces** (THEME map both themes + landing + /pricing), each pair verified via computed
+      luminance ratios — no browser needed; light-theme subtext went from ~1.5–2:1 (near-invisible) to
+      ≥4.5:1 AA. Remaining: optional per-view skeletons + service worker (SW deliberately skipped until
+      browser-verifiable) — all minor. The real gate here is a real-device eyeball.)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
       rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
       Landing/onboarding/manifest already on-brand. Remaining: eyeball in-app copy on a real device;
@@ -296,8 +298,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
     colour-swatch pickers (`role="radio"` + aria-checked), paywall colour cards (commit `1642b05`).
     Verified you-screen/wellness-hub/bottom-nav already use real `<button>`s; paywall CTAs too (the
     remaining div-onClicks in tend-plus-screen/urge-support are modal backdrops — correct as-is).
-    STILL OPEN in this bucket: **contrast check** both themes (needs a browser/tooling pass); optional
-    per-view Insights skeletons + a minimal service worker (SW not required for install).
+    ✅ (b) **CONTRAST CHECK — DONE (shift 7)**, done rigorously *without* a browser by computing WCAG
+    luminance ratios for every text/bg pair. Three commits: (1) `constants.ts` THEME map — light-theme
+    subtext was near-invisible (`textSub` 1.98:1, `textMuted`/`label` 1.52:1); raised alphas so
+    textSub/label ≥4.5:1 (AA) and textMuted ≥3:1 (AA-large) in **both** themes, both bg+card (~161
+    subtext usages fixed in one change). (2) `app/page.tsx` landing — 10 failing colors incl. the hero
+    subtitle (4.23:1) + final-CTA subtitle (3.48:1) → all ≥4.5:1 (kept the soft hierarchy; decorative
+    footer wordmark left, logos are WCAG-exempt). (3) `/pricing` route — `text-slate-400` (2.56:1) on
+    toggle labels + plan period → slate-500; `text-green-600` savings badge (3.30:1) → green-700;
+    disabled button left (inactive controls exempt). All verified via a luminance script; build+lint
+    green. STILL OPEN in this bucket (all optional/minor): per-view Insights skeletons + a minimal
+    service worker (deliberately SKIPPED — a fetch-intercepting SW can't be safely shipped untested and
+    the frontier itself marks it not-required-for-install; leave for a shift that can browser-verify).
 15. ✅ **[PHASE 4] Wellness leftovers — DONE (shift 6).** (a) **Gratitude now persists server-side**
     (commit `be566c1`): migration-008 + schema add a `gratitude_entries` JSONB column on
     user_preferences; `/api/preferences` GET/PUT read+accept it; garden/page hydrates it into
@@ -322,13 +334,17 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > 5 left are intentional — see #17). DONE: front door (landing + onboarding), bottom-nav shell,
 > Wellness + You screens, assumes-best one-tap check-in, **Phase 3 deep Insights + Tend Wrapped**
 > (shift 3), grace-token UX + pricing model §13 + PWA install (shift 4), Phase 6 polish + branding
-> audit (shift 5), and **shift 6 = keyboard-a11y + wellness leftovers + lint**: a reusable
-> `clickable()` helper made the garden's primary tap targets keyboard-operable (#14a), **gratitude now
-> persists server-side + shows in Insights** (migration-008), a **"Wind down" calm/night mode** shipped
-> as a 5th wellness tool (#15 fully done), and lint dead-code was cleared (#17). **§8 DoD now shows
-> only 3 items un-checked**, and ALL THREE hinge on **browser-verification** (auth-gated) rather than
-> new code — the remaining pure-code levers are minor/optional (contrast check, per-view skeletons,
-> service worker, the §13 price change). **BIGGEST BLOCKER TO DECLARING DONE: none of the shift-2→6 UI
+> audit (shift 5), **shift 6 = keyboard-a11y + wellness leftovers + lint** (a reusable `clickable()`
+> helper made the garden's primary tap targets keyboard-operable (#14a), **gratitude now persists
+> server-side + shows in Insights** (migration-008), a **"Wind down" calm/night mode** as a 5th
+> wellness tool (#15 done), lint dead-code cleared (#17)), and **shift 7 = a full WCAG CONTRAST PASS**
+> across all three surfaces — the THEME map (both themes), the landing, and /pricing — every text/bg
+> pair fixed to ≥4.5:1 AA and *verified by computing luminance ratios, so no browser was needed*
+> (light-theme subtext had been a near-invisible ~1.5–2:1). That closes the last meaningful pure-code
+> polish lever (#14b). **§8 DoD now shows only 3 items un-checked**, and ALL THREE hinge on
+> **browser-verification** (auth-gated) rather than new code — the only remaining pure-code levers are
+> minor/optional (per-view skeletons, a service worker [skip until browser-verifiable], the §13 price
+> change). **BIGGEST BLOCKER TO DECLARING DONE: none of the shift-2→7 UI
 > is browser-verified** — it all renders behind Clerk auth. A successor (or Jonny) with real keys must
 > eyeball the whole app once: Wrapped reel, nav, wellness tools (incl. the new Wind-down mode), You
 > screen, grace-token badge/detail, one-tap, egg-warming bars, empty-garden state, and the new gratitude
