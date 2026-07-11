@@ -250,21 +250,26 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > (SoftwareApplication + FAQPage) so Google can render an app rich-card and surface the shift-10 FAQ
 > as a rich snippet. It was the last genuinely-verifiable landing lever — zero client JS, verified
 > end-to-end against `next start` (both blocks in the SSR HTML, valid JSON, offers Free=$0/Tend+=$4.99,
-> all 6 FAQ answers plain-text). This is the honest floor now: the file://-verifiable landing surface
-> is **conversion + SEO complete** (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff/structured-
-> data all done), the cold-read bug vein is exhausted (shifts 49–53), and the §12 deferred list is down
-> to ONE Jonny-only item (verify-subscription 10-session Stripe fallback — needs real volume). **A
-> deliberately-rejected lever this shift:** converting the landing's Google-Fonts `<link>` to `next/font`
-> — would remove one render-blocking request, but the family names `'Fraunces'`/`'DM Sans'` are literal
-> strings across **94 sites**, so a full conversion is invasive AND the visual result can't be verified
-> in this sandbox → not worth the regression risk (documented so a successor doesn't reflexively retry;
-> it's a real win only on a shift that can browser-verify). **What's actually left is Jonny-only:**
-> (a) run `migration-009` + `-008` in Supabase (atomicity + gratitude — app falls back until then);
-> (b) the §13/#16 Stripe price change (keyed — new price IDs); (c) the bounce-back ramp fires for ALL
-> users not just after a lapse (product call); (d) the real-device / networked-browser eyeball of the
-> auth-gated app (§14). Do NOT re-run the exhausted cold-read hunt and do NOT manufacture churn — if no
-> genuinely-verifiable improvement remains next shift, say so plainly. **This branch is mature and ready
-> for Jonny's review + merge.**
+> NEXT SHIFT — shift 56 shipped the last SEO surface the site was missing: `/robots.txt` +
+> `/sitemap.xml` (#0aq). The landing had structured data (JSON-LD #0ap) + an OG card (#0ab) but NO
+> crawl directives and NO sitemap — nothing told Google what to index or pointed it at the rich
+> landing. Added Next metadata routes (`app/robots.ts`, `app/sitemap.ts`) + made both public in
+> middleware (same auth-gotcha /opengraph-image hit). Verified end-to-end vs `next start` (both 200,
+> right content-types, valid urlset, correct allow/disallow). **The site's on-page + technical SEO is
+> now genuinely complete** (structured-data + OG + robots + sitemap), the file://-verifiable landing is
+> conversion + SEO complete, the cold-read bug vein is exhausted (shifts 49–53), and §12 is down to ONE
+> Jonny-only item. **Two deliberately-rejected levers (documented so a successor doesn't reflexively
+> retry):** (1) `next/font` conversion of the Google-Fonts `<link>` — `'Fraunces'`/`'DM Sans'` are
+> literal strings across ~94 sites → invasive + visually unverifiable here; a real win only on a
+> browser-capable shift. (2) A `manifest.webmanifest`-vs-`manifest.json` rename / PWA-icon audit — the
+> manifest is already on-brand (shift 4) and PWA install already works; no verifiable defect to fix.
+> **What's actually left is Jonny-only:** (a) run `migration-009` + `-008` in Supabase (atomicity +
+> gratitude — app falls back until then); (b) the §13/#16 Stripe price change (keyed — new price IDs);
+> (c) the bounce-back ramp fires for ALL users not just after a lapse (product call); (d) the
+> real-device / networked-browser eyeball of the auth-gated app (§14). Do NOT re-run the exhausted
+> cold-read hunt and do NOT manufacture churn — the honest conclusion two shifts running is that no
+> further sandbox-verifiable improvement of consequence remains. **This branch is mature and ready for
+> Jonny's review + merge.**
 
 > PRIOR POINTER (shift 53) — re-triaged the §12 "for Jonny" list and banked the two that were actually
 > reasoning-verifiable guards (urge-entries habit-ownership check + Stripe email-clobber, #0an). Lesson
@@ -273,6 +278,25 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0aq. ✅ **[SHIFT 56] robots.txt + sitemap.xml — the last missing technical-SEO surface.** The landing
+   carried structured data (JSON-LD #0ap) and an OG card (#0ab), but the site had NO `robots.txt` and NO
+   `sitemap.xml` — so a crawler had zero index directives and nothing pointing it at the JSON-LD-rich
+   landing (crawl-budget + discoverability left on the floor). Added two Next metadata routes:
+   **`app/robots.ts`** (`allow: /`; `disallow` the auth-gated app + `/preview` QA harness — all would
+   only 302 to sign-in or expose a mock-data page → wasted budget/thin results; `sitemap:` pointer) and
+   **`app/sitemap.ts`** (a single canonical public URL `/` with `lastModified`/`changeFrequency`/
+   `priority` — every other route is auth-gated so deliberately excluded). Both read the same
+   `NEXT_PUBLIC_APP_URL || "https://tendhabit.com"` as `layout.tsx`'s `metadataBase`. **middleware.ts:**
+   added `/robots.txt` + `/sitemap.xml` to the PUBLIC route matcher — their extensions aren't in the
+   static-asset skip list, so without this Clerk's `auth.protect()` would 302 crawlers to sign-in
+   (exactly the gotcha `/opengraph-image` hit in shift 10). Both render statically (○), zero client JS.
+   **Verified end-to-end against `next start`** (not just cold-read): both fetched **HTTP 200** (proving
+   the public-matcher works — not auth-redirected), correct content-types (`text/plain` / `application/
+   xml`), valid sitemap `urlset` schema, robots allow/disallow correct. (The dev output showed
+   `localhost:3000` — that's only the gitignored `.env.local` build placeholder inlining the
+   `NEXT_PUBLIC_` var; the committed fallback is the real domain.) build GREEN, lint 0/5, test 99/99,
+   1 commit. **This completes the site's technical SEO** (structured-data + OG + robots + sitemap).
 
 0ap. ✅ **[SHIFT 55] Landing structured data (schema.org JSON-LD) — the search-rich-results lever.**
    The landing (the one file://-verifiable, conversion-critical surface) had ZERO structured data, so
