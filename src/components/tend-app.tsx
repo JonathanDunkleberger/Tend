@@ -37,6 +37,7 @@ import type { CoinTier } from "@/components/milestone-coin";
 import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
 import { Ceremony } from "@/components/ceremony";
+import { StreakFlame } from "@/components/streak-flame";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
@@ -2459,6 +2460,17 @@ export function TendApp({
                     <p style={{ fontSize: 10, color: th.textFaint, marginTop: 1 }}>
                       {fmtQuitDate(dqd.quitDate)}
                     </p>
+                  )}
+                  {/* Build-habit streak flame — the "your streak, earned" moment.
+                      The flame grows + heats with the streak (reduced-motion safe). */}
+                  {!dq && getStreak(detailHabit.id) > 0 && (
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: 6, marginTop: 10,
+                      padding: "5px 14px", borderRadius: 100, background: th.progressBg,
+                    }}>
+                      <StreakFlame streak={getStreak(detailHabit.id)} size={20} showCount />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: th.textSub }}>day streak</span>
+                    </div>
                   )}
                   {/* Name your creature prompt — if not yet named and stage >= 1 */}
                   {!detailHabit.creature_name && getStageForId(detailHabit.id) >= 1 && (
