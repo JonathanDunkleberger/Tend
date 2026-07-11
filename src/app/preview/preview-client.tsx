@@ -40,6 +40,7 @@ import { Constellation } from "@/components/constellation";
 import { TerrariumScene } from "@/components/terrarium-scene";
 import { Ceremony } from "@/components/ceremony";
 import { StreakFlame } from "@/components/streak-flame";
+import { AnimatedNumber } from "@/components/animated-number";
 
 /* ───────────────────────── mock data ───────────────────────── */
 
@@ -298,7 +299,7 @@ function GardenPreview({ th, dark }: { th: (typeof THEME)["light"]; dark: boolea
         <span style={{
           marginLeft: "auto", fontSize: 11, fontWeight: 700, color: "#d97706",
           background: th.coinBg, padding: "3px 10px", borderRadius: 100,
-        }}>🪙 {helpers.coins}</span>
+        }}>🪙 <AnimatedNumber value={helpers.coins} /></span>
       </div>
 
       {/* The real terrarium scene — the dragon showcase, the #1 emotional pillar */}

@@ -38,6 +38,7 @@ import { MorningCheckin } from "@/components/morning-checkin";
 import { CreatureNamingModal } from "@/components/creature-naming-modal";
 import { Ceremony } from "@/components/ceremony";
 import { StreakFlame } from "@/components/streak-flame";
+import { AnimatedNumber } from "@/components/animated-number";
 import { ShareCard } from "@/components/share-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
@@ -1755,7 +1756,7 @@ export function TendApp({
               background: th.coinBg, color: "#d97706",
               fontSize: 11, fontWeight: 700, cursor: "pointer",
             }}>
-              <Coins size={11} />{coins}
+              <Coins size={11} /><AnimatedNumber value={coins} />
             </div>
             {totalSaved > 0 && (
               <div style={{
