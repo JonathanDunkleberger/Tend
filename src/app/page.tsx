@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- dragon sprites are small static PNGs served from /public; plain <img> keeps this a zero-client-JS server component and matches the rest of the app. */
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -74,28 +75,24 @@ export default async function LandingPage() {
         <div className="tHeroArt" aria-hidden>
           <div className="tHeroDisc" />
           <img
-            /* eslint-disable-next-line @next/next/no-img-element */
             src={getDragonSprite(4, 33)}
             alt=""
             className="tHeroDragon"
             draggable={false}
           />
           <img
-            /* eslint-disable-next-line @next/next/no-img-element */
             src={getDragonSprite(0, 7)}
             alt=""
             className="tHeroEgg tHeroEgg1"
             draggable={false}
           />
           <img
-            /* eslint-disable-next-line @next/next/no-img-element */
             src={getDragonSprite(0, 14)}
             alt=""
             className="tHeroEgg tHeroEgg2"
             draggable={false}
           />
           <img
-            /* eslint-disable-next-line @next/next/no-img-element */
             src={getDragonSprite(0, 24)}
             alt=""
             className="tHeroEgg tHeroEgg3"
@@ -150,7 +147,6 @@ export default async function LandingPage() {
             <div key={s.n} className="tStep">
               <div className="tStepArt">
                 <img
-                  /* eslint-disable-next-line @next/next/no-img-element */
                   src={s.sprite}
                   alt={s.title}
                   className="tStepSprite"
@@ -208,7 +204,6 @@ export default async function LandingPage() {
           {[5, 10, 16, 22, 28, 33, 36, 3, 21, 14].map((id, i) => (
             <img
               key={id}
-              /* eslint-disable-next-line @next/next/no-img-element */
               src={getDragonSprite(4, id)}
               alt=""
               className="tDragonChip"
