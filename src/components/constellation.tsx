@@ -61,6 +61,99 @@ function smoothPath(pts: { x: number; y: number }[], close = false): string {
   return d;
 }
 
+/**
+ * A small circular progress ring with the value centered inside. Sequential-by-
+ * magnitude fill (the caller passes the graded color) over a recessive track.
+ * Pure SVG + an HTML overlay label → renders identically at SSR (file://-verifiable).
+ */
+function ConsistencyRing({ pct, color, th, size = 42 }: { pct: number; color: string; th: ThemeColors; size?: number }) {
+  const stroke = 4;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = Math.max(0, Math.min(1, pct / 100)) * circ;
+  const cxy = size / 2;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)", display: "block" }}>
+        <circle cx={cxy} cy={cxy} r={r} fill="none" stroke={th.progressBg} strokeWidth={stroke} />
+        <circle
+          cx={cxy} cy={cxy} r={r} fill="none" stroke={color} strokeWidth={stroke}
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          style={{ transition: "stroke-dasharray .5s cubic-bezier(.4,0,.2,1)" }}
+        />
+      </svg>
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 11, fontWeight: 800, color: th.text, letterSpacing: -0.3,
+      }}>{pct}</div>
+    </div>
+  );
+}
+
+/** Grade a 0–100 consistency into the status ramp (paired with the numeric label, never color-alone). */
+function gradeColor(pct: number): string {
+  return pct >= 70 ? "#4caf50" : pct >= 40 ? "#f59e0b" : "#ef4444";
+}
+
+/**
+ * Best-day "polar area" (nightingale rose): 7 sectors, one per weekday, radius ∝
+ * completion rate. Days-of-week are cyclical, so a radial reads more naturally
+ * than a bar row — and it's a lovelier centerpiece. Single-hue sequential (green)
+ * by magnitude; the best day gets the fullest, brightest wedge + a highlighted
+ * label. Pure SVG (viewBox units) so it's crisp at any width and SSR-stable.
+ */
+function PolarDays({
+  data, bestDay, worstDay, th,
+}: {
+  data: { name: string; pct: number }[];
+  bestDay: number;
+  worstDay: number;
+  th: ThemeColors;
+}) {
+  const S = 220, cx = S / 2, cy = S / 2, maxR = 82, floor = 10;
+  const seg = (Math.PI * 2) / 7;
+  const gap = 0.05; // radians of surface gap between wedges
+  const hasSpread = data[worstDay].pct < data[bestDay].pct;
+  return (
+    <svg viewBox={`0 0 ${S} ${S}`} width="100%" style={{ display: "block", maxWidth: 260, margin: "2px auto 0" }}>
+      {/* recessive concentric grid at 25 / 50 / 75 / 100% */}
+      {[0.25, 0.5, 0.75, 1].map((g) => (
+        <circle key={g} cx={cx} cy={cy} r={floor + g * (maxR - floor)} fill="none"
+          stroke={th.cardBorder} strokeWidth="1" opacity={g === 1 ? 0.7 : 0.4} />
+      ))}
+      {data.map((d, i) => {
+        const ac = i * seg - Math.PI / 2; // sector center, start at top (Sun)
+        const a0 = ac - seg / 2 + gap;
+        const a1 = ac + seg / 2 - gap;
+        const rr = floor + (d.pct / 100) * (maxR - floor);
+        const x0 = cx + Math.cos(a0) * rr, y0 = cy + Math.sin(a0) * rr;
+        const x1 = cx + Math.cos(a1) * rr, y1 = cy + Math.sin(a1) * rr;
+        const isBest = i === bestDay && hasSpread;
+        const isWorst = i === worstDay && hasSpread;
+        // Sequential green by magnitude; best day fullest, worst day dimmest.
+        const fill = isBest ? "#4caf50" : isWorst ? "#ef4444" : "#66bb6a";
+        const op = isBest ? 0.95 : isWorst ? 0.5 : 0.28 + (d.pct / 100) * 0.4;
+        // label just outside the max ring
+        const lr = maxR + 14;
+        const lx = cx + Math.cos(ac) * lr, ly = cy + Math.sin(ac) * lr;
+        return (
+          <g key={i}>
+            <path
+              d={`M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${rr.toFixed(2)} ${rr.toFixed(2)} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`}
+              fill={fill} opacity={op}
+            />
+            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
+              fontSize="10" fontWeight={isBest || isWorst ? 700 : 500}
+              fill={isBest ? "#4caf50" : isWorst ? "#ef4444" : th.textMuted}>
+              {d.name[0]}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function Constellation({
   habits, isDone, getStreak, getTotal, getCleanDays, getBestStreak, getStage,
   isPro, onUpgrade, th, gratitudeLog,
@@ -228,6 +321,23 @@ export function Constellation({
   };
   const advice = getAdvice();
 
+  // ── Headline summary ("here's how you're doing this week") ──
+  // A warm one-line read of the week, keyed off this-week completion % + the
+  // momentum delta vs last week. Purely derived from weeklyTrend (already memoized).
+  const thisWeekPct = weeklyTrend[weeklyTrend.length - 1]?.pct ?? 0;
+  const lastWeekPct = weeklyTrend[weeklyTrend.length - 2]?.pct ?? 0;
+  const weekDelta = thisWeekPct - lastWeekPct;
+  const headline: { emoji: string; text: string } | null =
+    habits.length === 0
+      ? null
+      : thisWeekPct >= 85
+        ? { emoji: "🔥", text: weekDelta >= 0 ? "You’re on fire this week — keep the flame going." : "Still a strong week — a small dip, nothing to worry about." }
+        : thisWeekPct >= 60
+          ? { emoji: "🌱", text: weekDelta > 0 ? "Building beautifully — you’re up from last week." : weekDelta < 0 ? "A solid week with a gentle dip — easy to recover." : "Steady and consistent — right on track." }
+          : thisWeekPct >= 30
+            ? { emoji: "🌤", text: weekDelta > 0 ? "Momentum is turning your way — lovely comeback." : "A quieter week. One small tend tomorrow turns it around." }
+            : { emoji: "🤍", text: "Fresh-start energy. Tend one egg today and the curve turns up." };
+
   // How many scoreboard rows free users see
   const FREE_SCOREBOARD_LIMIT = 3;
 
@@ -236,8 +346,40 @@ export function Constellation({
       {/* Title */}
       <div style={{ textAlign: "center", marginBottom: 12 }}>
         <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 700, color: th.text }}>Insights</h2>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>Your habits at a glance</p>
+        <p style={{ fontSize: 13, color: th.textMuted, marginTop: 2 }}>Your habits at a glance</p>
       </div>
+
+      {/* ── 0. Headline summary — the warm "how you're doing this week" hero ── */}
+      {headline && (
+        <div className="cd" style={{
+          padding: 16, marginBottom: 10, display: "flex", alignItems: "center", gap: 16,
+          background: "linear-gradient(135deg, rgba(76,175,80,0.12), rgba(76,175,80,0.02))",
+          borderColor: "rgba(76,175,80,0.22)", boxShadow: th.cardShadow,
+        }}>
+          <div style={{ textAlign: "center", flexShrink: 0, minWidth: 62 }}>
+            <div style={{
+              fontSize: 34, fontWeight: 800, fontFamily: "'Fraunces',serif", lineHeight: 1,
+              color: thisWeekPct >= 60 ? "#4caf50" : th.text,
+            }}>{thisWeekPct}<span style={{ fontSize: 16, fontWeight: 600 }}>%</span></div>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase" as const, color: th.label, marginTop: 3 }}>This week</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, color: th.text, fontWeight: 600, lineHeight: 1.45 }}>
+              <span style={{ marginRight: 5 }}>{headline.emoji}</span>{headline.text}
+            </div>
+            {lastWeekPct > 0 || weekDelta !== 0 ? (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4, marginTop: 8,
+                fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
+                color: weekDelta > 0 ? "#4caf50" : weekDelta < 0 ? "#e57373" : th.textMuted,
+                background: weekDelta > 0 ? "rgba(76,175,80,0.14)" : weekDelta < 0 ? "rgba(229,115,115,0.14)" : th.progressBg,
+              }}>
+                {weekDelta > 0 ? "▲" : weekDelta < 0 ? "▼" : "•"} {weekDelta > 0 ? "+" : ""}{weekDelta}% vs last week
+              </span>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {/* ── 1. Overview stats ── */}
       <div className="cd" style={{ padding: 16, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
@@ -353,7 +495,7 @@ export function Constellation({
           <div className="lb" style={{ marginBottom: 10, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
             <Trophy size={10} /> Habit Scoreboard
             <span style={{ fontWeight: 500, textTransform: "none", letterSpacing: 0, color: th.textMuted, marginLeft: "auto", fontSize: 9 }}>
-              bar = 30-day consistency
+              ring = 30-day consistency
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -362,47 +504,34 @@ export function Constellation({
               const stageLabel = getStage ? STAGE_LABELS[s.stage] : "";
               return (
                 <div key={s.habit.id} style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "8px 10px", borderRadius: 10,
-                  background: i === 0 ? "rgba(255,255,255,0.03)" : "transparent",
+                  display: "flex", alignItems: "center", gap: 11,
+                  padding: "9px 10px", borderRadius: 12,
+                  background: i === 0 ? th.hoverBg : "transparent",
                 }}>
-                  {/* Rank */}
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 6,
-                    background: i === 0 ? `${s.habit.color}20` : "rgba(255,255,255,0.03)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 700, color: i === 0 ? s.habit.color : th.textMuted,
-                  }}>
-                    {i + 1}
-                  </div>
+                  {/* Consistency ring (build) or a clean-streak shield (quit) \u2014 the row's visual anchor */}
+                  {isQuit ? (
+                    <div style={{
+                      position: "relative", width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: "rgba(74,222,128,0.1)", border: "1.5px solid rgba(74,222,128,0.3)",
+                    }}>
+                      <Shield size={17} color="#4ade80" />
+                    </div>
+                  ) : (
+                    <ConsistencyRing pct={s.consistency} color={gradeColor(s.consistency)} th={th} />
+                  )}
                   {/* Name */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
-                      fontSize: 13, fontWeight: 600, color: th.text,
+                      fontSize: 13.5, fontWeight: 600, color: th.text,
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
                       {s.habit.creature_name || s.habit.name}
                     </div>
-                    <div style={{ fontSize: 10, color: th.textSub, marginTop: 1 }}>
+                    <div style={{ fontSize: 10.5, color: th.textSub, marginTop: 2 }}>
                       {s.habit.creature_name ? s.habit.name : stageLabel}
                       {s.habit.creature_name && stageLabel ? ` \u00b7 ${stageLabel}` : ""}
                     </div>
-                    {/* Consistency bar (build habits) */}
-                    {!isQuit && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
-                        <div style={{ flex: 1, height: 4, borderRadius: 3, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-                          <div style={{
-                            height: "100%", borderRadius: 3,
-                            width: `${s.consistency}%`,
-                            background: s.consistency >= 70 ? "#4caf50" : s.consistency >= 40 ? "#f59e0b" : "#ef4444",
-                            transition: "width .4s ease",
-                          }} />
-                        </div>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: th.textMuted, minWidth: 26, textAlign: "right" }}>
-                          {s.consistency}%
-                        </span>
-                      </div>
-                    )}
                   </div>
                   {/* Streak */}
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -453,40 +582,24 @@ export function Constellation({
       {/* ── 4. Day-of-week analysis (PRO) ── */}
       {isPro && buildHabits.length > 0 && (
         <div className="cd" style={{ padding: 14, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
-          <div className="lb" style={{ marginBottom: 10, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
+          <div className="lb" style={{ marginBottom: 4, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
             <Calendar size={10} /> Completion by Day
           </div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 70, padding: "0 2px" }}>
-            {dayOfWeekData.map((d, i) => {
-              const barH = Math.max(3, (d.pct / 100) * 52);
-              const isBest = i === bestDay;
-              const isWorst = i === worstDay && d.pct < dayOfWeekData[bestDay].pct;
-              return (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  <div style={{
-                    fontSize: 9, fontWeight: 600,
-                    color: isBest ? "#4caf50" : isWorst ? "#ef4444" : th.textMuted,
-                  }}>
-                    {d.pct}%
-                  </div>
-                  <div style={{
-                    width: "100%", maxWidth: 28, height: barH, borderRadius: 4,
-                    background: isBest
-                      ? "linear-gradient(to top, #4caf50, #66bb6a)"
-                      : isWorst
-                        ? "rgba(239,68,68,0.3)"
-                        : "rgba(76,175,80,0.2)",
-                  }} />
-                  <div style={{
-                    fontSize: 8, fontWeight: 600,
-                    color: isBest ? "#4caf50" : isWorst ? "#ef4444" : th.textMuted,
-                  }}>
-                    {d.name}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <PolarDays data={dayOfWeekData} bestDay={bestDay} worstDay={worstDay} th={th} />
+          {/* best / worst callout beneath the rose */}
+          {dayOfWeekData[worstDay].pct < dayOfWeekData[bestDay].pct && (
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, margin: "6px 0 2px" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 15, fontWeight: 800, fontFamily: "'Fraunces',serif", color: "#4caf50" }}>{dayOfWeekData[bestDay].name}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase" as const, color: th.label }}>Best · {dayOfWeekData[bestDay].pct}%</div>
+              </div>
+              <div style={{ width: 1, background: th.cardBorder }} />
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 15, fontWeight: 800, fontFamily: "'Fraunces',serif", color: "#ef4444" }}>{dayOfWeekData[worstDay].name}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase" as const, color: th.label }}>Toughest · {dayOfWeekData[worstDay].pct}%</div>
+              </div>
+            </div>
+          )}
           {dayOfWeekData[worstDay].pct < dayOfWeekData[bestDay].pct && (
             <div style={{
               marginTop: 8, padding: "6px 10px", borderRadius: 8,
