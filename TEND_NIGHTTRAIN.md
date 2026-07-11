@@ -218,7 +218,12 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       grow-first twilight-garden flow. NOT yet browser-verified — auth-gated.)*
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
       progress, dragon evolution art showcased with animation. *(shift 2: one-tap assumes-best check-in.
-      shift 5: ambient egg-warming progress bar per garden row. Left: browser-verify on a real phone.)*
+      shift 5: ambient egg-warming progress bar per garden row. **run-2 shift 3: the dragon-art
+      "showcased with animation" clause is now BUILT** — `components/ceremony.tsx` plays a full-screen
+      hatch (egg cracks → dragon emerges) + evolution ceremony on every stage-up, browser-verified
+      light+dark via file:// (`scripts/shots/preview-{hatch,evolve}-fold.png`); plus a habit-colored
+      check-off ring burst on the daily tap. Left: the live-motion + real-phone eyeball (Jonny's, as
+      always — interaction/animation can't be file://-verified).)*
 - [x] A **deep analytics** screen that genuinely helps + a shareable **Wrapped**. *(shift 3: Insights
       page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
       synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
@@ -311,24 +316,29 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
    egg-warming + one-tap check) and the full **Insights** analytics screen (real heatmap + Constellation
    on rich mock history). Both screenshotted light+dark via `file://`. The harness is now a thin
    server wrapper (`page.tsx`, reads `?view=` / `?dark=`) + client module (`preview-client.tsx`) so the
-   pipeline can capture any surface/theme without tab-switching JS.)* **Still to mount:** a **habit
-   detail** (dragon hero at each stage + egg-warming + grace shield) and the **hatch + evolution
-   ceremonies** — those pair naturally with item #2 (they're mostly a motion surface). Detail needs a
-   small extraction from the monolith (the detail view is inline ~line 2310); scope it as its own step.
+   pipeline can capture any surface/theme without tab-switching JS.)* *(run-shift-3: the **hatch +
+   evolution ceremonies** are now mounted (`?view=hatch` / `?view=evolve`) — each renders the reveal
+   money-shot for file:// (proof: `scripts/shots/preview-{hatch,evolve}-fold.png`, light+dark) and
+   replays the full sequence in a live browser via the Continue button.)* **Still to mount:** a **habit
+   detail** (dragon hero at each stage + egg-warming + grace shield). Detail needs a small extraction
+   from the monolith (the detail view is inline ~line 2320); scope it as its own step.
 
 2. **PREMIUM MOTION + MICRO-INTERACTION PASS** (the "cool as f***" mandate — the biggest gap vs §2).
-   *(run-shift-3 IN PROGRESS: building `components/ceremony.tsx` — a shared full-screen **HatchCeremony**
-   (egg rocks → cracks with a light-flash + shard burst → dragon springs in with light rays + confetti +
-   coin burst) and **EvolutionCeremony** (old stage dissolves → new stage springs up through a ray burst).
-   Reduced-motion gated (skips straight to the revealed frame, no rocking/crack). Takes a `previewPhase`
-   prop so the file:// SSR snapshot can render the money-shot "reveal" frame for composition verification.
-   Then wire into the monolith: play HatchCeremony before the naming ceremony on 0→1, EvolutionCeremony on
-   each stage-up. New /preview views `hatch` + `evolve` render the reveal frame.)*
-   Still to build after: a **satisfying one-tap check-off** (spring/scale + optional haptic via
-   `navigator.vibrate` + a soft chime, sound-optional), a **streak-flame** flourish, a **coin-counter
-   roll**, and smooth **page/tab transitions**. Use CSS/Web-Animations, keep 60fps, gate ALL of it behind
-   `useReducedMotion` (the pattern already exists). Compile- + composition-verify via `/preview`; flag the
-   live-motion eyeball for Jonny. Showcase the purchased dragon art as the emotional payoff it's meant to be.
+   *(run-shift-3 SHIPPED the two biggest beats: `components/ceremony.tsx` — a shared full-screen
+   **Hatch** (egg rocks → cracks with a light-flash + shard burst + expanding ring → dragon springs in
+   with rotating light rays + confetti + coin burst) and **Evolution** (dragon charges/glows → flash →
+   next stage springs up bigger). Reduced-motion gated (starts at the finished reveal frame, Confetti
+   self-gates). `previewPhase` prop → file:// captures the money shot. WIRED into the monolith's stage
+   detector: hatch plays then chains to naming; evolution on stage-up; a DOWNWARD move (a slip) stays
+   silent — never celebrate a lapse. ALSO shipped a **check-off ring burst** (habit-colored ring pops out
+   of the check circle on the real tap, keyed off the transient `bouncingId` so it never fires on load).
+   IMPORTANT ART CONSTRAINT discovered: there is ONE dragon sprite per species — stages 1–4 SHARE it, only
+   SIZE differs (`getDragonSprite` returns `dragon_NN.png` for all stages≥1). So evolution "growth" is
+   conveyed by `heroSize(stage)` scaling, not new art. Don't expect distinct per-stage dragon art.)*
+   Still to build: a **soft chime** on check/hatch (sound-optional, off by default), a **streak-flame**
+   flourish, a **coin-counter roll**, and smooth **page/tab transitions**. Use CSS/Web-Animations, keep
+   60fps, gate ALL of it behind `useReducedMotion`. Compile- + composition-verify via `/preview`; flag the
+   live-motion eyeball for Jonny (interaction-triggered motion can't be file://-verified).
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
@@ -692,7 +702,26 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   app (the dragon art, the #1 pillar, collapsing to an egg on return). Confirms the shift-57 rule: before
   trusting "well-swept," enumerate which FILES were actually read.
 
-## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
+- *(run-2 shift 3)* **The hatch/evolution ceremony is ONE shared component driven by a 3-phase machine,
+  and the whole thing is composition-verifiable offline because of a `previewPhase` escape hatch.**
+  Design calls worth recording. (1) **One `Ceremony` (kind: hatch | evolve), not two** — the beats are
+  identical (a "before" state → break/flash → spring-in reveal + rays + confetti + coin burst); only the
+  "before" art (egg vs previous-stage dragon) and copy differ. (2) **All motion is CSS-driven** so the
+  existing global `prefers-reduced-motion` rule already neuters durations; on TOP of that, reduced-motion
+  users START at the `reveal` phase (via `useState(previewPhase ?? (reduced ? "reveal" : "rock"))`) so
+  they never see a half-played frame, and shard/coin directions are HARDCODED (no `Math.random`) so the
+  SSR snapshot is byte-stable. (3) **`previewPhase="reveal"` forces the finished frame at SSR** — that's
+  what let file:// screenshot the money shot (the pipeline can only see pre-hydration markup; a
+  phase-machine would otherwise only ever snapshot the initial "rock" frame). The /preview CeremonyPreview
+  passes it only on the first mount, so tapping Continue remounts WITHOUT it and a live browser replays
+  the real sequence. (4) **A downward stage move is deliberately SILENT** — the monolith wiring only fires
+  on `curr > prev`, so a slip that de-evolves the dragon never triggers a "celebration" (brand-soul: never
+  shaming). (5) **THE ART CONSTRAINT:** `getDragonSprite` has ONE `dragon_NN.png` per species for ALL
+  stages≥1 (only stage 0 differs = the egg). So there is no distinct per-stage dragon art; the sense of
+  "growth" on evolution is carried by `heroSize(stage)` size-scaling + the happy glow, nothing more. Any
+  future "show the dragon evolving through forms" idea must reckon with this (it's a size/effect story,
+  not a new-silhouette story) unless more art is commissioned. Build/lint/test green (124), light+dark
+  file:// proof committed.
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
