@@ -5,7 +5,7 @@
 <h1 align="center">tend.</h1>
 
 <p align="center">
-  <strong>Quit bad habits. Grow new ones.</strong>
+  <strong>Your habits are dragon eggs. Tend them daily and watch them hatch.</strong>
 </p>
 
 <p align="center">
@@ -34,21 +34,29 @@
 
 ---
 
-## The Problem
+## The Idea
 
-Most habit trackers assume you already have momentum. They hand you a checkbox and a streak counter. But if you're on hour 6 of quitting nicotine, white-knuckling through cravings at 2 AM — you need more than a checkbox.
+Most habit trackers are cold. A checkbox, a streak counter, a guilt trip when you miss a day. Tend is the opposite — a calm little garden you tend every morning, where each habit is a **dragon egg** that hatches and evolves as you show up for it.
 
-**Tend is a habit tracker built for people fighting real battles.** It combines recovery support (guided breathing, urge journaling, physical redirects) with a gamified world that grows with your progress. Every quit habit plants an egg that cracks, wobbles, and hatches over 72 hours. Every urge you survive earns coins and brings your creature closer to life.
+**Tend assumes the best in you.** Every day defaults to *"you did well."* You only tell it when you slipped — and even then there's no shame, just a gentle pause before your egg keeps growing. Streaks, coins, and milestone rewards make tending feel great; deep analytics and a shareable *Tend Wrapped* show you how far you've come.
 
-It's [Forest](https://www.forestapp.cc/) meets [Tamagotchi](https://en.wikipedia.org/wiki/Tamagotchi) meets the hardest thing you've ever done.
+And when a habit is a hard one to break, Tend has your back: quitting is a **first-class mode** with guided breathing, urge support, healing timelines, and compassionate — never punishing — relapse handling. The garden holds the whole of you.
+
+It's [Forest](https://www.forestapp.cc/) meets [Tamagotchi](https://en.wikipedia.org/wiki/Tamagotchi), with the warmth of a garden you actually want to open.
 
 ---
 
 ## Features
 
+### Dragon-Egg Garden
+Every habit plants a **dragon egg**. Tend it and it visibly warms toward hatching, then evolves through five stages — **Egg → Hatchling → Whelp → Drake → Elder Dragon** — as your consistency grows. 36 hand-drawn dragon species (each with an element and rarity) are the emotional payoff, showcased across the garden, milestones, and your shareable *Tend Wrapped*.
+
+### Assumes the Best In You
+The daily loop defaults to *"you did well."* One tap — **"Everything went well today"** — marks every habit done, or you quietly report a slip. A slip never shames you; it just gently pauses the egg. **Grace tokens** (earned at streak milestones or bought with coins) protect a streak so one bad day never stings.
+
 ### Dual-Mode Habit Tracking
+- **Build habits** — daily check-offs for exercise, meditation, hydration, journaling, and anything you want to grow.
 - **Quit habits** — sobriety-style counters that tick automatically. You're clean unless you say otherwise. No daily checkboxes for things you're *not* doing.
-- **Build habits** — traditional daily check-offs for exercise, meditation, hydration, journaling, and anything you want to grow.
 
 ### Urge Intervention System
 When cravings hit, tap **Urge** and choose your weapon:
@@ -58,8 +66,8 @@ When cravings hit, tap **Urge** and choose your weapon:
 
 Every urge survived earns coins and accelerates egg hatching.
 
-### Living Planet
-Your habits grow creatures on a tiny planet inspired by *The Little Prince*. The planet starts with natural foliage — grass, flowers, a small tree — and fills with life as you progress. Creatures evolve through 5 stages (Egg → Hatchling → Young → Growing → Evolved) based on consistency.
+### Living Garden
+Your dragons grow on a tiny planet-garden inspired by *The Little Prince*. It starts with natural foliage — grass, flowers, a small tree — and fills with life as you progress. Dragons evolve through 5 stages (Egg → Hatchling → Whelp → Drake → Elder Dragon) based on consistency, and you can decorate the garden from the shop with coins.
 
 ### Egg Progression
 New quit habits begin as eggs that visually transform over 72 hours:
@@ -67,7 +75,7 @@ New quit habits begin as eggs that visually transform over 72 hours:
 - **12–24h**: Hairline crack, wobble begins
 - **24–48h**: Multiple cracks, pronounced wobble
 - **48–72h**: Heavy cracks, intense shaking, sparkle particles
-- **72h+**: Hatch animation with flash, burst, and creature reveal
+- **72h+**: Hatch animation with flash, burst, and dragon reveal
 
 ### AA-Style Milestone Coins
 Recovery medallions awarded at 2h, 6h, 12h, 24h, 48h, 72h, 1 week, 2 weeks, 1 month, 2 months, 3 months, 6 months, and 1 year. Color progression from stone gray → bronze → green → blue → purple → red → gold. Each coin is earned, never given.
@@ -76,23 +84,25 @@ Recovery medallions awarded at 2h, 6h, 12h, 24h, 48h, 72h, 1 week, 2 weeks, 1 mo
 Science-backed body recovery timelines for quit habits. See what's happening inside your body at each milestone — from heart rate normalizing at 2 hours to lung function improving at 90 days.
 
 ### Insights & Analytics
+- **Tend Wrapped** — a tap-through, Spotify-Wrapped-style story of your journey: total days, longest streak, your hero dragon, best day, and a shareable final card
 - **Multi-habit heatmap** — vertical color columns showing all habits at a glance
-- **Trigger patterns** — aggregated urge journal data revealing when and why cravings hit
+- **Per-habit consistency** — fair, capped-window completion rates so young habits aren't punished
 - **Habit synergies** — constellation visualization showing which habits reinforce each other
+- **Trigger patterns** — aggregated urge journal data revealing when and why cravings hit
 - **Money saved** — real-time calculator based on daily cost of the habit you quit
 
 ### Engagement Without Manipulation
 - **Morning check-in** — daily pledge ("I'm still clean") with a science fact about your body healing
-- **Creature reactions** — creatures respond to your habits (thriving, neglected, sleeping) via CSS state changes
+- **Dragon reactions** — your dragons respond to your habits (thriving, neglected, sleeping) via CSS state changes
 - **Night wind-down** — calm end-of-day screen when all habits are complete
 - **Compassionate relapse** — no shame, no red screens. "You went 3 days. That strength is still inside you."
 - **Weekly recap** — Sunday summary with habit completion rates, urges beaten, and coins earned
 
 ### Monetization
-- **Free tier**: 3 habits, all recovery features, basic shop, simplified insights
-- **Tend+** ($4.99/mo or $29.99/yr): Unlimited habits, +5 daily coins, full insights, premium decorations, custom colors
+- **Free tier**: up to 3 habit eggs, the full daily loop (assumes-best check-in, streaks, coins, hatching art), **all wellness tools**, grace tokens at milestones, and basic insights.
+- **Tend+** ($4.99/mo or $39.99/yr): unlimited habit eggs, choose your egg & species, full deep insights + *Tend Wrapped*, all garden décor & themes, extra grace tokens, +5 daily coins.
 
-Recovery features are **never** gated. Breathing, urge support, healing timelines, and relapse compassion are free forever.
+The core emotional loop is **never** gated. The whole garden, hatching art, wellness suite (breathing, grounding, urge-surf, gratitude), and relapse compassion are free forever — the paywall is depth and expression, not the soul.
 
 ---
 
@@ -114,7 +124,7 @@ Recovery features are **never** gated. Breathing, urge support, healing timeline
 | **UI** | React 19 + Tailwind CSS | Component architecture, utility styling |
 | **Auth** | Clerk | Authentication, user management, webhooks |
 | **Database** | Supabase (PostgreSQL) | Cloud persistence, RLS, real-time |
-| **Rendering** | Pixel art sprites (Sprout Lands) | Creature and decoration assets |
+| **Rendering** | Sprite art (custom dragons + Sprout Lands world) | Dragon, egg, and garden decoration assets |
 | **Icons** | Lucide React | Consistent, clean iconography |
 | **Typography** | Fraunces + DM Sans | Serif display + clean body |
 | **Payments** | Stripe (web) / StoreKit (iOS) | Subscription billing, webhook-verified |
@@ -170,13 +180,13 @@ vercel --prod
 ### v1.0 — Launch *(shipped)*
 - [x] Dual-mode habit tracking (build + quit)
 - [x] Urge intervention system (Breathe / Write / Redirect)
-- [x] Living planet with pixel art creatures
+- [x] Living garden with hand-drawn dragon art
 - [x] Egg progression with 72-hour hatch cycle
 - [x] AA-style milestone coins
 - [x] Healing timelines
 - [x] Coin economy + World Shop
 - [x] Tend+ subscription
-- [x] Morning check-in + creature reactions
+- [x] Morning check-in + dragon reactions
 - [x] Privacy policy + Terms of Service
 
 ### v1.1 — Cloud & Polish *(current)*
@@ -201,21 +211,21 @@ vercel --prod
 
 ### v2.0 — Growth
 - [ ] Seasonal events (cosmetic, Tend+ only)
-- [ ] Expanded creature catalog
-- [ ] Custom creature naming
+- [ ] Expanded dragon catalog
+- [ ] Custom dragon naming
 - [ ] Cloud sync (optional, encrypted)
 
 ---
 
 ## Philosophy
 
-### Recovery features are free. Forever.
+### The core loop is free. Forever.
 
-Breathing timer, urge journal, healing timelines, relapse support, and milestone coins will never be moved behind a paywall. If someone is having a craving at 2 AM, the last thing they should see is a purchase screen.
+The whole daily garden — assumes-best check-in, hatching art, streaks, coins — plus every wellness tool (breathing, grounding, urge-surf, gratitude) and all relapse support will never be moved behind a paywall. If someone is having a craving at 2 AM, the last thing they should see is a purchase screen.
 
 ### No shame mechanics.
 
-There are no red screens, broken streaks, or dying creatures. Relapsing shows: "You went 3 days. That strength is still inside you." Users earn +5 coins for honesty when they reset. The app should be the last thing someone deletes, not the first.
+There are no red screens, punished streaks, or dying dragons. Relapsing shows: "You went 3 days. That strength is still inside you." Users earn +5 coins for honesty when they reset. The app should be the last thing someone deletes, not the first.
 
 ### Your data is yours.
 
@@ -223,18 +233,18 @@ Tend stores data in an encrypted cloud database tied to your authenticated accou
 
 ### Engagement without addiction.
 
-We're building an app for people breaking addictions. The engagement model must be fundamentally different from apps that exploit attention. No loot boxes, no daily login obligations, no guilt notifications, no "your creature is dying" manipulation. Every feature should make users feel cared for, not surveilled.
+Tend is a place people come to care for themselves — including, sometimes, breaking a hard habit. The engagement model must be fundamentally different from apps that exploit attention. No loot boxes, no daily login obligations, no guilt notifications, no "your dragon is dying" manipulation. Every feature should make users feel cared for, not surveilled.
 
 ---
 
 ## Credits
 
-- **Creature & decoration art**: [Sprout Lands](https://cupnooble.itch.io/sprout-lands-asset-pack) by Cup Nooble
+- **World & decoration art**: [Sprout Lands](https://cupnooble.itch.io/sprout-lands-asset-pack) by Cup Nooble
 - **Icons**: [Lucide](https://lucide.dev/)
 - **Typography**: [Fraunces](https://fonts.google.com/specimen/Fraunces) by Undercase Type · [DM Sans](https://fonts.google.com/specimen/DM+Sans) by Colophon Foundry
 
 ---
 
 <p align="center">
-  <strong>tend.</strong> — Quit bad habits. Grow new ones.
+  <strong>tend.</strong> — Your habits are dragon eggs. Tend them daily and watch them hatch.
 </p>
