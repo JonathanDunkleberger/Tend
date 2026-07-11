@@ -36,6 +36,10 @@ export default async function LandingPage() {
     >
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
+      {/* schema.org structured data → rich results (app card + FAQ snippet) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(SOFTWARE_LD) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(FAQ_LD) }} />
+
       {/* ambient garden glow */}
       <div aria-hidden className="tGlow tGlow1" />
       <div aria-hidden className="tGlow tGlow2" />
@@ -398,6 +402,58 @@ const FAQS: { q: string; a: string }[] = [
     a: "Anytime, in a tap. If you downgrade you keep every dragon you’ve hatched and every day you’ve grown — nothing you tended disappears.",
   },
 ];
+
+/*
+ * Structured data (schema.org JSON-LD) — lets Google render rich results:
+ * a SoftwareApplication card (name/category/price) and, paired with the FAQ
+ * accordion above, an FAQ rich snippet that surfaces the Q&As directly in
+ * search. Server-rendered into the SSR HTML (zero client JS). Answer text is
+ * stripped of the inline <b>/<i> markup so it stays plain text + matches the
+ * visible copy (Google requires JSON-LD FAQ text to mirror on-page content).
+ */
+const LANDING_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
+const stripTags = (s: string) => s.replace(/<[^>]+>/g, "");
+
+const SOFTWARE_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Tend",
+  applicationCategory: "HealthApplication",
+  applicationSubCategory: "Habit Tracker",
+  operatingSystem: "Web, iOS, Android",
+  url: LANDING_URL,
+  description:
+    "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.",
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Free",
+      price: "0",
+      priceCurrency: "USD",
+      description: "Three dragon eggs, the full daily check-in, streaks, coins, and every wellness tool — free forever.",
+    },
+    {
+      "@type": "Offer",
+      name: "Tend+",
+      price: "4.99",
+      priceCurrency: "USD",
+      description: "Unlimited dragon eggs, deep insights, and garden décor. $4.99/mo or $39.99/yr.",
+    },
+  ],
+};
+
+const FAQ_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: stripTags(a) },
+  })),
+};
+
+// Escape `<` so a stray "</script>" in future copy can't break out of the tag.
+const ldJson = (o: unknown) => JSON.stringify(o).replace(/</g, "\\u003c");
 
 const CSS = `
 :root{ --g:${GREEN}; --gd:${GREEN_DEEP}; }
