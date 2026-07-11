@@ -2,7 +2,7 @@
 
 import { Creature } from "@/components/creature";
 import { Heart, RotateCcw } from "lucide-react";
-import { fmtDuration } from "@/lib/utils";
+import { fmtDuration, getStage } from "@/lib/utils";
 import type { ThemeColors } from "@/lib/constants";
 
 interface RelapseModalProps {
@@ -37,8 +37,10 @@ export function RelapseModal({ habit, cleanDays, bestStreak, onConfirm, onClose,
         textAlign: "center", animation: "su .35s cubic-bezier(.16,1,.3,1)",
         border: `1px solid ${th.cardBorder}`,
       }}>
-        {/* Creature — always shown happy/neutral, never sad */}
-        <Creature stage={Math.min(4, Math.floor(cleanDays / 5))} color={habit.color} happy size={64} />
+        {/* Creature — always shown happy/neutral, never sad. Use the shared getStage
+            thresholds (3/7/14/30) so its stage matches every other quit surface,
+            not a lone 5/10/15/20 Math.floor. */}
+        <Creature stage={getStage(cleanDays)} color={habit.color} happy size={64} />
 
         <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 18, fontWeight: 500, color: th.text, margin: "12px 0 6px" }}>
           It&apos;s okay
