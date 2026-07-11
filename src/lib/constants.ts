@@ -120,8 +120,8 @@ export const THEME: Record<"light" | "dark", ThemeColors> = {
   light: {
     bg: "#FAF8F3", card: "white", cardBorder: "rgba(0,0,0,0.04)",
     cardShadow: "0 1px 3px rgba(0,0,0,0.02),0 4px 16px rgba(0,0,0,0.015)",
-    text: "#1a1a2e", textSub: "rgba(0,0,0,.28)", textMuted: "rgba(0,0,0,.18)", textFaint: "rgba(0,0,0,.08)",
-    label: "rgba(0,0,0,.18)", hoverBg: "rgba(0,0,0,.01)", inputBg: "#FAFAF8", inputBorder: "rgba(0,0,0,.04)",
+    text: "#1a1a2e", textSub: "rgba(0,0,0,.55)", textMuted: "rgba(0,0,0,.42)", textFaint: "rgba(0,0,0,.2)",
+    label: "rgba(0,0,0,.55)", hoverBg: "rgba(0,0,0,.01)", inputBg: "#FAFAF8", inputBorder: "rgba(0,0,0,.04)",
     checkBorder: "rgba(0,0,0,.08)", progressBg: "rgba(0,0,0,.04)", overlayBg: "rgba(0,0,0,.15)",
     modalBg: "white", dangerBg: "rgba(239,68,68,.02)", dangerBorder: "rgba(239,68,68,.1)",
     streakBg: "rgba(0,0,0,.02)", streakActiveBg: "rgba(245,158,11,.06)", coinBg: "rgba(245,158,11,.06)",
@@ -131,8 +131,8 @@ export const THEME: Record<"light" | "dark", ThemeColors> = {
   dark: {
     bg: "#0f0f1a", card: "#1a1a2e", cardBorder: "rgba(255,255,255,0.06)",
     cardShadow: "0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.2)",
-    text: "#e8e6f0", textSub: "rgba(255,255,255,.45)", textMuted: "rgba(255,255,255,.3)", textFaint: "rgba(255,255,255,.12)",
-    label: "rgba(255,255,255,.3)", hoverBg: "rgba(255,255,255,.03)", inputBg: "#12122a", inputBorder: "rgba(255,255,255,.08)",
+    text: "#e8e6f0", textSub: "rgba(255,255,255,.6)", textMuted: "rgba(255,255,255,.42)", textFaint: "rgba(255,255,255,.2)",
+    label: "rgba(255,255,255,.55)", hoverBg: "rgba(255,255,255,.03)", inputBg: "#12122a", inputBorder: "rgba(255,255,255,.08)",
     checkBorder: "rgba(255,255,255,.12)", progressBg: "rgba(255,255,255,.06)", overlayBg: "rgba(0,0,0,.5)",
     modalBg: "#1a1a2e", dangerBg: "rgba(239,68,68,.08)", dangerBorder: "rgba(239,68,68,.2)",
     streakBg: "rgba(255,255,255,.04)", streakActiveBg: "rgba(245,158,11,.12)", coinBg: "rgba(245,158,11,.1)",
