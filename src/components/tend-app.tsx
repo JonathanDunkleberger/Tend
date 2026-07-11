@@ -305,8 +305,14 @@ export function TendApp({
   // ── Write-through persistence: server API + localStorage cache ──
   // Quit data and paused habits use point-of-action syncing (see updateQuitData, togglePause)
   // Preferences use effect-based syncing since multiple sources update them
-  const hasHydrated = useRef(false);
-  useEffect(() => { hasHydrated.current = true; }, []);
+  // First-render skip flags for the effect-based preference sync below. NOTE: a
+  // single shared "hasHydrated" ref set in its own useEffect does NOT work — passive
+  // effects run in definition order, so that setter fires BEFORE the guarded effects
+  // on the first commit and the guard is already true (dead). Each guarded effect
+  // therefore owns a ref it flips AFTER its own first run, so the mount PUT (which
+  // would echo the just-hydrated props back to the server) is truly skipped.
+  const milestoneCoinsHydrated = useRef(false);
+  const prefsHydrated = useRef(false);
 
   // Keep quit data localStorage cache in sync (server sync happens at point of action)
   useEffect(() => {
@@ -330,7 +336,7 @@ export function TendApp({
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("tend_milestone_coins", JSON.stringify(earnedMilestoneCoins));
-    if (!hasHydrated.current) return;
+    if (!milestoneCoinsHydrated.current) { milestoneCoinsHydrated.current = true; return; }
     apiSync("/api/preferences", "PUT", {
       earned_milestone_coins: earnedMilestoneCoins,
     });
@@ -341,7 +347,7 @@ export function TendApp({
     if (typeof window === "undefined") return;
     localStorage.setItem("tend_dark", darkMode ? "1" : "0");
     localStorage.setItem("tend_season", season);
-    if (!hasHydrated.current) return;
+    if (!prefsHydrated.current) { prefsHydrated.current = true; return; }
     apiSync("/api/preferences", "PUT", { dark_mode: darkMode, season });
   }, [darkMode, season]);
 
@@ -451,8 +457,11 @@ export function TendApp({
       setCoinToast({ msg: "+5 daily Tend+ coins", icon: Coins });
       syncCoins(5);
     }
+    // today() in the deps so a session left open across midnight re-grants the next
+    // day's bonus (the lastBonusDate gate still prevents any same-day double grant);
+    // the 10s liveNow tick re-renders past midnight so the new date string is seen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, isPro]);
+  }, [mounted, isPro, today()]);
 
   // Dev toggle: tap logo 5x (disabled in production)
   const onLogoTap = useCallback(() => {
@@ -526,6 +535,40 @@ export function TendApp({
       const qd = quitDataMap[hId];
       const currentClean = getCleanDays(hId);
       const newBest = computeQuitBest(currentClean, qd?.bestStreak);
+      // The clean run restarts at 0, so clear this habit's per-milestone dedup flags —
+      // otherwise the 24h/72h/7d encouragement toasts, the 7-day nudge, and the streak
+      // milestones would NEVER fire again for this habit after a single slip, which
+      // contradicts the soul (self-healing, never-shaming — "recovery is a spiral, you're
+      // still moving upward"). Re-earning them requires genuinely re-accumulating clean
+      // days, so this isn't farmable. Keyed per-habit; only touches this hId's entries.
+      if (typeof window !== "undefined") {
+        const clearHabit = (key: string) => {
+          try {
+            const store = JSON.parse(localStorage.getItem(key) || "{}") as Record<string, unknown>;
+            if (hId in store) {
+              delete store[hId];
+              localStorage.setItem(key, JSON.stringify(store));
+            }
+          } catch { /* corrupt store — leave it; the guarded readers above heal it */ }
+        };
+        clearHabit("tend_quit_celebrations");
+        clearHabit("tend_7day_shown");
+        // Milestone grants are keyed `${hId}:${days}` in a shared store.
+        try {
+          const granted = JSON.parse(localStorage.getItem("tend_granted_milestones") || "{}") as Record<string, unknown>;
+          let touched = false;
+          for (const k of Object.keys(granted)) {
+            if (k.startsWith(`${hId}:`)) { delete granted[k]; touched = true; }
+          }
+          if (touched) localStorage.setItem("tend_granted_milestones", JSON.stringify(granted));
+        } catch { /* corrupt store — leave it */ }
+      }
+      // Also drop this habit's in-session earned badges so the rebuilt run can re-light them.
+      setEarned((prev) => {
+        const next = { ...prev };
+        for (const k of Object.keys(next)) if (k.startsWith(`${hId}:`)) delete next[k];
+        return next;
+      });
       // Store exact ISO timestamp so "Started today at 6:04 PM" works
       updateQuitData(hId, { quitDate: new Date().toISOString(), bestStreak: newBest });
     },
@@ -835,7 +878,11 @@ export function TendApp({
   // First-day celebration toasts for quit habits (24h, 72h, 7d)
   useEffect(() => {
     if (!mounted) return;
-    const fired = JSON.parse(localStorage.getItem("tend_quit_celebrations") || "{}") as Record<string, number[]>;
+    // Guarded parse: a corrupt value would otherwise throw on every mount and
+    // permanently suppress the 24h/72h/7d quit celebrations + their coin grants
+    // (every other localStorage JSON read in this file is already try/caught).
+    let fired: Record<string, number[]> = {};
+    try { fired = JSON.parse(localStorage.getItem("tend_quit_celebrations") || "{}"); } catch { fired = {}; }
     let changed = false;
     habits.filter((h) => h.category === "quit").forEach((h) => {
       const cd = getCleanDays(h.id);
@@ -860,7 +907,8 @@ export function TendApp({
 
     // 7-day Tend+ nudge — show SevenDayCelebration once per quit habit
     if (!isTendPlus()) {
-      const shown7 = JSON.parse(localStorage.getItem("tend_7day_shown") || "{}") as Record<string, boolean>;
+      let shown7: Record<string, boolean> = {};
+      try { shown7 = JSON.parse(localStorage.getItem("tend_7day_shown") || "{}"); } catch { shown7 = {}; }
       for (const h of habits.filter((h) => h.category === "quit")) {
         const cd = getCleanDays(h.id);
         if (cd >= 7 && !shown7[h.id]) {
@@ -2416,7 +2464,7 @@ export function TendApp({
                 const timer = dqd?.quitDate ? formatLiveTimer(dqd.quitDate, liveNow) : null;
                 return (
                 <div style={{ marginTop: 14 }}>
-                  {cleanD === 0 && timer && timer.totalHours >= 1 && timer.totalHours < 24 ? (
+                  {cleanD === 0 && timer && timer.totalHours >= 1 ? (
                     <>
                       <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: "white", letterSpacing: "-1px", lineHeight: 1 }}>
                         {timer.totalHours}
