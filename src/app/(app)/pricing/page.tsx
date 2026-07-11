@@ -68,7 +68,7 @@ export default function PricingPage() {
 
       {/* Toggle */}
       <div className="flex items-center justify-center gap-3 mb-8">
-        <span className={cn("text-sm font-medium", !annual ? "text-slate-800" : "text-slate-400")}>Monthly</span>
+        <span className={cn("text-sm font-medium", !annual ? "text-slate-800" : "text-slate-500")}>Monthly</span>
         <button
           onClick={() => setAnnual(!annual)}
           className={cn("w-12 h-7 rounded-full p-1 transition-colors",
@@ -79,8 +79,8 @@ export default function PricingPage() {
             annual ? "translate-x-5" : "translate-x-0"
           )} />
         </button>
-        <span className={cn("text-sm font-medium", annual ? "text-slate-800" : "text-slate-400")}>
-          Annual <span className="text-green-600 text-xs font-bold">Save 33%</span>
+        <span className={cn("text-sm font-medium", annual ? "text-slate-800" : "text-slate-500")}>
+          Annual <span className="text-green-700 text-xs font-bold">Save 33%</span>
         </span>
       </div>
 
@@ -98,12 +98,12 @@ export default function PricingPage() {
                   <h3 className="font-bold text-lg text-slate-800">{plan.name}</h3>
                 </div>
                 {plan.savings && (
-                  <span className="text-xs text-green-600 font-medium">{plan.savings}</span>
+                  <span className="text-xs text-green-700 font-medium">{plan.savings}</span>
                 )}
               </div>
               <div className="text-right">
                 <span className="text-3xl font-bold text-slate-800">{plan.price}</span>
-                <span className="text-sm text-slate-400">{plan.period}</span>
+                <span className="text-sm text-slate-500">{plan.period}</span>
               </div>
             </div>
 
