@@ -201,7 +201,9 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       math** — extracted `lib/quit.ts` (`computeCleanDays` / `computeMoneySaved` / `computeTotalSaved` /
       `computeQuitBest` / `applyStageDrop` / `computeQuitStage`) out of the monolith + delegated, adding
       24 more cases → `npm test` **78/78 green**. Every user-facing dollar figure AND the gentle
-      dragon-regresses-one-stage-on-slip math is now regression-locked, not trusted by cold-read.)*
+      dragon-regresses-one-stage-on-slip math is now regression-locked, not trusted by cold-read.
+      **run-2 shift 2: `npm test` now 124 green** — +16 for the new species-by-habit-type mapping
+      (`sprites.test.ts`). build + lint still clean (0 errors / 5 intentional warnings).)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
       new `app/page.tsx`, on-brand, verified 200. **shift 9: BROWSER-VERIFIED** — rendered the real
       page in headless Chromium at a 390px phone viewport and eyeballed it end-to-end (Fraunces serif
@@ -325,18 +327,27 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 3. **Make the DEEP ANALYTICS genuinely BEAUTIFUL** (§2's "deep, beautiful analytics"). The data is
    there — redesign Insights into something gorgeous and motivating on a phone. *(run-shift-1: the
-   **momentum curve** is DONE — Weekly Trend's flat pale bars are now a smooth green area sparkline w/
-   delta pill + glowing latest marker, dataviz-skill-guided, verified light+dark. `smoothPath` helper +
-   the SSR-safe SVG technique (viewBox 0..100 + preserveAspectRatio="none" + non-scaling stroke + HTML
-   overlay markers) are reusable for the rest.)* **Still to beautify:** **per-habit consistency rings**
-   (the scoreboard is still flat progress bars), a **best-day radial** (day-of-week is plain bars), the
-   **synergy constellation** (works but could be lovelier), a **streak timeline**, and a headline
-   "here's how you're doing this week" summary line at the top. Keep loading `dataviz` before chart code.
+   **momentum curve** is DONE — smooth green area sparkline w/ delta pill + glowing marker. run-shift-2:
+   THREE MORE DONE, dataviz-skill-guided + browser-verified light+dark via file://: a **headline
+   summary hero** ("here's how you're doing this week" — big this-week %, momentum delta pill,
+   encouraging line keyed off level+trend) at the top of Constellation; **consistency rings**
+   (scoreboard's flat bars → status-graded circular SVG rings with % centered, quit habits get a
+   clean-streak shield); a **best-day polar rose** (day-of-week bars → a nightingale-rose radial, single-
+   hue sequential, best-day brightest + Best/Toughest callout). All pure SVG + HTML-overlay labels →
+   SSR-stable. `smoothPath` + the SSR-safe SVG recipe (viewBox 0..100 + preserveAspectRatio="none" +
+   non-scaling stroke + HTML overlay markers) reused.)* **Still to beautify (lower value now):** the
+   **synergy constellation** (works but could be lovelier) and a **streak timeline** (needs per-day
+   streak history derived from isDone). Keep loading `dataviz` before chart code. Insights is now
+   genuinely handsome — consider this item ~80% done; a successor may prefer #1/#2 over the last polish.
 
-4. **Promote the best parked ideas into real features** (§11), lightest-risk / highest-delight first:
-   **dragon species-by-habit-type** (pure mapping logic → unit-testable + more meaningful collection);
-   a **garden-wide night re-theme** (CSS, `file://`-verifiable); a **widget-style "Today" hero** a user
-   could screenshot to their home screen. Prune any idea that doesn't earn its complexity.
+4. **Promote the best parked ideas into real features** (§11), lightest-risk / highest-delight first.
+   *(run-shift-2: **dragon species-by-habit-type** SHIPPED — `suggestElementForHabit` /
+   `suggestSpeciesForHabit` in lib/sprites.ts (pure, 16 unit tests) map a habit's name+category to a
+   thematically-fitting dragon element (fire←workout, water←hydrate, storm←deep-work, cosmic←read,
+   light←meditate/sleep, nature←default/growth, shadow←quit), wired into the API free-tier fallback +
+   the Pro egg-picker default. The collection now MEANS something.)* **Still parked:** a **garden-wide
+   night re-theme** (CSS, `file://`-verifiable) and a **widget-style "Today" hero** a user could
+   screenshot to their home screen. Prune any idea that doesn't earn its complexity.
 
 5. **Re-audit the DoD (§8)** and only tick the core-loop / premium-polish / analytics items once their
    surfaces are **visually verified via `/preview`**. Keep this queue tight (3–6 items) — when you
@@ -544,6 +555,28 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
   `top:${y}%` overlay (circles drawn in the SVG would distort to ellipses under the non-uniform scale).
   `smoothPath()` (Catmull-Rom→bézier) is in `constellation.tsx` and is the reusable primitive for the
   remaining curves. Renders identically at SSR (no browser-only APIs) so it's fully file://-verifiable.
+- *(run-2 shift 2)* **Analytics beautification = swap the mark, keep the tested math.** The Insights
+  redesign (headline hero, consistency rings, best-day polar rose) is PURELY presentational — every
+  number still comes from the unit-locked kernels (`computeConsistency` / `computeDayOfWeekRates` /
+  `weeklyTrend`); only the SVG/HTML that draws them changed. Rationale: the data was already correct
+  (108 tests), so the open work was visual, and keeping the math untouched means the beautification
+  carries zero correctness risk and needed no new tests — just file:// composition proof (committed
+  `scripts/shots/preview-insights-full.png` light+dark). Chose a **nightingale-rose (polar area)** for
+  day-of-week specifically because weekdays are *cyclical* — a radial reads more naturally than a bar
+  row and is a lovelier centerpiece — and **circular rings** for consistency because a ring with the %
+  centered is denser + more premium than a flat bar while still pairing color(status-grade) WITH the
+  number (dataviz rule: identity never color-alone). Also fixed a latent contrast bug found in passing:
+  the Constellation subtitle was hardcoded `rgba(255,255,255,0.5)` → invisible on light theme → `th.textMuted`.
+- *(run-2 shift 2)* **Species-by-habit-type is a pure suggestion layer, not a data-model change.** The
+  `creature_type` column + egg-picker are unchanged; the mapping only decides the *default/fallback*
+  species (was `rollDragonSpecies()` random). Kept it framework-free in `lib/sprites.ts` (keyword→element
+  rules, priority-ordered, + a name-hash pick within the element) so it's importable by BOTH the API
+  route (free-tier fallback) and the client monolith (Pro picker pre-select) and fully unit-testable
+  (16 cases) with no browser. An explicit user pick always wins (Pro picker) and the API still honours a
+  provided `creature_type`, so this is strictly additive — it makes the *random* case meaningful without
+  removing any choice. Quit habits default to `shadow` (the dark loop you tame into your own dragon);
+  build/general default to `nature` (the "tend your garden" growth metaphor). This promotes the parked
+  "dragon personality from your habits" idea (§11) from surprise-me to shipped.
 - *(shift 15)* **Relapse penalty = a gentle, self-healing one-tier dip, NOT an accumulating counter.**
   Made the product call that §12 bug #2 flagged (permanent-cumulative vs recovering). Chose recovering,
   because the soul is explicit: assumes-best, never-shaming, "gently delays the egg's hatch." The old
@@ -658,8 +691,9 @@ archive here. Frontier-first: rewrite this queue BEFORE a long task so a success
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
   so opening the app shows tangible daily change even before a hatch.
-- **Dragon personality from your habits:** the species/color you hatch reflects the habit type
-  (calm/water for sleep, fire for fitness, etc.) — collectible + meaningful.
+- ~~**Dragon personality from your habits:** the species/color you hatch reflects the habit type
+  (calm/water for sleep, fire for fitness, etc.) — collectible + meaningful.~~ ✅ SHIPPED run-2 shift 2
+  (`suggestSpeciesForHabit` in lib/sprites.ts — element by keyword/category, wired into API + Pro picker).
 - **"Tend Wrapped" as a share-card export** (the constellation/share-card components hint this exists).
 - ~~**Calm mode / night mode** starlit wind-down~~ ✅ SHIPPED shift 6 as the "Wind down" wellness tool
   (a full-screen overlay, not a garden re-theme — see §10). A garden-wide night re-theme is still open.
