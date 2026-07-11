@@ -189,7 +189,10 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 ## 8. DEFINITION OF DONE (refine as the vision sharpens — do NOT declare COMPLETE until all true)
 
 - [x] `npm run build` + `npm run lint` pass clean on the `night-train` branch. *(green every shift;
-      re-verified shift 6 — build ✅, lint 0 errors / **5 warnings** (down from 27, all intentional).)*
+      re-verified shift 6 — build ✅, lint 0 errors / **5 warnings** (down from 27, all intentional).
+      **shift 11: added a real test runner + suite** — `npm test` (vitest) now runs **30/30 green**,
+      covering the pure core-loop math (streak/grace/best-streak) + dragon-evolution stage thresholds +
+      quit-day math. The repo had ZERO tests before; this is the first automated regression net.)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
       new `app/page.tsx`, on-brand, verified 200. **shift 9: BROWSER-VERIFIED** — rendered the real
       page in headless Chromium at a 390px phone viewport and eyeballed it end-to-end (Fraunces serif
@@ -230,6 +233,23 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 ---
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
+
+0ac. ✅ **[SHIFT 11] First automated test suite — the core-loop math is now regression-locked.** The
+   daily-loop math (consecutive streaks, "one slip never stings" grace-token bridging, historical best
+   streak) is Tend's emotional core, yet it lives buried in the 3000-line `tend-app.tsx` monolith and has
+   NEVER been browser-verifiable in this sandbox (auth-gated) — it was trusted purely by cold-read. Fixed
+   the verifiable way: **extracted the pure math into `src/lib/streak.ts`** (`computeStreak` /
+   `computeGraceActive` / `computeBestStreak`, decoupled from React + date formatting via an `isDone(n)`
+   predicate, with a defensive lookback cap so corrupt data can't spin forever), had the monolith
+   **delegate** its `getStreak`/`isGraceProtected`/`getBestStreak` to them (single tested source of truth;
+   ~40 lines of inline logic deleted, behavior identical), and added a **vitest suite** (`src/lib/
+   streak.test.ts` + `utils.test.ts`, **30 cases, all green**): clean runs, today-not-yet-done (no
+   mid-day break), single/multi-gap grace bridging, never-bridge-today, grace-active detection,
+   best-streak with dupes/gaps/month-boundaries, the Egg→Hatchling→Whelp→Drake→Elder `getStage`
+   thresholds (the dragon-evolution payoff), and `daysBetween` quit-day math. Added `npm test` +
+   vitest devDep (repo had ZERO tests before — this is the first regression net). Build GREEN, lint
+   0 errors / 5 intentional warnings, `npm test` **30/30**. This is a rare high-value lever that needs
+   no browser: it verifies correctness of the exact logic that can't be eyeballed here.
 
 0aa. ✅ **[SHIFT 10] Landing conversion polish — added an objection-handling FAQ + fixed pricing-copy
    drift.** The landing is the one surface verifiable in this sandbox (server component → `file://`), and
@@ -565,6 +585,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   buyers and break checkout parity. §13's price change stays an explicit Stripe-config follow-up (#16).
   Shift 10 only removed the *drift* (the `/pricing` card double-stated "Save 33%" + "Save $20/year" →
   now shows the effective monthly "$3.33/mo, billed yearly", a stronger, non-redundant annual nudge).
+- *(shift 11)* **Test the core-loop math by extraction, not by mocking React.** The streak/grace/
+  best-streak logic was inline `useCallback`s closing over component state — untestable without a
+  browser or a heavy render harness, and it's the ONE part of the daily loop that can't be eyeballed in
+  this sandbox (auth-gated). Chose to lift the *pure* kernel into `src/lib/streak.ts` behind an
+  `isDone(n)` predicate (no React, no `Date` coupling) and have the monolith delegate to it, rather than
+  trying to unit-test the component. Rationale: (a) it makes the emotional core verifiable *here*, with
+  no browser — a rare high-value lever this late in the mission; (b) it's a first, safe step of the
+  long-planned monolith decomposition (behavior is byte-identical, build-verified); (c) it gives Jonny a
+  green `npm test` as concrete proof the streak/grace/dragon-evolution math is correct, which no amount
+  of cold-reading could. Kept the `Math.max(historical, currentStreak)` composition and all quit-habit
+  branches in the component (they need live state) — only the pure kernel moved. Added vitest as the
+  runner (zero-config, TS-native); the repo had no test tooling at all before.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
