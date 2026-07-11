@@ -344,6 +344,22 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 > a deliberate scope call in §10). If you genuinely spot a NEW real gap or a fresh product insight, act on
 > it and verify via `/preview`; otherwise the honest move is to keep the build green, tidy the docs, and
 > leave the merge call to Jonny. Don't declare COMPLETE (§8 has real-device gates only Jonny can close).
+>
+> **run-2 shift 9 (DONE):** re-verified baseline GREEN (build ✅ / lint 0-err-5-intentional /
+> `npm test` 129/129) and eyeballed the committed Insights + Garden proof shots — both genuinely handsome,
+> frontier assessment holds. Closed ONE honest verification gap (not churn): two DoD *centerpiece*
+> surfaces — **Tend Wrapped** (the shareable story reel) and the **wellness hub** — were `/preview`-mounted
+> but had NEVER been file://-screenshotted. Ran the offline pipeline over `?view=wrapped|wellness` light+dark:
+> **both render beautifully** — Wrapped cover (ice-dragon hero + Fraunces serif + warm "no numbers to fear"
+> copy + story-progress bars, self-contained palette so light==dark by design), wellness hub (gentle-reminder
+> quote + 5-tool grid, dark parity confirmed). No flaws found → banked as durable proof shots
+> (`scripts/shots/preview-{wrapped-fold,wellness-full,wellness-dark-full}.png`) + added to the pipeline's
+> default routes. FINDING: **onboarding is animation-gated, not file://-verifiable** — it wraps its whole
+> content in `opacity: fadeIn?1:0` (a `useEffect` entrance fade), so the pre-hydration frame is legitimately
+> blank; that's the intended fade-in, not a bug, and it's build-verified only (real-device eyeball stays
+> Jonny's). With Wrapped + wellness now shot, **every /preview-mountable surface that CAN be file://-verified
+> has been** — the offline-verifiable design vein is genuinely exhausted this run. Successor: don't
+> re-shoot handsome surfaces; the remaining §8 gates are Jonny's real-device eyeball + merge only.
 
 1. **Expand the `/preview` harness to the remaining CORE surfaces.** *(run-shift-1: DONE for the two
    biggest — the **Garden daily-tend home** (real TerrariumScene + faithful today's-tend rows w/
