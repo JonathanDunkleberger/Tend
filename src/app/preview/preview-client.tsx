@@ -39,6 +39,7 @@ import { MultiHabitHeatmap } from "@/components/multi-habit-heatmap";
 import { Constellation } from "@/components/constellation";
 import { TerrariumScene } from "@/components/terrarium-scene";
 import { Ceremony } from "@/components/ceremony";
+import { StreakFlame } from "@/components/streak-flame";
 
 /* ───────────────────────── mock data ───────────────────────── */
 
@@ -127,11 +128,12 @@ const wrappedProps = {
 };
 
 export type View =
-  | "garden" | "insights" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
+  | "garden" | "insights" | "detail" | "gallery" | "onboarding" | "wellness" | "wrapped" | "you" | "breathe" | "nav"
   | "hatch" | "evolve";
 
 const VIEWS: { key: View; label: string }[] = [
   { key: "garden", label: "🌱 Garden" },
+  { key: "detail", label: "🐣 Habit detail" },
   { key: "insights", label: "📊 Insights" },
   { key: "hatch", label: "🥚 Hatch" },
   { key: "evolve", label: "🐉 Evolve" },
@@ -202,6 +204,7 @@ export function PreviewClient({ initialView = "garden", initialDark = false }: {
       {/* Phone-width stage so it reads like the real mobile product */}
       <main style={{ maxWidth: 460, margin: "0 auto", padding: "18px 14px 120px" }}>
         {view === "garden" && <GardenPreview th={th} dark={dark} />}
+        {view === "detail" && <DetailPreview th={th} />}
         {view === "insights" && <InsightsPreview th={th} dark={dark} />}
         {view === "gallery" && <DragonGallery th={th} />}
         {view === "onboarding" && <Framed th={th}><Onboarding onComplete={() => setView("gallery")} /></Framed>}
@@ -366,6 +369,135 @@ function GardenPreview({ th, dark }: { th: (typeof THEME)["light"]; dark: boolea
       </div>
       <p style={{ fontSize: 11, color: th.textMuted, marginTop: 12, textAlign: "center" }}>
         Preview approximation of the daily-tend rows — the live app renders these from the monolith.
+      </p>
+    </div>
+  );
+}
+
+/* ── Habit detail: the dragon-hero surface — evolution filmstrip + grace shield ──
+   A faithful approximation of the monolith's detail view (which is ~200 lines of
+   deeply-coupled inline JSX, too entangled to extract safely in one shift). The
+   payoff here is the EVOLUTION FILMSTRIP: every stage Egg→Elder shown at once so
+   the dragon art's growth — the #1 emotional pillar — is visible in a single
+   file:// snapshot, with a big hero of the selected stage above it. Default stage
+   is a mid-evolution Drake so the SSR snapshot lands on a real dragon, not an egg. */
+function DetailPreview({ th }: { th: (typeof THEME)["light"] }) {
+  const [stage, setStage] = useState(3);
+  const habit = { name: "Morning run", color: "#ef7d3a", creatureType: 5, creatureName: "Ember", streak: 41 };
+  const nextT = stage < 4 ? STAGE_THRESHOLDS[stage + 1] : null;
+  const base = STAGE_THRESHOLDS[stage];
+  // A representative "days into this stage" so the egg-warming bar reads ~60% full.
+  const daysIn = nextT ? Math.round((nextT - base) * 0.6) : 0;
+  const warmPct = nextT ? Math.min(1, daysIn / (nextT - base)) : 1;
+  const heroSize = 118 + stage * 13; // matches ceremony.tsx heroSize scaling
+
+  return (
+    <div style={{ animation: "fadeUp .3s ease" }}>
+      {/* Hero card — vignette glow + big creature + identity + streak flame */}
+      <div style={{
+        padding: "26px 22px 22px", textAlign: "center", marginBottom: 12, borderRadius: 20,
+        background: th.card, border: `1px solid ${th.cardBorder}`, boxShadow: th.cardShadow,
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 200,
+          background: `radial-gradient(circle at 50% 40%, ${habit.color}22 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+        <div style={{ position: "relative", zIndex: 1, minHeight: heroSize, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+          <Creature stage={stage} color={habit.color} happy size={heroSize} creatureType={habit.creatureType} />
+        </div>
+        <div style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 700, color: th.text, marginTop: 10, letterSpacing: "-0.3px" }}>
+          {habit.creatureName}
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: th.textSub, marginTop: 2 }}>{habit.name}</div>
+        <p style={{ fontSize: 11.5, color: th.textSub, marginTop: 4 }}>Building · {STAGE_LABELS[stage]}</p>
+        {/* streak flame flourish */}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 10,
+          padding: "5px 14px", borderRadius: 100, background: th.hoverBg, border: `1px solid ${th.cardBorder}` }}>
+          <StreakFlame streak={habit.streak} size={20} showCount />
+          <span style={{ fontSize: 12, fontWeight: 600, color: th.textSub }}>day streak</span>
+        </div>
+      </div>
+
+      {/* Evolution filmstrip — the whole journey, tap to preview any stage */}
+      <div style={{
+        padding: "14px 12px 16px", marginBottom: 12, borderRadius: 18,
+        background: th.card, border: `1px solid ${th.cardBorder}`, boxShadow: th.cardShadow,
+      }}>
+        <div style={{ fontSize: 12.5, fontWeight: 700, color: th.text, margin: "0 4px 10px" }}>Evolution</div>
+        <div style={{ display: "flex", gap: 6, justifyContent: "space-between" }}>
+          {STAGE_LABELS.map((label, s) => {
+            const on = s === stage;
+            const reached = s <= stage;
+            return (
+              <button
+                key={s}
+                onClick={() => setStage(s)}
+                style={{
+                  flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                  padding: "8px 2px", borderRadius: 12, cursor: "pointer",
+                  border: `1px solid ${on ? habit.color : "transparent"}`,
+                  background: on ? `${habit.color}14` : "transparent",
+                  opacity: reached ? 1 : 0.4,
+                }}
+              >
+                <div style={{ filter: reached ? "none" : "grayscale(1)" }}>
+                  <Creature stage={s} color={habit.color} happy={reached} size={30 + s * 4} creatureType={habit.creatureType} />
+                </div>
+                <span style={{ fontSize: 9.5, fontWeight: on ? 800 : 600, color: on ? habit.color : th.textMuted, marginTop: 2 }}>{label}</span>
+                <span style={{ fontSize: 8.5, color: th.textFaint }}>{STAGE_THRESHOLDS[s] === 0 ? "day 1" : `day ${STAGE_THRESHOLDS[s]}`}</span>
+              </button>
+            );
+          })}
+        </div>
+        {/* egg-warming toward next stage */}
+        {nextT ? (
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: th.textSub, marginBottom: 5 }}>
+              <span>{STAGE_LABELS[stage]}</span>
+              <span>{nextT - daysIn}d to {STAGE_LABELS[stage + 1]}</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 6, background: th.progressBg, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", width: `${Math.round(warmPct * 100)}%`, borderRadius: 6,
+                background: `linear-gradient(90deg, ${habit.color}aa, ${habit.color})`,
+                boxShadow: warmPct >= 0.66 ? `0 0 8px ${habit.color}88` : "none",
+              }} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginTop: 14, textAlign: "center", fontSize: 11.5, fontWeight: 600, color: habit.color }}>
+            ✦ Fully evolved — an Elder dragon, tended to its peak
+          </div>
+        )}
+      </div>
+
+      {/* Streak-shield / grace-token card — faithful to the monolith's build-habit card */}
+      <div style={{
+        padding: 14, marginBottom: 12, borderRadius: 18,
+        background: th.card, border: `1px solid ${th.cardBorder}`, boxShadow: th.cardShadow,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(74,222,128,0.14)", boxShadow: "0 0 12px rgba(74,222,128,0.4)",
+          }}>🛡️</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: th.text }}>Streak shield</div>
+            <div style={{ fontSize: 11, color: th.textSub, marginTop: 2, lineHeight: 1.4 }}>
+              2 grace days banked — one slip won&rsquo;t break your streak
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#4ade80", marginTop: 4 }}>
+              🛡️ Earn one free at 7-, 21- &amp; 60-day streaks
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style={{ fontSize: 11, color: th.textMuted, textAlign: "center" }}>
+        Preview approximation of the habit-detail surface — the live app renders it from the monolith.
       </p>
     </div>
   );

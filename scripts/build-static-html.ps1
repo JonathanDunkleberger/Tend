@@ -20,6 +20,8 @@ param(
     "",
     "pricing",
     "preview-garden|preview?view=garden",
+    "preview-detail|preview?view=detail",
+    "preview-detail-dark|preview?view=detail&dark=1",
     "preview-insights|preview?view=insights",
     "preview-insights-dark|preview?view=insights&dark=1",
     "preview-garden-dark|preview?view=garden&dark=1"
