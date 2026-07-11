@@ -665,14 +665,19 @@ export function TendApp({
     prevAllDoneRef.current = allDone;
   }, [allDone]);
 
+  // Milestones that also gift a free grace token (the public "milestone rewards
+  // → a grace token so one slip never stings" promise). Capped by MAX_GRACE.
+  const GRACE_MILESTONE_DAYS = new Set([7, 21, 60]);
   const checkMilestones = (habitId: string, streak: number) => {
     let nc = 0;
+    let graceGift = 0;
     const ne = { ...earned };
     for (const m of MILESTONES) {
       const key = `${habitId}:${m.days}`;
       if (streak >= m.days && !ne[key]) {
         ne[key] = true;
         nc += m.coins;
+        if (GRACE_MILESTONE_DAYS.has(m.days)) graceGift++;
         const Ic = getIcon(m.iconName);
         setCoinToast({ msg: `${m.label} +${m.coins}`, icon: Ic });
       }
@@ -680,7 +685,17 @@ export function TendApp({
     if (nc > 0) {
       haptic("medium");
       setCoins((prev) => prev + nc);
-      syncCoins(nc);
+      // Gift grace token(s) alongside coins, capped — persist together.
+      const held = streakFreezes[habitId] || 0;
+      const newHeld = Math.min(MAX_GRACE, held + graceGift);
+      if (graceGift > 0 && newHeld > held) {
+        const newFreezes = { ...streakFreezes, [habitId]: newHeld };
+        setStreakFreezes(newFreezes);
+        syncCoins(nc, { streakFreezes: newFreezes });
+        setTimeout(() => setCoinToast({ msg: "Grace token gifted 🛡️", icon: Shield }), 1400);
+      } else {
+        syncCoins(nc);
+      }
       setEarned(ne);
     }
   };
@@ -2364,7 +2379,7 @@ export function TendApp({
                       <div style={{ fontSize: 11, color: th.textSub, marginTop: 2, lineHeight: 1.4 }}>
                         {tokens > 0
                           ? `${tokens} grace ${tokens === 1 ? "day" : "days"} banked — one slip won't break your streak`
-                          : "Bank a grace day so one slip never stings"}
+                          : "Earn one free at 7-, 21- & 60-day streaks, or bank one now so a slip never stings"}
                       </div>
                       {protectedNow && (
                         <div style={{ fontSize: 11, fontWeight: 600, color: "#4ade80", marginTop: 4 }}>
