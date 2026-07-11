@@ -193,7 +193,9 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - [ ] A delightful **onboarding** that hatches the first egg in under a minute.
 - [ ] The **daily core loop** feels great on a phone: assumes-best check-in, streaks, coins, egg
       progress, dragon evolution art showcased with animation.
-- [ ] A **deep analytics** screen that genuinely helps + a shareable **Wrapped**.
+- [x] A **deep analytics** screen that genuinely helps + a shareable **Wrapped**. *(shift 3: Insights
+      page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
+      synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
 - [ ] An expanded **wellness suite** (breathing + at least 2–3 more uplifting tools).
 - [ ] A coherent **pricing/monetization** model (costs modeled, free/Pro split, Stripe wired).
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
@@ -234,31 +236,42 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    slip. *(Remaining core-loop polish to pick up: richer egg-progress-toward-hatch visualization on the
    garden, and the gentle time-of-day nudge is now slightly redundant with the one-tap button — consider
    suppressing it when the button shows.)*
-8. **[PHASE 3 — IN PROGRESS, shift 3] Deep analytics + Wrapped.** The Insights tab (bottom-nav 📊 →
-   `page==="constellation"`) already renders a solid `MultiHabitHeatmap` + `Constellation` (weekly
-   trend, scoreboard, day-of-week, synergies, streak records, calm advice, pro-gating). The real
-   remaining DoD gap was the shareable **Tend Wrapped**. Shift 3 is building `tend-wrapped.tsx`: a
-   full-screen, tap-to-advance story (Spotify-Wrapped pattern, warm garden aesthetic) that showcases
-   the dragon art and ends on a share card. Data comes from the same helper props Constellation uses
-   (`isComplete/getStreak/getBestStreak/getTotal/getCleanDays/getStageForId`) + `coins` + `totalSaved`.
-   Launcher = a hero banner at the top of the Insights page. **Research done** (Spotify Wrapped 2025:
-   story cards, big personal numbers, an identity/"club" moment, share-optimized final card).
-   NEXT after this lands: per-habit consistency % + simple correlations on the Insights page proper.
+8. ✅ **[PHASE 3] Deep analytics + Wrapped.** DONE (shift 3). (a) New `tend-wrapped.tsx` (commit
+   `4ad21aa`): full-screen, tap-to-advance **Tend Wrapped** story (cover · total days · longest streak ·
+   hero-dragon showcase · best day · clean-days/money-saved · dragons+coins · a persona identity moment ·
+   final share card), Web Share + clipboard fallback, safe-area, haptics, zero-shame copy, graceful for
+   new users. Launcher = an ✨ "Your Tend Story" banner atop the Insights tab. (b) Per-habit **30-day
+   consistency bars** added to the Constellation scoreboard (commit `bb555be`, color-graded, fair
+   window). The Insights page now covers heatmap + Wrapped + overview + weekly trend + consistency +
+   day-of-week + synergies(correlations) + streak records + calm advice — genuinely deep. **NOT
+   browser-verified** (auth-gated) — a successor with keys should eyeball the Wrapped reel + share once.
 9. **[PHASE 4] Wellness suite — mostly banked (shift 2).** Breathe + grounding + urge-surf + gratitude
    now live in `wellness-hub.tsx`. Remaining: persist gratitude server-side (currently localStorage
    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
-10. **[PHASE 5] Grace token / "one slip never stings"** is a PUBLIC promise (landing + onboarding) but
-    not yet real UX. `streak_freezes` exists in schema/profile — make it real and tie to coins.
+10. **[PHASE 5 — NEXT] Grace token / "one slip never stings"** is a PUBLIC promise (landing + onboarding)
+    but not yet real UX. `streak_freezes` (a `Record<habitId, number>`) is ALREADY wired into
+    `getStreak` in tend-app (it bridges up to N missed days) — so the streak-math half exists. What's
+    missing is the *UX*: a way to see/earn/spend a grace token (tie to coins in the shop), a gentle
+    "your streak was protected 🛡️" moment when a freeze is consumed, and surfacing remaining tokens on
+    the habit/garden. Make the public promise real so we're not over-promising. HIGH honesty value.
+12. **[PHASE 5] Pricing/monetization model.** Stripe is wired (Free 3 habits / Tend+ $4.99mo·$39.99yr),
+    but DoD wants costs *modeled* + a benchmarked free/Pro split documented. Research Finch/Forest/
+    Fabulous/Duolingo price points + model Supabase/Clerk/Stripe/Vercel free-tier reality, then write
+    the recommendation into DECISIONS. No code necessarily — a decision doc closes this DoD item.
 11. **[ongoing] Lint hygiene** — 32 warnings (unused vars + unused exhaustive-deps disables). NOTE:
     `eslint --fix` on the monolith leaves ugly trailing-whitespace where it strips disable comments —
     do these by hand (delete the whole comment line), don't --fix blindly.
 
-> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. Front door (landing + onboarding),
-> bottom-nav shell, Wellness + You screens, AND the assumes-best one-tap check-in are all DONE. Biggest
-> remaining DoD lever now = **Phase 3: deep Insights analytics + a shareable Tend Wrapped** (frontier #8)
-> — research first. NOTE: shift 2's new UI (nav, wellness tools, You, one-tap) is build-verified but
-> **NOT browser-verified** (auth-gated). Read §6b audit + §10 decisions first. `.env.local` + middleware
-> notes in NEEDS EYES still stand.
+> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. DONE so far: front door (landing +
+> onboarding), bottom-nav shell, Wellness + You screens, assumes-best one-tap check-in, AND **Phase 3
+> — deep Insights analytics + shareable Tend Wrapped** (`tend-wrapped.tsx` + consistency bars, shift 3).
+> Biggest remaining DoD levers now: **(1) Phase 5 grace-token UX** — make the public "one slip never
+> stings" promise real (frontier #10; streak-freeze math already exists in `getStreak`, only the
+> earn/spend/see UX is missing); **(2) Phase 5 pricing model doc** (#12); **(3) Phase 6 premium-polish
+> pass** (PWA install, a11y, empty/error states). NOTE: all shift-2/3 UI is build-verified but **NOT
+> browser-verified** (auth-gated) — eyeball the Wrapped reel, nav, wellness tools, You, one-tap once
+> with real Clerk keys. Read §6b audit + §10 decisions first. `.env.local` + middleware notes in NEEDS
+> EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -322,6 +335,19 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   instead we added a one-tap "Everything went well today" button that batch-marks all remaining build
   habits done. It delivers the assumes-best *feeling* and the one-tap convenience without touching the
   logging model or the server contract. A future shift can revisit a true default-done model if desired.
+- *(shift 3)* **Tend Wrapped is a self-contained overlay, computed client-side from existing helpers.**
+  `tend-wrapped.tsx` takes the same helper props Constellation already uses (`isDone/getBestStreak/
+  getTotal/getCleanDays/getStage` + `coins`/`totalSaved`) and derives the whole story reel in one
+  `useMemo` — no new API, no schema change, no server round-trip. Rationale: keep it additive + low-risk
+  on top of the monolith, works offline, and every stat is already trusted app state. Researched Spotify
+  Wrapped 2025 first (story cards, big personal numbers, an identity/"club" moment, a share-optimized
+  final card) and mirrored that shape in a warm garden aesthetic. Deliberately titled "Your Tend Story"
+  (not "2026 Wrapped") so it works with ANY amount of history, and every card degrades gracefully for a
+  brand-new user (encouraging copy instead of empty zeros). The dragon art is the emotional centerpiece:
+  the most-tended habit's real `Creature` sprite is the hero on the cover, showcase, and share card.
+- *(shift 3)* **Consistency % = a fair, capped-window rate, not lifetime.** The scoreboard bar uses
+  completions over `min(30, habitAgeInDays)` so a 3-day-old habit at 3/3 reads 100%, not 10% — avoids
+  punishing young habits with a fixed 30-day denominator. Color-graded (green ≥70 / amber ≥40 / red).
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
