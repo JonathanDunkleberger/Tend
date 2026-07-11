@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Check, Plus, X, Flame, ChevronLeft, Coins, Sparkles,
+  Check, Plus, X, Flame, ChevronLeft, ChevronRight, Coins, Sparkles,
   Pencil, Shield, Crown,
   Users, RefreshCw, Wind, DollarSign, Heart,
   Sunrise, SunMedium, MoonStar, Store, Pause, Play,
@@ -31,6 +31,7 @@ import { BottomNav, type NavTab } from "@/components/bottom-nav";
 import { WellnessHub } from "@/components/wellness-hub";
 import { YouScreen } from "@/components/you-screen";
 import { MultiHabitHeatmap } from "@/components/multi-habit-heatmap";
+import { TendWrapped } from "@/components/tend-wrapped";
 import { MilestoneCoin, MilestoneCelebration, CoinBadge, CoinRow, MILESTONE_COINS } from "@/components/milestone-coin";
 import type { CoinTier } from "@/components/milestone-coin";
 import { MorningCheckin } from "@/components/morning-checkin";
@@ -169,6 +170,7 @@ export function TendApp({
   const [isPro, setIsPro] = useState(initialIsPro);
   const [lastBonusDate, setLastBonusDate] = useState<string | null>(initialPreferences.lastBonusDate);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showWrapped, setShowWrapped] = useState(false);
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [sevenDayCelebration, setSevenDayCelebration] = useState<{ habitName: string; moneySaved: number; urgeCount: number } | null>(null);
   const logoTapRef = useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null }>({ count: 0, timer: null });
@@ -1375,6 +1377,20 @@ export function TendApp({
       )}
 
       {/* Tend+ paywall screen */}
+      {showWrapped && (
+        <TendWrapped
+          habits={habits}
+          isDone={isComplete}
+          getBestStreak={getBestStreak}
+          getTotal={getTotal}
+          getCleanDays={getCleanDays}
+          getStage={getStageForId}
+          coins={coins}
+          totalSaved={totalSaved}
+          onClose={() => setShowWrapped(false)}
+        />
+      )}
+
       {showPaywall && (
         <TendPlusScreen
           onClose={() => setShowPaywall(false)}
@@ -2499,6 +2515,34 @@ export function TendApp({
         {/* ═══ CONSTELLATION ═══ */}
         {page === "constellation" && (
           <div style={{ animation: "fadeUp 0.28s ease" }}>
+            {/* Tend Wrapped launcher — the shareable story reel */}
+            {habits.length > 0 && (
+              <button
+                onClick={() => { haptic("medium"); setShowWrapped(true); }}
+                style={{
+                  width: "100%", marginBottom: 12, padding: "16px 18px", borderRadius: 18,
+                  border: "1px solid rgba(139,92,246,0.3)", cursor: "pointer", textAlign: "left",
+                  fontFamily: "inherit",
+                  background: "linear-gradient(135deg, rgba(139,92,246,0.22), rgba(74,222,128,0.12))",
+                  display: "flex", alignItems: "center", gap: 14,
+                  boxShadow: "0 6px 22px rgba(139,92,246,0.15)",
+                }}
+              >
+                <div style={{
+                  width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+                  background: "linear-gradient(135deg, #8B5CF6, #4ade80)",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+                  boxShadow: "0 4px 14px rgba(139,92,246,0.35)",
+                }}>
+                  {"✨"}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Fraunces',serif", fontSize: 17, fontWeight: 700, color: th.text }}>Your Tend Story</div>
+                  <div style={{ fontSize: 12, color: th.textSub, marginTop: 1 }}>A shareable look at everything you&rsquo;ve tended</div>
+                </div>
+                <ChevronRight size={18} color={th.textMuted} />
+              </button>
+            )}
             {/* Multi-habit heatmap — first section */}
             {habits.length > 0 && (
               <MultiHabitHeatmap habits={habits} isDone={isComplete} getCleanDays={getCleanDays} th={th} />

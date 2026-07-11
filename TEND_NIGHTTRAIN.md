@@ -234,11 +234,16 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
    slip. *(Remaining core-loop polish to pick up: richer egg-progress-toward-hatch visualization on the
    garden, and the gentle time-of-day nudge is now slightly redundant with the one-tap button — consider
    suppressing it when the button shows.)*
-8. **[PHASE 3 — NEXT] Deep analytics + Wrapped.** The Insights tab (bottom-nav 📊) currently renders
-   `MultiHabitHeatmap` + `Constellation`. Elevate to genuinely insightful & motivating: best/worst days,
-   momentum trend, per-habit consistency %, streak history, simple correlations, and a shareable **Tend
-   Wrapped** summary. `share-card.tsx` + `constellation.tsx` are the seeds. **Research first** (Finch/
-   Duolingo/Spotify-Wrapped analytics patterns) before building. This is the biggest remaining DoD gap.
+8. **[PHASE 3 — IN PROGRESS, shift 3] Deep analytics + Wrapped.** The Insights tab (bottom-nav 📊 →
+   `page==="constellation"`) already renders a solid `MultiHabitHeatmap` + `Constellation` (weekly
+   trend, scoreboard, day-of-week, synergies, streak records, calm advice, pro-gating). The real
+   remaining DoD gap was the shareable **Tend Wrapped**. Shift 3 is building `tend-wrapped.tsx`: a
+   full-screen, tap-to-advance story (Spotify-Wrapped pattern, warm garden aesthetic) that showcases
+   the dragon art and ends on a share card. Data comes from the same helper props Constellation uses
+   (`isComplete/getStreak/getBestStreak/getTotal/getCleanDays/getStageForId`) + `coins` + `totalSaved`.
+   Launcher = a hero banner at the top of the Insights page. **Research done** (Spotify Wrapped 2025:
+   story cards, big personal numbers, an identity/"club" moment, share-optimized final card).
+   NEXT after this lands: per-habit consistency % + simple correlations on the Insights page proper.
 9. **[PHASE 4] Wellness suite — mostly banked (shift 2).** Breathe + grounding + urge-surf + gratitude
    now live in `wellness-hub.tsx`. Remaining: persist gratitude server-side (currently localStorage
    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
