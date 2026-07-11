@@ -189,7 +189,7 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 ## 8. DEFINITION OF DONE (refine as the vision sharpens — do NOT declare COMPLETE until all true)
 
 - [x] `npm run build` + `npm run lint` pass clean on the `night-train` branch. *(green every shift;
-      re-verified shift 5 — build ✅, lint 0 errors / 27 warnings.)*
+      re-verified shift 6 — build ✅, lint 0 errors / **5 warnings** (down from 27, all intentional).)*
 - [x] A stunning, mobile-first, conversion-optimized **landing page** that sells the dream. *(shift 1:
       new `app/page.tsx`, on-brand, verified 200. Not yet browser-eyeballed but content/sprites serve.)*
 - [x] A delightful **onboarding** that hatches the first egg in under a minute. *(shift 1: rebuilt
@@ -201,16 +201,19 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
       page = heatmap + Tend Wrapped + overview + weekly trend + per-habit consistency + day-of-week +
       synergies + streak records + calm advice. Build-verified; not yet browser-verified — auth-gated.)*
 - [x] An expanded **wellness suite** (breathing + at least 2–3 more uplifting tools). *(shift 2:
-      `wellness-hub.tsx` ships 4 tools — Breathe + 5-4-3-2-1 grounding + 90s urge-surf + gratitude.
-      Meets "breathing + 2–3 more". Optional leftover: persist gratitude server-side + a calm mode.)*
+      4 tools — Breathe + grounding + urge-surf + gratitude. shift 6: gratitude now persists
+      server-side + surfaces in Insights, and a 5th tool — a "Wind down" calm/night mode — shipped.
+      All wellness leftovers now banked.)*
 - [x] A coherent **pricing/monetization** model (costs modeled, free/Pro split, Stripe wired). *(shift 4:
       §13 PRICING MODEL — costs modeled, competitor benchmark, free/Tend+ split + price recommendation.
       Stripe already wired. Executing the recommended price tweak is an optional follow-up.)*
 - [ ] **Premium polish**: micro-interactions, dark mode, PWA install, accessibility, safe-area insets.
       *(shift 4: PWA install prompt + on-brand manifest. shift 5: reduced-motion guard, `:focus-visible`
       ring, accessible role="checkbox" check-off, warm empty-garden state, `syncError` save-fail toasts,
-      egg-warming viz. Loading skeleton already present. Remaining: broader a11y sweep (more div-onClick
-      tap targets → real buttons/roles + contrast check), optional per-view skeletons + service worker.)*
+      egg-warming viz. shift 6: `clickable()` a11y helper made the garden's primary tap targets
+      keyboard-operable (roles + Enter/Space + aria-labels). Remaining: colour-contrast check both
+      themes (needs browser/tooling), optional per-view skeletons + service worker — all minor. The
+      real gate here is a real-device eyeball.)*
 - [ ] Everything **branding-consistent as "Tend"** with the warm garden aesthetic. *(shift 5: README
       rebranded off the stale recovery-first framing → dragon-garden identity + correct pricing/stages.
       Landing/onboarding/manifest already on-brand. Remaining: eyeball in-app copy on a real device;
@@ -285,43 +288,53 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
     (Android/Chrome → native install) and shows Share → Add-to-Home-Screen steps on iOS Safari; renders
     nothing when already standalone or dismissed. Fixed the off-brand `manifest.json` (was "Habit &
     Recovery Tracker / Quit bad habits") to the dragon-garden identity + maskable icons + categories.
-14. **[PHASE 6 — IN PROGRESS] Remaining premium-polish pass.** The biggest still-open DoD bucket.
-    Shift-5 progress: ✅ (c) **richer egg-progress viz** — ambient egg-warming bar on each garden build
-    row fills toward next hatch/evolution, glows+pulses (`eggWarm`) at ≥66% (commit `6f798ea`, §11
-    "egg incubation as ambient progress" done). ✅ (b-partial) **empty/error states** — warm on-brand
-    empty garden (floating egg + "Plant your first egg" CTA) + `syncError` toast replacing 5 silent
-    `router.refresh()` rollbacks (commit `d3776b7`). ✅ **reduced-motion** global guard in globals.css.
-    STILL OPEN: (a) **a11y** — app is inline-style + div-onClick heavy; add `aria-label`s, real
-    `<button>`s where divs handle taps, `:focus-visible` styles, check color contrast in both themes.
-    (b-rest) loading skeleton already exists (verified shift 5); consider per-view skeletons for Insights.
-    (d) minimal **service worker** for offline shell (optional; SW not required for install).
-15. **[PHASE 4] Wellness leftovers.** Persist gratitude server-side (currently localStorage
-    `tend_gratitude`) + surface it in Insights; consider a "calm/night mode" starlit terrarium.
+14. **[PHASE 6 — IN PROGRESS] Remaining premium-polish pass.** Shift-6 advanced the a11y sub-item:
+    ✅ (a) **keyboard-accessible tap targets** — new reusable `clickable()` helper in `lib/utils.ts`
+    (role/tabIndex/aria-label/aria-checked + Enter+Space activation, spread alongside the existing
+    onClick so mouse behaviour is untouched). Applied across the garden monolith's primary daily-loop
+    surfaces: coin/shop pill, egg-callout dismiss, habit-row open-detail, streak-at-risk protect rows,
+    colour-swatch pickers (`role="radio"` + aria-checked), paywall colour cards (commit `1642b05`).
+    Verified you-screen/wellness-hub/bottom-nav already use real `<button>`s; paywall CTAs too (the
+    remaining div-onClicks in tend-plus-screen/urge-support are modal backdrops — correct as-is).
+    STILL OPEN in this bucket: **contrast check** both themes (needs a browser/tooling pass); optional
+    per-view Insights skeletons + a minimal service worker (SW not required for install).
+15. ✅ **[PHASE 4] Wellness leftovers — DONE (shift 6).** (a) **Gratitude now persists server-side**
+    (commit `be566c1`): migration-008 + schema add a `gratitude_entries` JSONB column on
+    user_preferences; `/api/preferences` GET/PUT read+accept it; garden/page hydrates it into
+    initialPreferences; tend-app holds `gratitudeLog` + a `saveGratitude()` (dedupes by day, caches to
+    localStorage, syncs to server); wellness-hub Gratitude calls the parent handler (localStorage-only
+    fallback preserved). **Surfaced in Insights** — a warm "Things you were grateful for" card in
+    Constellation shows the 3 most-recent entries + days-logged. (b) **Calm/night "Wind down" mode**
+    (commit `4cb39f1`): a 5th wellness tool — full-screen starlit evening space, a breathing moon-orb
+    on a 12s in-hold-out-rest cadence (JS-synced phase text), deterministic twinkling starfield,
+    rotating gentle lines, safe-area + aria-label + X/"Rest well" exits.
 16. **[PHASE 5 — OPTIONAL] Execute the §13 price change.** Only if desired: new Stripe price IDs
     ($5.99/mo, $79.99 one-time lifetime), a 7-day trial on the annual price, and a `lifetime` entitlement
     branch alongside the existing sub check. NOT required for the DoD (model is documented in §13).
-17. **[ongoing] Lint hygiene** — 27 warnings (unused vars + unused exhaustive-deps disables). NOTE:
-    `eslint --fix` on the monolith leaves ugly trailing-whitespace where it strips disable comments —
-    do these by hand (delete the whole comment line), don't --fix blindly.
+17. ✅ **[ongoing] Lint hygiene — 27 → 5 warnings (shift 6, commit `bf7dc9d`).** Removed dead code by
+    hand (not `--fix`, which mangles the monolith's whitespace): unused imports, write-only dead state
+    (`celebrationActive`, `creatureBounce`, urge-support `method`), unused destructured props, and two
+    stale eslint-disable directives. Remaining 5 are intentional: 3 exhaustive-deps suppressions, a
+    legacy-compat param (`_hexColor`), and Next's `no-page-custom-font` notice (would need a next/font
+    refactor of the Fraunces/Nunito loads in `app/layout.tsx` — optional polish).
 
-> HANDOFF TL;DR for the next shift: build is GREEN, lint 0-errors. DONE: front door (landing +
-> onboarding), bottom-nav shell, Wellness + You screens, assumes-best one-tap check-in, **Phase 3 deep
-> Insights + Tend Wrapped** (shift 3), grace-token UX + pricing model §13 + PWA install (shift 4), and
-> **shift 5 = Phase 6 polish + branding audit**: ambient egg-warming progress bar (#14c/§11), warm
-> empty-garden state + `syncError` save-fail toasts (#14b), reduced-motion guard + `:focus-visible`
-> ring + accessible `role="checkbox"` check-off + FAB aria-label (#14a), and a full **branding pass** —
-> README rebranded off the stale recovery-first framing and the /pricing route copy aligned to the
-> dragon-garden + §13 split. **§8 DoD now shows only 3 items un-checked**, and two of those hinge on
-> **browser-verification** (auth-gated) rather than new code. Remaining DoD levers: **(1)** the last of
-> Phase 6 polish — a broader a11y sweep (many habit-row `div`-onClick tap targets still lack roles/
-> keyboard handlers; contrast check both themes), optional per-view Insights skeletons + a service
-> worker (#14). **(2)** Phase 4 wellness leftovers — persist gratitude server-side + surface in
-> Insights, calm/night mode (#15). **(3, optional)** execute the §13 price change (#16). **BIGGEST
-> BLOCKER TO DECLARING DONE: none of the shift-2→5 UI is browser-verified** — it all renders behind
-> Clerk auth. A successor (or Jonny) with real keys must eyeball the Wrapped reel, nav, wellness tools,
-> You screen, grace-token badge/detail, one-tap, the new egg-warming bars, and the empty-garden state
-> once. Read §6b audit + §10 decisions + §13 pricing first. `.env.local` + middleware notes in NEEDS
-> EYES still stand.
+> HANDOFF TL;DR for the next shift: build is GREEN, **lint 0-errors / 5 warnings** (down from 27; the
+> 5 left are intentional — see #17). DONE: front door (landing + onboarding), bottom-nav shell,
+> Wellness + You screens, assumes-best one-tap check-in, **Phase 3 deep Insights + Tend Wrapped**
+> (shift 3), grace-token UX + pricing model §13 + PWA install (shift 4), Phase 6 polish + branding
+> audit (shift 5), and **shift 6 = keyboard-a11y + wellness leftovers + lint**: a reusable
+> `clickable()` helper made the garden's primary tap targets keyboard-operable (#14a), **gratitude now
+> persists server-side + shows in Insights** (migration-008), a **"Wind down" calm/night mode** shipped
+> as a 5th wellness tool (#15 fully done), and lint dead-code was cleared (#17). **§8 DoD now shows
+> only 3 items un-checked**, and ALL THREE hinge on **browser-verification** (auth-gated) rather than
+> new code — the remaining pure-code levers are minor/optional (contrast check, per-view skeletons,
+> service worker, the §13 price change). **BIGGEST BLOCKER TO DECLARING DONE: none of the shift-2→6 UI
+> is browser-verified** — it all renders behind Clerk auth. A successor (or Jonny) with real keys must
+> eyeball the whole app once: Wrapped reel, nav, wellness tools (incl. the new Wind-down mode), You
+> screen, grace-token badge/detail, one-tap, egg-warming bars, empty-garden state, and the new gratitude
+> Insights card. **Also NEEDS EYES: migration-008 must be run in Supabase** before gratitude persists
+> for real (falls back to localStorage gracefully until then). Read §6b audit + §10 decisions + §13
+> pricing first. `.env.local` + middleware notes in NEEDS EYES still stand.
 
 > Keep this queue to ~3–6 concrete next actions. When you finish one, replace it with what you learned
 > should come next. Always leave the queue actionable for a cold-start successor.
@@ -398,6 +411,24 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - *(shift 3)* **Consistency % = a fair, capped-window rate, not lifetime.** The scoreboard bar uses
   completions over `min(30, habitAgeInDays)` so a 3-day-old habit at 3/3 reads 100%, not 10% — avoids
   punishing young habits with a fixed 30-day denominator. Color-graded (green ≥70 / amber ≥40 / red).
+- *(shift 6)* **A11y via a `clickable()` helper, not a wholesale button rewrite.** The monolith is
+  inline-style + div-onClick heavy; converting every tap div to a real `<button>` would fight the
+  layout and risk regressions. Instead a small `clickable(onActivate, opts)` util returns the a11y
+  props (role/tabIndex/aria-label/aria-checked + Enter/Space) to spread *alongside* the existing
+  onClick — mouse behaviour untouched, keyboard/SR support added. Applied to primary daily-loop
+  surfaces only; deliberately left redundant duplicate tab stops (status icon + sprite that also open
+  detail) mouse-only so keyboard users get one clean stop per row (the labelled name div).
+- *(shift 6)* **Gratitude persists via the existing `user_preferences` row, not a new table.** Added a
+  `gratitude_entries` JSONB column (migration-008) rather than a `gratitude` table — it's small,
+  per-user, append-only, capped to 60, and rides the preferences GET/PUT + hydration path already in
+  place. tend-app owns the state + sync (dedupe-by-day) and passes a `saveGratitude` handler down;
+  wellness-hub keeps a localStorage-only fallback when no handler is wired, so it degrades gracefully
+  offline and before the migration is run. Surfaced read-only in Insights (Constellation card).
+- *(shift 6)* **Calm/night mode = a self-contained wellness tool, not a global palette shift.** Rather
+  than re-theming the whole garden into a starlit terrarium (deep + risky in the monolith), "Wind
+  down" is a full-screen overlay launched from the Wellness hub — a breathing moon-orb + starfield +
+  gentle lines, all client-only/CSS/JS-timer, no DB, no theme surgery. Delivers the calm-evening
+  feeling with near-zero blast radius. A future shift can still theme the garden itself if desired.
 
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
@@ -406,13 +437,18 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 - **Dragon personality from your habits:** the species/color you hatch reflects the habit type
   (calm/water for sleep, fire for fitness, etc.) — collectible + meaningful.
 - **"Tend Wrapped" as a share-card export** (the constellation/share-card components hint this exists).
-- **Calm mode / night mode** that turns the garden into a starlit terrarium for evening wind-down.
+- ~~**Calm mode / night mode** starlit wind-down~~ ✅ SHIPPED shift 6 as the "Wind down" wellness tool
+  (a full-screen overlay, not a garden re-theme — see §10). A garden-wide night re-theme is still open.
 - **Streak insurance / grace token** earned by coins — protects against one slip so it never feels
   punishing (retention gold, monetizable).
 - **Widget-style "today" hero** you could screenshot to a phone home screen.
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
 
+- **Run `migration-008-gratitude-entries.sql` in Supabase (shift 6).** Adds the `gratitude_entries`
+  JSONB column to `user_preferences` so the Wellness "three good things" ritual persists server-side +
+  shows in Insights. Until it's run, gratitude falls back to localStorage gracefully (no crash), but
+  won't sync across devices or appear in the Insights card. `IF NOT EXISTS`, so it's safe to re-run.
 - **`.env.local` build placeholders (shift 1).** To make `npm run build` pass without secrets, shift 1
   created a **gitignored** `.env.local` with DUMMY, non-secret values (Clerk *publishable* key is
   public; everything else is an obvious placeholder). No real secret is in the tree. This file will
