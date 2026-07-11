@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface ConfettiProps {
   active: boolean;
 }
 
 export function Confetti({ active }: ConfettiProps) {
+  const prefersReducedMotion = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Array<{
     x: number; y: number; vx: number; vy: number;
@@ -17,7 +19,9 @@ export function Confetti({ active }: ConfettiProps) {
   const raf = useRef<number>(0);
 
   useEffect(() => {
-    if (!active || !canvasRef.current) return;
+    // Canvas rAF is not stopped by the global prefers-reduced-motion CSS rule, so
+    // gate the burst here — reduced-motion users get no confetti animation at all.
+    if (!active || !canvasRef.current || prefersReducedMotion) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -79,9 +83,9 @@ export function Confetti({ active }: ConfettiProps) {
     return () => {
       if (raf.current) cancelAnimationFrame(raf.current);
     };
-  }, [active]);
+  }, [active, prefersReducedMotion]);
 
-  if (!active) return null;
+  if (!active || prefersReducedMotion) return null;
   return (
     <canvas
       ref={canvasRef}

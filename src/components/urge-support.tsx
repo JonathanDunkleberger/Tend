@@ -126,7 +126,7 @@ export function UrgeSupport({ habit, urgesToday, onComplete, onClose }: UrgeSupp
                 <Wind size={22} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
                 <div style={{ textAlign: "left" }}>
                   <div style={{ fontSize: 15, fontWeight: 600, color: "white" }}>Breathe</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>5-minute guided breathing</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>One minute of guided breathing</div>
                 </div>
               </div>
             </div>
