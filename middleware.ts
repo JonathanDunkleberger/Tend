@@ -9,15 +9,17 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
  * see auth changes "not taking effect", check you're editing THIS file.)
  *
  * Public routes: landing (/), sign-in, sign-up, Stripe/Clerk webhooks (verified
- * by signature, not a Clerk session), and the auth-free `/preview` QA/showcase
- * harness (mock data only, no secrets — see src/app/preview/page.tsx). Everything
- * else requires a signed-in user.
+ * by signature, not a Clerk session), the auth-free `/preview` QA/showcase
+ * harness (mock data only, no secrets — see src/app/preview/page.tsx), and the
+ * dynamically-generated `/opengraph-image` share card (social crawlers fetch it
+ * unauthenticated, so it MUST be public). Everything else requires a signed-in user.
  */
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/preview(.*)",
+  "/opengraph-image(.*)",
   "/api/webhooks(.*)",
 ]);
 

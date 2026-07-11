@@ -2,11 +2,32 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
+const TITLE = "Tend — Grow habits, hatch dragons";
+const DESCRIPTION =
+  "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.";
+
 export const metadata: Metadata = {
-  title: "Tend — Grow habits, hatch dragons",
-  description: "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.",
+  metadataBase: new URL(APP_URL),
+  title: TITLE,
+  description: DESCRIPTION,
   keywords: ["habit tracker", "habit building", "self improvement", "dragon eggs", "gamified habits", "streaks", "wellness", "breathing"],
   manifest: "/manifest.json",
+  applicationName: "Tend",
+  openGraph: {
+    type: "website",
+    siteName: "Tend",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: APP_URL,
+    locale: "en_US",
+    // og image is provided by app/opengraph-image.tsx (dynamic 1200x630 card)
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
