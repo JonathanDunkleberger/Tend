@@ -39,6 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# night-train shift transcripts (raw session logs)
+/logs/
+
 # code review dumps
 DEBUG_DUMP.txt
 FULL_CODE_REVIEW_DUMP.txt
