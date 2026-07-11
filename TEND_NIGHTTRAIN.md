@@ -246,7 +246,28 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 9. CURRENT FRONTIER (the live work queue — top item is next)
 
-> NEXT SHIFT — shift 57 REOPENED the cold-read bug vein that shifts 49–53 had declared "exhausted" and
+> NEXT SHIFT — shift 58 CLOSED BOTH of shift 57's found-but-deferred bugs (they were more
+> reasoning-verifiable than the deferral implied), then ran a fresh hunter on the least-swept surfaces
+> and fixed 2 more nits. Banked (#0as, 3 fix commits): (1) **log-route milestone keying** — now keys on
+> the RAW consecutive streak (`computeStreakForDate`, tested) instead of total-days-logged, killing the
+> phantom-`streak:N` false-suppression while preserving the perfect-streak cross-device badge (§10 design
+> call). (2) **reduced-motion SMIL** — added an `ambientPulse` tier flag gating the moon + planet-shadow
+> pulses, and fixed the `constellation.tsx` synergy-line twin (no reduced-motion awareness at all). (3) a
+> fresh hunter on habits-CRUD/quit/pro/verify/checkout/portal routes + 11 unswept components found only
+> LOW-sev: `urge-entries ?limit` had no NaN/range guard (`?limit=abc` → `.limit(NaN)` → 500) and
+> `healing-timeline` showed "tomorrow" next to a "2h" sub-day step — both fixed. build GREEN, lint 0/5,
+> **test 99→107**. The hunter CONFIRMED the rest of those surfaces are clean (habits PATCH allowlist,
+> pro-status, checkout, portal, morning-checkin, breathing-timer, urge-trend bucketing, multi-heatmap
+> quit fill all traced correct). **The §12 deferred bug list is now empty of code-fixable items.**
+> **Still Jonny-only (unchanged):** run `migration-009` + `-008` in Supabase; §13/#16 Stripe price change
+> (keyed); the verify-subscription 10-session fallback (needs real Stripe volume to fix right — the only
+> remaining known gap); the bounce-back ramp fires for ALL users not just after a lapse (product call);
+> the real-device eyeball of the auth-gated app (§14). The `next/font` conversion stays rejected. Honest
+> read: the cold-read vein across API routes + component internals is now genuinely well-swept (shifts
+> 49–58); a future hunter should aim at anything still untouched (e.g. the tend-app monolith's deeper
+> effect wiring) but expect thin returns. Remaining un-checked DoD items hinge on Jonny's browser.
+
+> PRIOR POINTER — shift 57 REOPENED the cold-read bug vein that shifts 49–53 had declared "exhausted" and
 > found it was NOT: prior hunts concentrated on reward/celebration/optimistic-update/analytics + the
 > coins/inventory/stripe/urge API routes, but several surfaces had NEVER been deeply swept — the
 > data-lifecycle helpers (`migrate-local-data`, `ensure-profile`), the log/relapse/preferences/clerk-
@@ -283,6 +304,34 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 > lesson to the atomicity race. The cold-read bug vein (reward/celebration/optimistic-update/stale-
 > snapshot/analytics-derivation classes) is genuinely exhausted across shifts 49–53; the file://-
 > verifiable landing levers (copy/FAQ/OG/pricing/promise/showcase/evolution-payoff) are all done.
+
+0as. ✅ **[SHIFT 58] Closed BOTH shift-57 deferred bugs + 2 more nits (reasoning-verified, no DB/browser).**
+   Shift 57 parked two bugs as "needs design/browser"; on a fresh read both were more cold-fixable than the
+   deferral implied (shift-53's lesson: check whether the *fix* needs the service, or just the *repro*).
+   (1) **[api] Log-route milestones keyed on total-days-logged, not consecutive streak** (deferred #5). The
+   route inserted `milestone_type:"streak", value: count(habit_logs)` — total distinct days EVER logged —
+   which rehydrates into the client's `earned` map (dedups celebrations + lights the detail badge grid), so
+   a sporadic logger reaching 7 *total* days (never a run) got a phantom `streak:7` row that SUPPRESSED the
+   real 7-day-streak celebration. The server can't see the client's grace tokens, so it now records the
+   best RAW consecutive streak it can derive from the log dates via a new tested pure helper
+   `computeStreakForDate` (lib/streak.ts → delegates to the tested `computeStreak` over a tz-independent
+   UTC-noon date walk). Kills the false-suppression while preserving the perfect-streak case (streak ==
+   total → still persists cross-device); grace-bridged milestones fall back to the client's localStorage
+   `granted` dedup. +8 unit cases. (2) **[a11y] Ambient SVG SMIL ignored reduced-motion** (deferred #6).
+   The global `@media (prefers-reduced-motion)` CSS rule doesn't stop SVG SMIL `<animate>`; the moon
+   r/opacity pulses + the planet-shadow ry pulse were ungated (every other terrarium SMIL node already gated
+   by a `tc.*` flag). Added an `ambientPulse` tier flag (full+reduced true, minimal false) + gated the
+   three — restoring the tier system's own "minimal = static scene" contract. **Found + fixed the twin:**
+   `constellation.tsx`'s synergy-line pulse was the lone SMIL node there with NO reduced-motion awareness →
+   added `useReducedMotion` + gated it. (3) **Fresh hunter on the least-swept surfaces** (habits-CRUD/quit/
+   pro/verify/checkout/portal routes + 11 components) found only LOW-sev: `urge-entries ?limit` had no
+   NaN/range guard (`?limit=abc` → `parseInt`=NaN → `.limit(NaN)` → malformed query/500; now clamped 1..500)
+   and `healing-timeline` rendered "tomorrow" beside a "2h" sub-day step (`Math.ceil(0.08)=1`; sub-day steps
+   now count down in hours) — both fixed. The hunter CONFIRMED the rest clean (habits PATCH allowlist,
+   pro-status, checkout, portal, morning-checkin, breathing-timer, urge-trend bucketing, multi-heatmap quit
+   fill). build GREEN, lint 0/5, **test 99→107**, 3 fix commits. §12 code-fixable deferred list now EMPTY;
+   the only remaining known API gap (verify-subscription 10-session fallback) genuinely needs real Stripe
+   volume. See §10 shift-58 decision for the milestone-keying design call.
 
 0ar. ✅ **[SHIFT 57] Fresh cold-read bug hunt on the NEVER-swept surfaces — FIXED 5 real bugs
    (reasoning-verified, no DB/browser).** Shifts 49–53 declared the cold-read vein "exhausted," but that
@@ -996,6 +1045,22 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
   race (needs an atomic SQL RPC + migration to even express the fix) and the verify-subscription volume
   fallback (the correct fix — look up by metadata — needs real Stripe data to confirm it resolves).
 
+- *(shift 58)* **The log route persists milestones keyed by the RAW consecutive streak — the best metric
+  the server can compute — not total-days-logged, and not the client's grace-aware streak.** Deferred bug
+  #5 asked for a design decision: drive milestones purely client-side, or teach the server about grace.
+  Rejected both extremes. Pure-client would drop the cross-device badge persistence the disciplined user
+  currently gets (perfect streak → total-days == streak → the old code happened to key it right). Teaching
+  the server about grace is impossible (grace tokens are client-only React/localStorage state the server
+  never sees). Chose the middle: the server derives the raw consecutive run from `habit_logs` and keys the
+  milestone row on THAT. Rationale: (a) it eliminates the actual bug (a sporadic logger's total-days
+  crossing a milestone number no longer writes a phantom `streak:N` row that false-suppresses the real
+  celebration); (b) it strictly preserves the good case (a genuine consecutive N-day run still persists the
+  badge cross-device); (c) the only thing it can't persist is a milestone that a *grace token* bridged —
+  and that already falls to the client's durable localStorage `granted` dedup (so it won't re-celebrate; it
+  just won't light the badge on a *different* device — a rare, minor edge). The streak math is a pure,
+  tz-independent, unit-tested helper (`computeStreakForDate`), so the fix is fully reasoning-verifiable
+  even though the DB round-trip can't be exercised in this sandbox — the insert/dedup path is structurally
+  unchanged; only the `value` it computes changed from `count` to the consecutive streak.
 ## 11. SURPRISE-ME IDEAS (park bold ideas here; promote the best into the frontier)
 
 - **Egg incubation as ambient progress:** the egg visibly "warms"/cracks a little each day you tend it,
@@ -1011,22 +1076,26 @@ re-center the product on the dragon-egg garden and the assumes-best daily tend.*
 
 ## 12. NEEDS EYES (blockers / decisions for Jonny — keep short)
 
-- **DEFERRED BUG (shift 57) #5 — the `habits/[id]/log` route awards "streak" milestones off
-  total-days-logged, not consecutive streak.** `totalDays = count(habit_logs)` counts DISTINCT days ever
-  logged (schema has `unique(habit_id, log_date)`), then inserts a `milestones` row with
-  `milestone_type:"streak", value: totalDays` when it hits a MILESTONE_DAYS value. That table rehydrates
-  into the client's `initialEarned` celebration-dedup (`garden/page.tsx` → `earned[habit_id:value]`), so
-  a user who logs sporadically to 7 total days gets a "7-day streak" row that then SUPPRESSES the real
-  7-day-streak celebration later. **Not fixed** because the correct fix (compute the consecutive run
-  server-side) still wouldn't match the client's streak, which bridges gaps with grace tokens the server
-  doesn't know about — it needs a small design decision (drive milestones purely client-side, or teach
-  the server about grace) + live-DB verification. Flagged for a keyed/design shift.
-- **DEFERRED BUG (shift 57) #6 — terrarium SMIL animations ignore reduced-motion (minor).** The moon
-  `<g>`'s `<animate>` (r/opacity) and the planet-shadow `<animate ry>` in `terrarium-scene.tsx` aren't
-  gated by the `tc.*` tier flags, and the global `@media (prefers-reduced-motion)` CSS rule only stops
-  CSS `animation`/`transition` — NOT SVG SMIL. So a reduced-motion user still sees the moon subtly pulse
-  + the shadow throb. Low impact; fix = gate those SMIL nodes on the reduced-motion tier. Left for a
-  browser-verifiable shift (the visual effect can't be eyeballed here).
+- **✅ FIXED (shift 58) — DEFERRED BUG #5, the log-route milestone keying.** Was: the `habits/[id]/log`
+  route inserted a `milestone_type:"streak", value: totalDays` row where `totalDays = count(habit_logs)`
+  (distinct days EVER logged), which rehydrates into the client's `earned` map (`garden/page.tsx`) that
+  both dedups celebrations AND lights the detail badge grid — so a sporadic logger reaching 7 *total*
+  days (never a run) got a phantom `streak:7` row that SUPPRESSED the real 7-day-streak celebration.
+  **Fix (design call, see §10 shift 58):** the server can't see grace tokens, so it now records the best
+  RAW consecutive streak it can derive from the log dates via a new tested pure helper
+  `computeStreakForDate` (lib/streak.ts, delegating to the existing `computeStreak` over a tz-independent
+  UTC-noon date walk). This kills the false-suppression while preserving the perfect-streak case
+  (streak == total-days → still persists the badge cross-device); grace-bridged milestones the server
+  can't observe fall back to the client's durable localStorage `granted` dedup. +8 unit cases; the fix
+  is reasoning-verifiable (pure date math; the DB insert/dedup path is structurally unchanged).
+- **✅ FIXED (shift 58) — DEFERRED BUG #6, terrarium SMIL ignoring reduced-motion.** Was: the moon
+  `<animate>` r/opacity + the planet-shadow `<animate ry>` weren't gated by any tier flag, and the global
+  `@media (prefers-reduced-motion)` CSS rule only stops CSS `animation`/`transition`, NOT SVG SMIL. Added
+  an `ambientPulse` flag to the animation-tier config (full+reduced true, minimal false) and gated the
+  three nodes — restoring the tier system's own contract that "minimal" (= reduced-motion) is a static
+  scene. **Also found + fixed the twin:** `constellation.tsx`'s synergy-line pulse was the lone SMIL node
+  there with NO reduced-motion awareness at all → added `useReducedMotion` + gated it. Reasoning-verified
+  (the accessibility contract is expressible in code; the visual is the only browser-only part).
 
 - **PRODUCT CALL (shift 49) — the bounce-back "recovery" ramp fires for ALL users, not just after a
   real lapse.** Shift 49 fixed the *exploit* (it was an unbounded +3-coins/day faucet — see frontier
