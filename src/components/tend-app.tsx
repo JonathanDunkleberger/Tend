@@ -817,6 +817,51 @@ export function TendApp({
     }
   };
 
+  // ── Assumes-best one-tap: "everything went well today" ──
+  // Marks every active build habit that isn't already done as complete in one
+  // satisfying tap. Flipping all habits done triggers the all-done celebration
+  // effect (confetti + shooting star + banner + coins) automatically.
+  const [allGoodPulse, setAllGoodPulse] = useState(false);
+  const markAllGood = async () => {
+    const targets = activeHabits.filter((h) => h.category !== "quit" && !isHappy(h.id));
+    if (targets.length === 0) return;
+    haptic("success");
+    setAllGoodPulse(true);
+    setTimeout(() => setAllGoodPulse(false), 500);
+    const ids = new Set(targets.map((h) => h.id));
+
+    // Optimistic: mark all target habits done at once
+    setHabits((prev) =>
+      prev.map((h) =>
+        ids.has(h.id)
+          ? {
+              ...h,
+              completedToday: true,
+              totalDays: h.totalDays + 1,
+              logs: [...h.logs, { id: "temp", habit_id: h.id, log_date: todayStr, value: 1, created_at: new Date().toISOString() }],
+            }
+          : h
+      )
+    );
+
+    // Persist each in parallel + run per-habit milestone checks
+    await Promise.all(
+      targets.map((h) =>
+        apiCall<{ action: string }>(`/api/habits/${h.id}/log`, {
+          method: "POST",
+          body: { date: todayStr },
+          onError: () => router.refresh(),
+        }).then((result) => {
+          if (result.ok && result.data?.action === "logged") {
+            const streak = getStreak(h.id) + 1;
+            setTimeout(() => checkMilestones(h.id, streak), 100);
+            setTimeout(() => checkMilestoneCoins(h.id, h.name, false, streak), 200);
+          }
+        })
+      )
+    );
+  };
+
   const [addError, setAddError] = useState("");
 
   const addHabit = async (name: string, color: string, iconName: string, cat: string = "general", dailyCost: number = 0, creatureType?: number) => {
@@ -1604,6 +1649,46 @@ export function TendApp({
                 </div>
               </div>
             )}
+
+            {/* ── Assumes-best one-tap check-in ── */}
+            {(() => {
+              const buildRemaining = activeHabits.filter((h) => h.category !== "quit" && !isHappy(h.id));
+              if (buildRemaining.length === 0) return null;
+              return (
+                <button
+                  onClick={markAllGood}
+                  style={{
+                    width: "100%", marginTop: 10, padding: "13px 16px", borderRadius: 16,
+                    border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                    display: "flex", alignItems: "center", gap: 12,
+                    background: "linear-gradient(135deg, rgba(76,175,80,0.14), rgba(102,255,170,0.08))",
+                    boxShadow: allGoodPulse ? "0 0 0 3px rgba(76,175,80,0.25)" : `inset 0 0 0 1px ${darkMode ? "rgba(102,255,170,0.14)" : "rgba(76,175,80,0.16)"}`,
+                    transform: allGoodPulse ? "scale(0.98)" : "scale(1)",
+                    transition: "transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease",
+                  }}
+                >
+                  <span style={{
+                    width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                    background: "linear-gradient(135deg,#4caf50,#2e7d32)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 4px 12px rgba(76,175,80,0.3)",
+                  }}>
+                    <Check size={20} color="#fff" strokeWidth={3} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block", fontSize: 15, fontWeight: 700, color: th.text }}>
+                      Everything went well today
+                    </span>
+                    <span style={{ display: "block", fontSize: 12, color: th.textSub, marginTop: 1 }}>
+                      {buildRemaining.length === activeHabits.filter((h) => h.category !== "quit").length
+                        ? "One tap — we assume the best in you"
+                        : `Tend the last ${buildRemaining.length} in one tap`}
+                    </span>
+                  </span>
+                  <Sparkles size={16} color="#4caf50" />
+                </button>
+              );
+            })()}
 
             {/* Bounce-back recovery banner */}
             {bounceBackDay > 0 && bounceBackDay <= 7 && !allDone && (
