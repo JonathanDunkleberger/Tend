@@ -1,43 +1,11 @@
-"use client";
+import { redirect } from "next/navigation";
+import { accountPortalSignUpUrl } from "@/lib/auth-urls";
 
-import { SignUp, ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
-
-const cardAppearance = {
-  elements: {
-    card: "rounded-3xl shadow-lg border border-green-100",
-    formButtonPrimary: "bg-green-500 hover:bg-green-600 rounded-2xl",
-    footerActionLink: "text-green-600",
-  },
-} as const;
-
+/**
+ * Hand off to Clerk's Account Portal (production custom domain).
+ * Embedded SignUp was stuck on a blank "tend." shell because Clerk instance
+ * paths point at accounts.hatchtend.com, not this route.
+ */
 export default function SignUpPage() {
-  return (
-    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-4">
-      <div className="text-center w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <span style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 500 }}>
-            tend<span style={{ color: "#2E9E5B" }}>.</span>
-          </span>
-        </div>
-
-        <ClerkLoading>
-          <p style={{ color: "rgba(0,0,0,0.45)", fontSize: 14, marginBottom: 8 }}>
-            Loading sign-up…
-          </p>
-          <p style={{ color: "rgba(0,0,0,0.35)", fontSize: 12, lineHeight: 1.45 }}>
-            If this never finishes, hard-refresh (Ctrl+Shift+R) or try Incognito —
-            a stuck auth script is almost always a browser cache from an earlier SSL glitch.
-          </p>
-        </ClerkLoading>
-
-        <ClerkLoaded>
-          <SignUp
-            forceRedirectUrl="/garden"
-            signInUrl="/sign-in"
-            appearance={cardAppearance}
-          />
-        </ClerkLoaded>
-      </div>
-    </div>
-  );
+  redirect(accountPortalSignUpUrl());
 }

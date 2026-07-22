@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { APP_ORIGIN, GARDEN_URL } from "@/lib/auth-urls";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
+// Canonical host is www — apex 308s here. Keep Clerk redirects + OG on the same origin
+// or session cookies can land on the wrong host and look like a "blank" / broken sign-in.
+const APP_URL = APP_ORIGIN;
 const TITLE = "Tend — Grow habits, hatch dragons";
 const DESCRIPTION =
   "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.";
@@ -52,11 +55,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl={GARDEN_URL}
+      signUpFallbackRedirectUrl={GARDEN_URL}
+      afterSignOutUrl={APP_ORIGIN}
+    >
       <html lang="en">
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://clerk.hatchtend.com" />
+          <link rel="preconnect" href="https://accounts.hatchtend.com" />
           <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet" />
         </head>
         <body className="antialiased" style={{ background: "#FBFAF5", fontFamily: "'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif" }}>

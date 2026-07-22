@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No subscription found" }, { status: 404 });
   }
 
-  const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
+  const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://www.hatchtend.com";
 
   const session = await getStripe().billingPortal.sessions.create({
     customer: profile.stripe_customer_id,

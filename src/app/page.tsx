@@ -416,7 +416,7 @@ const FAQS: { q: string; a: string }[] = [
  * stripped of the inline <b>/<i> markup so it stays plain text + matches the
  * visible copy (Google requires JSON-LD FAQ text to mirror on-page content).
  */
-const LANDING_URL = process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
+const LANDING_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.hatchtend.com";
 const stripTags = (s: string) => s.replace(/<[^>]+>/g, "");
 
 const SOFTWARE_LD = {

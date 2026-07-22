@@ -13,7 +13,7 @@ import type { MetadataRoute } from "next";
  * extensions aren't in the middleware's static-asset skip list), same gotcha
  * as /opengraph-image.
  */
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.hatchtend.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
