@@ -702,25 +702,42 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 
 Jonny's own idea, captured so it doesn't get lost or accidentally over-built by a future shift:
 grow the garden metaphor into a small **village/world your dragons live in** — more of a "build your
-own little civilization" feel, closer to a mobile game than a habit tracker.
+own little civilization" feel, closer to a mobile game than a habit tracker. His own reference point:
+**Forest** (the study app where you plant a tree that dies if you leave the app) — the habit and the
+living world are the SAME loop, not a separate mini-game bolted on.
 
 He explicitly considered two scopes and picked the lighter one for now (his words: "there's a mix to
-find" — this is deliberately the safe end of that mix):
+find," "it's not that deep" — this is deliberately the safe end of that mix):
 
-- **CHOSEN (simple): a cosmetic village that grows with your dragons.** The existing planet/terrarium
-  scene (`terrarium-scene.tsx`, `planet-items.tsx`) already has a garden the shop's décor items populate
-  (ponds, lanterns, paths, trees — see `shop.tsx`/`SHOP_ITEMS`). The village extension is presentational
-  scaling of the SAME idea: as more habits hatch/evolve and more décor is owned, the scene visually reads
-  as a fuller little settlement (more structures, denser layout, maybe a couple of new building-shaped
-  shop items) — NO new mechanics, no dragon "needs," no simulation. Low risk, fits the existing
-  cosmetic-shop economy (coins → items) with zero new server logic.
+- **CHOSEN (simple): a cosmetic world that grows and breathes with your dragons.** The existing
+  planet/terrarium scene (`terrarium-scene.tsx`, `planet-items.tsx`) already has a garden the shop's
+  décor items populate (ponds, lanterns, paths, trees — see `shop.tsx`/`SHOP_ITEMS`), AND already has a
+  real season system (`getSeason()` in `lib/constants.ts` → spring/summer/autumn/winter sky + planet
+  colors + seasonal particles — blossoms/fireflies/leaves/snow — already wired into
+  `terrarium-scene.tsx`). The village extension is more of the SAME kind of presentational richness,
+  not new mechanics:
+    - More buyable world dressing (Jonny wants to literally buy new trees/structures like the
+      `SHOP_ITEMS` décor already works — "plant new trees... like Forest").
+    - A day/night cycle (currently the scene is always a starlit night by deliberate earlier design
+      call — worth revisiting once this direction is greenlit).
+    - Light weather beats beyond the existing seasonal particles (a rain/storm pass, not a simulation).
+    - A visual reskin pass toward Tolkien / Game-of-Thrones-flavored set pieces (banners, stone paths,
+      watchtowers, etc. — bought custom dragon PNGs from itch.io already; more itch.io asset packs are
+      an option for this) — pure art/CSS layer over the existing scene, no new state.
+    - NO new mechanics, no dragon "needs," no simulation, no failure states. Still coins → cosmetics,
+      same server model as today.
 - **REJECTED for now (deeper): dragons have moods/needs tied to habit consistency** ("your dragons get
   hurt if you fuck up on your habits"). Explicitly more complex — new state, new failure-mode design (the
   brand's whole soul is §1 "never shaming," so a dragon that visibly suffers from a missed day cuts
   directly against that — would need careful, deliberate design, not a cold-read bug-hunt shift). Jonny
   did NOT pick this; do not build punitive/suffering mechanics without him explicitly re-opening it.
-- **Rejected/deferred entirely (for later brainstorming, not scoped at all):** anything beyond the above
-  — full civilization-building, multiplayer villages, etc. Not sized, not planned.
+- **Rejected/deferred entirely (for later brainstorming, not scoped at all):** full civilization-sim
+  mechanics, "storm the wall"-style base-defense/action gameplay (Jonny explicitly said NOT this), any
+  multiplayer village. Not sized, not planned.
+
+Open thread for Jonny: he's bought dragon PNG assets from itch.io and is open to buying more art assets
+for this — when/if this is greenlit, the first real step is Jonny sharing what he's bought (or itch.io
+links) so a shift can actually integrate real art instead of guessing.
 
 Do NOT start building this without Jonny explicitly greenlighting a shift on it — it's parked here purely
 so the idea isn't lost, not queued as next work.
