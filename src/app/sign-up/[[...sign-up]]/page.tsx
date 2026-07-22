@@ -14,7 +14,7 @@ const appearance = {
   },
 } as const;
 
-export default function SignUpPage() {
+export default function Page() {
   return (
     <AuthScreen mode="sign-up">
       <SignUp

@@ -2,15 +2,22 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 
 type Mode = "sign-in" | "sign-up";
 
+/**
+ * Branded shell around Clerk's SignIn/SignUp.
+ * Always renders children — do NOT gate on ClerkLoading/ClerkLoaded (that pair
+ * was leaving a header with zero form when clerk-js stalled or Account Portal
+ * paths conflicted).
+ */
 export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode }) {
-  const [stuck, setStuck] = useState(false);
+  const { loaded } = useClerk();
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
-    const id = window.setTimeout(() => setStuck(true), 8000);
+    const id = window.setTimeout(() => setShowHelp(true), 6000);
     return () => window.clearTimeout(id);
   }, []);
 
@@ -27,28 +34,24 @@ export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode
       </Link>
       <h1 style={h1}>{title}</h1>
       <p style={sub}>{subtitle}</p>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        <ClerkLoading>
-          {stuck ? (
-            <div style={cardWarn}>
-              <p style={{ margin: "0 0 8px", fontWeight: 600 }}>Sign-in is stuck</p>
-              <p style={{ margin: "0 0 16px", fontSize: 13, opacity: 0.75, lineHeight: 1.45 }}>
-                Try a hard refresh (Ctrl+Shift+R) or an Incognito window. Ad blockers sometimes block the auth script.
-              </p>
-              <a href={mode === "sign-in" ? "/sign-in" : "/sign-up"} style={btn}>
-                Retry
-              </a>
-            </div>
-          ) : (
-            <div style={card}>
-              <div aria-hidden style={spinner} />
-              <p style={{ margin: 0, fontSize: 14, opacity: 0.7 }}>Loading secure sign-in…</p>
-              <style>{`@keyframes tendSpin{to{transform:rotate(360deg)}}`}</style>
-            </div>
-          )}
-        </ClerkLoading>
-        <ClerkLoaded>{children}</ClerkLoaded>
-      </div>
+
+      <div style={{ width: "100%", maxWidth: 420 }}>{children}</div>
+
+      {!loaded && (
+        <p style={{ marginTop: 20, fontSize: 13, opacity: 0.55 }}>Loading secure sign-in…</p>
+      )}
+
+      {showHelp && !loaded && (
+        <div style={help}>
+          <p style={{ margin: "0 0 8px", fontWeight: 600 }}>Still loading?</p>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.45, opacity: 0.8 }}>
+            Hard-refresh (Ctrl+Shift+R) or try Incognito. In Clerk Dashboard open{" "}
+            <strong>Account Portal</strong> (left sidebar) — Sign-in / Sign-up URLs must be{" "}
+            <code>https://www.hatchtend.com/sign-in</code> and{" "}
+            <code>https://www.hatchtend.com/sign-up</code>, not accounts.hatchtend.com.
+          </p>
+        </div>
+      )}
     </main>
   );
 }
@@ -91,39 +94,12 @@ const sub: CSSProperties = {
   lineHeight: 1.45,
 };
 
-const card: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: 16,
-  padding: "40px 24px",
+const help: CSSProperties = {
+  marginTop: 24,
+  maxWidth: 420,
+  padding: "16px 18px",
+  borderRadius: 16,
   background: "#fff",
-  borderRadius: 24,
-  border: "1px solid #d8f0e0",
-};
-
-const cardWarn: CSSProperties = {
-  ...card,
   border: "1px solid #f0d8d8",
-  textAlign: "center",
-};
-
-const spinner: CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: "50%",
-  border: "3px solid #d8f0e0",
-  borderTopColor: "#2E9E5B",
-  animation: "tendSpin 0.8s linear infinite",
-};
-
-const btn: CSSProperties = {
-  display: "inline-block",
-  padding: "12px 16px",
-  borderRadius: 14,
-  background: "#2E9E5B",
-  color: "#fff",
-  fontWeight: 600,
-  fontSize: 14,
-  textDecoration: "none",
+  textAlign: "left",
 };
