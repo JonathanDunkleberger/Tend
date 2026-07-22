@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
 const TITLE = "Tend — Grow habits, hatch dragons";
 const DESCRIPTION =
   "A calm little garden for building better habits. Each habit is a dragon egg that hatches and evolves as you tend it daily. Assumes the best in you — never shaming.";

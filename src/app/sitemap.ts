@@ -10,7 +10,7 @@ import type { MetadataRoute } from "next";
  * is referenced from robots.txt, which is what lets Google discover the landing's
  * JSON-LD rich results (see app/page.tsx). Generated statically by Next.
  */
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

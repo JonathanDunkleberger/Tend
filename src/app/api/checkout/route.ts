@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const supabase = await createServerSupabaseClient();
     const profile = await ensureProfile(supabase, userId);
 
-    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://tendhabit.com";
+    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://hatchtend.com";
     const isLifetime = plan === "lifetime";
 
     const sessionParams: Record<string, unknown> = {
