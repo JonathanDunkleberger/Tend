@@ -204,44 +204,24 @@ export const CREATURE_HERO_SIZE = 160;
 /** Stage names — dragon-themed */
 export const STAGE_NAMES = ["Egg", "Hatchling", "Whelp", "Drake", "Elder Dragon"] as const;
 
-/* ═══════════ SHOP SPRITES (unchanged) ═══════════ */
-
+/* ═══════════ SHOP SPRITES ═══════════
+ *
+ * NOTE (2026-07-21): most of the Sprout Lands PNGs under public/sprites/{shop,world}
+ * are raw, un-cropped spritesheets (multiple icons per file) or were mapped to the
+ * wrong file entirely (e.g. "lantern" was pointing at a signpost sheet, "birdhouse"
+ * at the well icon, flower items at tiny tree icons). Rather than guess pixel crops,
+ * every current SHOP_ITEMS id below was removed from this map so it falls back to
+ * the hand-drawn DecorGlyph vector icon (see components/decor-glyphs.tsx) on both
+ * the shop card and the planet scene — that art is already correct and on-brand.
+ *
+ * "well" is kept: public/sprites/shop/well.png is a single, clean, correctly-cropped
+ * icon — verified by inspection, safe to use as-is.
+ *
+ * If real per-item crops (or new commissioned/itch.io art) are added later, just add
+ * the mapping back here and both surfaces will pick it up automatically.
+ */
 const SHOP_SPRITE_MAP: Record<string, string> = {
-  "pond": "/sprites/world/stone_large.png",
-  "bridge": "/sprites/shop/bridge.png",
-  "bench": "/sprites/shop/picnic.png",
-  "fence": "/sprites/shop/fence.png",
-  "stone-path": "/sprites/world/stone_small.png",
-  "sakura": "/sprites/world/tree_large.png",
-  "pine": "/sprites/world/tree_medium.png",
-  "willow": "/sprites/world/big_tree.png",
-  "oak": "/sprites/world/tree_large.png",
-  "tulips": "/sprites/world/flower_pink.png",
-  "sunflowers": "/sprites/world/flower_yellow.png",
-  "roses": "/sprites/world/flower_pink.png",
-  "lavender": "/sprites/world/flower_blue.png",
-  "lantern": "/sprites/shop/sign.png",
-  "mushrooms": "/sprites/world/mushroom_red.png",
-  "rock-garden": "/sprites/world/stone_large.png",
-  "birdhouse": "/sprites/shop/well.png",
   "well": "/sprites/shop/well.png",
-  "boat": "/sprites/shop/boat.png",
-  "sign": "/sprites/shop/sign.png",
-  "picnic": "/sprites/shop/picnic.png",
-  "bush": "/sprites/world/bush.png",
-  "stump": "/sprites/world/stump.png",
-  "flower_pink": "/sprites/world/flower_pink.png",
-  "flower_blue": "/sprites/world/flower_blue.png",
-  "flower_yellow": "/sprites/world/flower_yellow.png",
-  "mushroom_red": "/sprites/world/mushroom_red.png",
-  "mushroom_purple": "/sprites/world/mushroom_purple.png",
-  "mushroom_blue": "/sprites/world/mushroom_blue.png",
-  "stone_small": "/sprites/world/stone_small.png",
-  "stone_large": "/sprites/world/stone_large.png",
-  "butterfly": "/sprites/world/butterfly.png",
-  "big_tree": "/sprites/world/big_tree.png",
-  "tree_sapling": "/sprites/world/tree_sapling.png",
-  "tree_small": "/sprites/world/tree_small.png",
 };
 
 export function getShopSprite(itemId: string): string | null {

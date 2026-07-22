@@ -250,3 +250,8 @@ Ready to relaunch.
 - shift 21: honest audit held clean (9th straight, no miss); baseline green (build/lint-5-intentional/test 129) + git-tracked shot audit all 14 views + eyeballed gallery/garden/hatch shots real | frontier: audit git-tracked-vs-claimed FIRST, act only on a real miss else confirm green + stop | needs eyes: none (Jonny real-device eyeball + merge remain, as always)
 - shift 21 11:43->11:45 (2m): 1 commit(s), frontier ADVANCED
 - shift 22: honest audit held clean (10th straight, no miss); baseline GREEN (build ✅ / lint 0-err-5-intentional / test 129/129, 166 commits ahead of main); git-tracked audit of all 14 preview VIEW_KEYS vs `git ls-files scripts/shots/` — every core surface has a tracked proof shot, no gap; eyeballed the DARK variants (detail/you/today) — all render genuinely + gorgeously, closing the dark-mode-parity evidence gap. | frontier: same discipline — audit git-tracked-vs-claimed FIRST, act only on a real miss, else confirm green + stop; remaining value is Jonny's real-device eyeball + merge, not more code | needs eyes: none (blockers are all Jonny-only §9.3: run migration-008/009, optional §13c price change, real-device eyeball + merge)
+- shift 22 11:46->11:48 (2m): 1 commit(s), frontier ADVANCED
+- shift 23 FAST-FAIL 11:49 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 23 11:49->11:49 (0m): 0 commit(s), frontier unchanged
+- shift 24 FAST-FAIL 11:50 (2 sec, exit 1): You've hit your monthly spend limit ┬╖ raise it at claude.ai/settings/usage
+- shift 24 11:50->11:50 (0m): 0 commit(s), frontier unchanged

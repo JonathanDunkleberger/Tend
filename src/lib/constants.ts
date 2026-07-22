@@ -251,6 +251,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "bench", name: "Bench", description: "A cozy resting spot", price: 20, category: "landscape" },
   { id: "fence", name: "Fence", description: "A picket fence section", price: 15, category: "landscape" },
   { id: "stone-path", name: "Stone Path", description: "Stepping stones", price: 25, category: "landscape" },
+  { id: "well", name: "Well", description: "A mossy stone wishing well", price: 35, category: "landscape", premium: true },
 
   // Trees (Sakura free, rest premium)
   { id: "sakura", name: "Sakura", description: "Pink cherry blossoms", price: 60, category: "trees" },

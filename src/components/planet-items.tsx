@@ -1,11 +1,18 @@
 "use client";
 
 /**
- * Sprite-based shop items rendered on the planet surface.
- * Each item renders a pixel art sprite from the Sprout Lands pack.
+ * World-shop items rendered on the planet surface.
+ *
+ * Most décor renders the hand-drawn DecorGlyph vector icon (same art as the
+ * shop card preview — guaranteed to match the item's name). A small set of
+ * items with a verified clean single-icon sprite crop (see SHOP_SPRITE_MAP
+ * in lib/sprites.ts) render that raster sprite instead. Everything else
+ * intentionally falls back to the glyph rather than an unverified/mismatched
+ * spritesheet crop.
  */
 
 import { getShopSprite } from "@/lib/sprites";
+import { DecorGlyph } from "@/components/decor-glyphs";
 
 interface PlanetItemProps {
   id: string;
@@ -49,6 +56,16 @@ const ITEM_SIZES: Record<string, { w: number; h: number }> = {
   butterfly: { w: 20, h: 20 },
 };
 
+// Per-item multiplier so hand-drawn glyphs (authored in the small shop-preview
+// coordinate space) read at a sensible size next to dragons on the planet.
+const GLYPH_SCALE: Record<string, number> = {
+  pond: 1.4, bridge: 1.3, bench: 1.3, fence: 1.3, "stone-path": 1.3,
+  sakura: 1.8, pine: 1.8, willow: 1.8, oak: 1.8,
+  tulips: 1.6, sunflowers: 1.6, roses: 1.6, lavender: 1.6,
+  lantern: 1.6, mushrooms: 1.8, "rock-garden": 1.6, birdhouse: 1.4,
+  well: 1.4,
+};
+
 export function PlanetItem({ id, x, y, rotation, scale = 1 }: PlanetItemProps) {
   const sprite = getShopSprite(id);
   const dims = ITEM_SIZES[id] || { w: 24, h: 24 };
@@ -56,10 +73,15 @@ export function PlanetItem({ id, x, y, rotation, scale = 1 }: PlanetItemProps) {
   const h = dims.h * scale;
 
   if (!sprite) {
-    // Fallback: small circle
+    // No verified-clean sprite crop for this item — render the hand-drawn
+    // vector glyph (same art as the shop card) instead of a raw spritesheet
+    // or a placeholder circle. Always matches the item's name correctly.
+    const glyphScale = (GLYPH_SCALE[id] || 1.5) * scale;
     return (
       <g transform={`translate(${x}, ${y}) rotate(${rotation})`}>
-        <circle cx="0" cy="-3" r="3" fill="#ccc" opacity="0.5" />
+        <g transform={`rotate(${-rotation}) scale(${glyphScale})`}>
+          <DecorGlyph id={id} />
+        </g>
       </g>
     );
   }
