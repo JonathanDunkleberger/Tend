@@ -8,6 +8,7 @@ import {
 } from "@/lib/sprites";
 import type { DragonElement } from "@/lib/sprites";
 import type { ThemeColors } from "@/lib/constants";
+import { FREE_SPECIES_COUNT, isFreeSpecies } from "@/lib/pricing";
 
 interface EggPickerProps {
   /** Currently selected species (1-36), or null for none */
@@ -37,11 +38,6 @@ const ELEMENT_TABS: { key: DragonElement | "all"; label: string; icon: string }[
   { key: "cosmic", label: "Cosmic",  icon: "🌌" },
 ];
 
-/** How many eggs a free user can pick from (rest are locked) */
-const FREE_EGG_COUNT = 6;
-/** Which species ids are free (first N common ones spread across elements) */
-const FREE_SPECIES_IDS = [1, 6, 11, 17, 23, 29]; // one common from each major element
-
 export function EggPicker({ selected, isPro, onPick, onSelect, onClose, onProTap }: EggPickerProps) {
   const [filter, setFilter] = useState<DragonElement | "all">("all");
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -52,7 +48,7 @@ export function EggPicker({ selected, isPro, onPick, onSelect, onClose, onProTap
     ? DRAGON_SPECIES
     : DRAGON_SPECIES.filter((d) => d.element === filter);
 
-  const isUnlocked = (id: number) => isPro || FREE_SPECIES_IDS.includes(id);
+  const isUnlocked = (id: number) => isPro || isFreeSpecies(id);
 
   return (
     <div style={{
@@ -78,7 +74,7 @@ export function EggPicker({ selected, isPro, onPick, onSelect, onClose, onProTap
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>
             {isPro
               ? "Pick any dragon species for your new habit"
-              : `${FREE_EGG_COUNT} eggs free · Unlock all 36 with Tend+`}
+              : `${FREE_SPECIES_COUNT} starter dragons free · Unlock all 36 with Tend+`}
           </p>
         </div>
         <button

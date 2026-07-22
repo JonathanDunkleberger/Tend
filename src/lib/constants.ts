@@ -43,7 +43,8 @@ export const HABIT_COLORS = [
   "#8b5cf6", "#ef4444", "#14b8a6", "#f97316", "#06b6d4",
 ];
 
-export const FREE_HABIT_LIMIT = 3;
+/** Re-export entitlement constants so existing `@/lib/constants` imports keep working. */
+export { FREE_HABIT_LIMIT, FREE_SPECIES_IDS, isFreeSpecies } from "./pricing";
 
 /* ═══════════ SEASONS ═══════════ */
 export type SeasonKey = "spring" | "summer" | "autumn" | "winter";

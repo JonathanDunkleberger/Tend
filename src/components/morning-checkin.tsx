@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { Sunrise, ArrowRight, ChevronUp, Sparkles, DollarSign } from "lucide-react";
 import { Creature } from "@/components/creature";
 import { HEAL, getHealKey } from "@/lib/constants";
+import { getDailyQuote } from "@/lib/quotes";
 import { fmtMoney } from "@/lib/utils";
 import type { HabitWithStats, QuitData } from "@/types";
 import type { ThemeColors } from "@/lib/constants";
@@ -88,6 +89,7 @@ export function MorningCheckin({
 
   const dayName = DAY_NAMES[new Date().getDay()];
   const msgIdx = todayStr.split("-").reduce((s, n) => s + parseInt(n), 0) % MORNING_MESSAGES.length;
+  const dailyQuote = getDailyQuote();
 
   const dismissedRef = useRef(false);
   const handleDismiss = useCallback(() => {
@@ -176,6 +178,23 @@ export function MorningCheckin({
         }}>
           {MORNING_MESSAGES[msgIdx]}
         </h1>
+        <blockquote style={{
+          margin: "14px auto 0", maxWidth: 300, padding: 0, border: "none",
+        }}>
+          <p style={{
+            fontFamily: "'Fraunces',serif", fontSize: 13, fontWeight: 400,
+            fontStyle: "italic", color: "rgba(255,255,255,0.45)",
+            lineHeight: 1.45, margin: 0,
+          }}>
+            “{dailyQuote.text}”
+          </p>
+          <footer style={{
+            marginTop: 6, fontSize: 11, fontWeight: 500,
+            color: "rgba(255,255,255,0.28)", letterSpacing: "0.02em",
+          }}>
+            — {dailyQuote.author}
+          </footer>
+        </blockquote>
       </div>
 
       {/* ── QUIT USERS: Hero clean days card ── */}

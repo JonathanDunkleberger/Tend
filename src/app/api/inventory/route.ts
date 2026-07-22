@@ -57,6 +57,12 @@ export async function POST(request: Request) {
   // Validate coins — server is the source of truth. ensureProfile guarantees the
   // row exists so the atomic deduct below can only return NULL for "can't afford".
   const profile = await ensureProfile(supabase, userId);
+  if (shopItem.premium && profile?.tier !== "pro") {
+    return NextResponse.json(
+      { error: "This decoration is part of Tend+. Upgrade to unlock the full garden shop." },
+      { status: 403 }
+    );
+  }
   const currentCoins = profile?.coins ?? 0;
 
   // Deduct coins atomically (migration-009): a single conditional UPDATE

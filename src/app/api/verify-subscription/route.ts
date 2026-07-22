@@ -60,6 +60,26 @@ export async function POST() {
         ) {
           customerId = session.customer as string;
 
+          // Lifetime (mode=payment) checkout — grant pro immediately.
+          if (
+            session.mode === "payment" ||
+            session.metadata?.tend_plan === "lifetime"
+          ) {
+            await supabase
+              .from("profiles")
+              .update({
+                tier: "pro",
+                stripe_customer_id: customerId,
+                stripe_subscription_id: null,
+              })
+              .eq("clerk_id", userId);
+
+            return NextResponse.json({
+              isPro: true,
+              reason: "Verified lifetime purchase via Stripe checkout — database updated",
+            });
+          }
+
           // Save the customer ID for future lookups
           await supabase
             .from("profiles")

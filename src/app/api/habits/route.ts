@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
 import { NextResponse } from "next/server";
-import { FREE_HABIT_LIMIT } from "@/lib/constants";
+import { FREE_HABIT_LIMIT, isFreeSpecies } from "@/lib/pricing";
+import { HABIT_COLORS } from "@/lib/constants";
 import { suggestSpeciesForHabit } from "@/lib/sprites";
 
 export async function GET() {
@@ -46,19 +47,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Habit name is required (max 100 characters)." }, { status: 400 });
   }
 
+  const category = body.category || "general";
+  let creatureType =
+    typeof body.creature_type === "number" && body.creature_type >= 1 && body.creature_type <= 36
+      ? body.creature_type
+      : suggestSpeciesForHabit(name, category);
+  // Free users may only pick starter species — never trust the client alone.
+  if (!isPro && !isFreeSpecies(creatureType)) {
+    const suggested = suggestSpeciesForHabit(name, category);
+    creatureType = isFreeSpecies(suggested) ? suggested : 1;
+  }
+
+  let color = typeof body.color === "string" ? body.color : "#6366f1";
+  if (!isPro && !(HABIT_COLORS as readonly string[]).includes(color)) {
+    color = HABIT_COLORS[0];
+  }
+
   const { data, error } = await supabase
     .from("habits")
     .insert({
       user_id: userId,
       name,
-      color: body.color || "#6366f1",
+      color,
       icon_name: body.icon_name || "Target",
-      category: body.category || "general",
-      // A themed dragon that fits the habit (fire for a workout, water for
-      // hydration, …) instead of a purely random roll — a meaningful collection.
-      creature_type: (typeof body.creature_type === "number" && body.creature_type >= 1 && body.creature_type <= 36)
-        ? body.creature_type
-        : suggestSpeciesForHabit(name, body.category || "general"),
+      category,
+      creature_type: creatureType,
     })
     .select()
     .single();

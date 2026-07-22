@@ -1,10 +1,18 @@
 "use client";
 
 import { X, Infinity, TrendingUp, TreePine, Sparkles, Egg } from "lucide-react";
+import {
+  PRICE_LIFETIME_DISPLAY,
+  PRICE_MONTHLY_DISPLAY,
+  PRICE_YEARLY_DISPLAY,
+  PRICE_YEARLY_PER_MONTH_DISPLAY,
+  YEARLY_SAVE_PERCENT,
+  type CheckoutPlan,
+} from "@/lib/pricing";
 
 interface TendPlusScreenProps {
   onClose: () => void;
-  onSubscribe: (plan: "annual" | "monthly") => void;
+  onSubscribe: (plan: CheckoutPlan) => void;
   onRestore?: () => void;
 }
 
@@ -18,7 +26,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
     {
       Icon: Egg,
       title: "Choose your dragon",
-      desc: "Pick from 36 unique species across 7 elements",
+      desc: "Pick from all 36 unique species across 7 elements",
     },
     {
       Icon: TrendingUp,
@@ -102,15 +110,26 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
           ))}
         </div>
 
-        {/* Annual pricing — primary */}
+        {/* Annual pricing — primary (best value for a 12–18 month life change) */}
         <div style={{
           padding: 20, borderRadius: 16,
           background: "rgba(74,222,128,0.12)",
           border: "1px solid rgba(74,222,128,0.2)",
           textAlign: "center", marginBottom: 12,
         }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "white" }}>$29.99 / year</div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>That&rsquo;s $2.50/month</div>
+          <div style={{
+            display: "inline-block", fontSize: 11, fontWeight: 700, color: "#4ade80",
+            background: "rgba(74,222,128,0.15)", padding: "3px 10px", borderRadius: 999,
+            marginBottom: 8, letterSpacing: "0.02em",
+          }}>
+            Best value · Save {YEARLY_SAVE_PERCENT}%
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: "white" }}>
+            {PRICE_YEARLY_DISPLAY} / year
+          </div>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>
+            That&rsquo;s {PRICE_YEARLY_PER_MONTH_DISPLAY}/month
+          </div>
           <button
             onClick={() => onSubscribe("annual")}
             style={{
@@ -129,26 +148,45 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
             onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
             onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
           >
-            Start Tend+
+            Start Tend+ yearly
           </button>
         </div>
 
         {/* Monthly — secondary */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div style={{ textAlign: "center", marginBottom: 8 }}>
           <button
             onClick={() => onSubscribe("monthly")}
             onTouchStart={(e) => { e.currentTarget.style.opacity = "0.6"; }}
             onTouchEnd={(e) => { e.currentTarget.style.opacity = "1"; }}
             style={{
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 14, color: "rgba(255,255,255,0.4)",
+              fontSize: 14, color: "rgba(255,255,255,0.45)",
               fontFamily: "inherit", padding: "8px 16px",
               position: "relative", zIndex: 10,
               pointerEvents: "auto",
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            $4.99 / month
+            Or try {PRICE_MONTHLY_DISPLAY} / month
+          </button>
+        </div>
+
+        {/* Lifetime — tertiary */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <button
+            onClick={() => onSubscribe("lifetime")}
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 12,
+              cursor: "pointer",
+              fontSize: 13, color: "rgba(255,255,255,0.55)",
+              fontFamily: "inherit", padding: "10px 16px",
+              width: "100%",
+              position: "relative", zIndex: 10,
+            }}
+          >
+            Tend Forever — {PRICE_LIFETIME_DISPLAY} once, yours for life
           </button>
         </div>
 
@@ -179,17 +217,13 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
         {/* Legal links */}
         <div style={{ textAlign: "center", marginTop: 16, display: "flex", justifyContent: "center", gap: 16 }}>
           <a
-            href="https://tendhabit.com/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/privacy"
             style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", textDecoration: "none" }}
           >
             Privacy Policy
           </a>
           <a
-            href="https://tendhabit.com/terms"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/terms"
             style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", textDecoration: "none" }}
           >
             Terms of Use
@@ -309,7 +343,7 @@ export function SevenDayCelebration({
           7 days clean. You&rsquo;re incredible.
         </h2>
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: 6 }}>
-          Your creature is growing. Your planet is thriving.
+          Your dragon is growing. Your garden is thriving.
         </p>
         {(moneySaved > 0 || urgeCount > 0) && (
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5, marginBottom: 20 }}>

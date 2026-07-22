@@ -44,6 +44,9 @@ export interface CeremonyProps {
   coinReward?: number;
   /** Called when the user taps Continue (or Skip). */
   onDone: () => void;
+  /** Soft Tend+ nudge after reveal (free users only). Never blocks Continue. */
+  showTendPlusNudge?: boolean;
+  onTryTendPlus?: () => void;
   /** Force an initial phase — used ONLY by the /preview harness for screenshots. */
   previewPhase?: Phase;
 }
@@ -58,6 +61,8 @@ export function Ceremony({
   creatureName,
   coinReward,
   onDone,
+  showTendPlusNudge,
+  onTryTendPlus,
   previewPhase,
 }: CeremonyProps) {
   const reduced = useReducedMotion();
@@ -328,6 +333,30 @@ export function Ceremony({
       >
         {revealed ? "Continue" : "Skip"}
       </button>
+
+      {revealed && showTendPlusNudge && onTryTendPlus ? (
+        <button
+          onClick={() => {
+            onTryTendPlus();
+            onDone();
+          }}
+          style={{
+            marginTop: 12,
+            background: "none",
+            border: "none",
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: "inherit",
+            cursor: "pointer",
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            animation: "fadeUp 0.5s ease 0.55s both",
+          }}
+        >
+          Grow further with Tend+
+        </button>
+      ) : null}
 
       {/* Ceremony-only keyframes, co-located (global reduced-motion rule still
           neuters their durations for reduced-motion users). */}

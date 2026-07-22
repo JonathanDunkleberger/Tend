@@ -108,7 +108,7 @@ export default async function LandingPage() {
           <Link href="/sign-up" className="tBtn tBtnLg">
             Hatch your first egg — free
           </Link>
-          <span className="tHeroFinePrint">No card. 3 habits free, forever.</span>
+          <span className="tHeroFinePrint">No card. 5 habits free, forever.</span>
         </div>
 
         <div className="tTrustRow">
@@ -275,7 +275,7 @@ export default async function LandingPage() {
               $0<span className="tPlanPer"> forever</span>
             </div>
             <ul className="tPlanList">
-              {["3 dragon eggs", "Daily assumes-best check-in", "Streaks, coins &amp; milestones", "Breathing &amp; calm tools", "30-day history"].map((f) => (
+              {["5 habit eggs", "12 starter dragons", "Daily assumes-best check-in", "Streaks, coins &amp; milestones", "All wellness tools", "Tend Wrapped &amp; daily wisdom"].map((f) => (
                 <li key={f} dangerouslySetInnerHTML={{ __html: bullet(f) }} />
               ))}
             </ul>
@@ -284,16 +284,16 @@ export default async function LandingPage() {
             </Link>
           </div>
           <div className="tPlan tPlanPro">
-            <div className="tPlanBadge">Most loved</div>
+            <div className="tPlanBadge">Best value</div>
             <div className="tPlanName">
               Tend+ <span style={{ color: "#F5A623" }}>♦</span>
             </div>
             <div className="tPlanPrice">
-              $4.99<span className="tPlanPer"> /mo</span>
+              $29.99<span className="tPlanPer"> /yr</span>
             </div>
-            <div className="tPlanNote">or $39.99/yr — save 33%</div>
+            <div className="tPlanNote">or $4.99/mo · save 50% yearly · Forever $39.99</div>
             <ul className="tPlanList">
-              {["Unlimited dragon eggs", "Choose your egg &amp; species", "Full history &amp; deep insights", "Tend Wrapped", "All garden décor", "Grace tokens &amp; more"].map((f) => (
+              {["Unlimited habit eggs", "All 36 dragon species", "Deep insights &amp; pattern maps", "All garden décor", "Extra grace tokens", "+5 daily Tend+ coins"].map((f) => (
                 <li key={f} dangerouslySetInnerHTML={{ __html: bullet(f, true) }} />
               ))}
             </ul>
@@ -336,6 +336,11 @@ export default async function LandingPage() {
           tend<span style={{ color: GREEN }}>.</span>
         </span>
         <p className="tFooterText">Every good day grows your world.</p>
+        <p className="tFooterLinks">
+          <Link href="/privacy">Privacy</Link>
+          <span aria-hidden> · </span>
+          <Link href="/terms">Terms</Link>
+        </p>
         <p className="tFooterCopy">© 2026 Tend</p>
       </footer>
 
@@ -383,7 +388,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is Tend really free?",
-    a: "Yes — free forever. Three dragon eggs, the full daily check-in, streaks, coins, and every wellness tool cost nothing. <b>Tend+</b> only unlocks more eggs, deeper insights, and garden décor when you’re ready. The whole emotional loop is free.",
+    a: "Yes — free forever. Five habit eggs, twelve starter dragons, the full daily check-in, streaks, coins, Tend Wrapped, daily wisdom, and every wellness tool cost nothing. <b>Tend+</b> only unlocks unlimited eggs, all 36 dragons, deeper insights, and garden décor when you’re ready. The whole emotional loop is free.",
   },
   {
     q: "Will it feel good on my phone?",
@@ -430,14 +435,14 @@ const SOFTWARE_LD = {
       name: "Free",
       price: "0",
       priceCurrency: "USD",
-      description: "Three dragon eggs, the full daily check-in, streaks, coins, and every wellness tool — free forever.",
+      description: "Five habit eggs, twelve starter dragons, the full daily check-in, streaks, coins, Tend Wrapped, and every wellness tool — free forever.",
     },
     {
       "@type": "Offer",
       name: "Tend+",
-      price: "4.99",
+      price: "29.99",
       priceCurrency: "USD",
-      description: "Unlimited dragon eggs, deep insights, and garden décor. $4.99/mo or $39.99/yr.",
+      description: "Unlimited habit eggs, all 36 dragons, deep insights, and garden décor. $4.99/mo, $29.99/yr, or $39.99 forever.",
     },
   ],
 };
@@ -586,6 +591,9 @@ const CSS = `
 /* footer */
 .tFooter{text-align:center;padding:34px 20px 96px;background:#FBFAF5;}
 .tFooterText{font-size:13px;color:rgba(0,0,0,0.55);margin:8px 0 2px;}
+.tFooterLinks{font-size:12.5px;margin:10px 0 6px;}
+.tFooterLinks a{color:rgba(0,0,0,0.4);text-decoration:none;}
+.tFooterLinks a:hover{color:${GREEN};}
 .tFooterCopy{font-size:11.5px;color:rgba(0,0,0,0.55);margin:0;}
 
 /* mobile sticky CTA */

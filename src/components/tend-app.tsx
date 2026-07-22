@@ -1540,6 +1540,8 @@ export function TendApp({
           habitName={ceremony.name}
           creatureName={ceremony.creatureName}
           onDone={dismissCeremony}
+          showTendPlusNudge={!isTendPlus()}
+          onTryTendPlus={() => setShowPaywall(true)}
         />
       )}
 

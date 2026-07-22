@@ -99,10 +99,10 @@ Science-backed body recovery timelines for quit habits. See what's happening ins
 - **Weekly recap** — Sunday summary with habit completion rates, urges beaten, and coins earned
 
 ### Monetization
-- **Free tier**: up to 3 habit eggs, the full daily loop (assumes-best check-in, streaks, coins, hatching art), **all wellness tools**, grace tokens at milestones, and basic insights.
-- **Tend+** ($4.99/mo or $39.99/yr): unlimited habit eggs, choose your egg & species, full deep insights + *Tend Wrapped*, all garden décor & themes, extra grace tokens, +5 daily coins.
+- **Free tier**: up to **5** habit eggs, **12** starter dragons, the full daily loop (assumes-best check-in, streaks, coins, hatching art), **all wellness tools**, *Tend Wrapped*, daily Stoic wisdom, grace tokens at milestones, and basic insights.
+- **Tend+** ($4.99/mo · **$29.99/yr** — save ~50% · or **$39.99 Forever**): unlimited habit eggs, all 36 species, deep insights & pattern maps, all garden décor & themes, extra grace tokens, +5 daily coins.
 
-The core emotional loop is **never** gated. The whole garden, hatching art, wellness suite (breathing, grounding, urge-surf, gratitude), and relapse compassion are free forever — the paywall is depth and expression, not the soul.
+The core emotional loop is **never** gated. The whole garden, hatching art, wellness suite (breathing, grounding, urge-surf, gratitude), Wrapped, and relapse compassion are free forever — the paywall is depth and expression, not the soul.
 
 ---
 

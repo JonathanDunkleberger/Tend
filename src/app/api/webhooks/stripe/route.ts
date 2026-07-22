@@ -39,9 +39,14 @@ export async function POST(req: Request) {
         if (!clerkId) break;
 
         const email = session.customer_details?.email;
+        const isLifetime =
+          session.mode === "payment" || session.metadata?.tend_plan === "lifetime";
         const proFields = {
           stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
+          // Lifetime is a one-time payment — no recurring subscription id.
+          stripe_subscription_id: isLifetime
+            ? null
+            : (session.subscription as string),
           tier: "pro" as const,
         };
 
