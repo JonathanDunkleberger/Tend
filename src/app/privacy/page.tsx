@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
         <h2 style={h2}>Who we are</h2>
         <p style={p}>
-          Tend ("we", "us") is operated by the maker of{" "}
+          Tend (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is operated by the maker of{" "}
           <a href="https://tendhabit.com" style={a}>tendhabit.com</a>.
           Contact:{" "}
           <a href="mailto:hello@tendhabit.com" style={a}>hello@tendhabit.com</a>.

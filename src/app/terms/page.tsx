@@ -65,7 +65,7 @@ export default function TermsPage() {
 
         <h2 style={h2}>Disclaimer</h2>
         <p style={p}>
-          Tend is provided "as is." To the fullest extent allowed by law, we disclaim warranties of merchantability,
+          Tend is provided &ldquo;as is.&rdquo; To the fullest extent allowed by law, we disclaim warranties of merchantability,
           fitness for a particular purpose, and non-infringement. We are not liable for indirect or consequential damages.
           Our total liability related to Tend is limited to the amount you paid us in the 12 months before the claim
           (or $50 if you paid nothing).
