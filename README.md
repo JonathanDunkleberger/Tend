@@ -147,11 +147,7 @@ The emotional core — garden, hatching, wellness, relapse compassion — is **n
 | Type | Fraunces + DM Sans |
 
 <p align="center">
-  <a href="docs/architecture.html">
-    <img src="public/tend-architecture.svg" alt="System architecture diagram" width="100%" />
-  </a>
-  <br />
-  <em>Interactive diagram → <code>docs/architecture.html</code></em>
+  <img src="public/tend-architecture.svg" alt="System architecture diagram" width="100%" />
 </p>
 
 User data lives in Supabase, keyed to Clerk. localStorage hydrates instantly; the server is source of truth. No tracking pixels. No data brokers.
@@ -173,6 +169,8 @@ Open [http://localhost:3000](http://localhost:3000) — best at phone width (~37
 ```bash
 npm run build && npm start   # production locally
 ```
+
+Database schema and SQL migrations live under [`supabase/`](./supabase) — not in the repo root.
 
 ---
 

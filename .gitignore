@@ -81,3 +81,9 @@ scripts/.nextpid
 
 # transient next-start logs from the file:// QA pipeline
 scripts/.nextstart.*
+
+# local agent / night-train leftovers (never publish)
+TEND_NIGHTTRAIN.md
+TEND_NIGHTTRAIN_LOG.md
+REVIEW.md
+night_train.ps1
