@@ -53,7 +53,8 @@ import {
   QUIT_PRESETS, SHOP_ITEMS,
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
-import { getDragonSprite, suggestSpeciesForHabit } from "@/lib/sprites";
+import { getDragonSprite, suggestSpeciesForHabit, deriveDragonFromId } from "@/lib/sprites";
+import { getDailyQuote } from "@/lib/quotes";
 import { playChime } from "@/lib/sound";
 import { migrateLocalStorageToServer } from "@/lib/migrate-local-data";
 import { apiCall, apiSync } from "@/lib/api";
@@ -2142,19 +2143,55 @@ export function TendApp({
                     subtitle = remaining > 0 ? `${STAGE_LABELS[stage]} · ${verb} in ${remaining}d` : STAGE_LABELS[stage];
                   }
 
+                  const species = h.creature_type || deriveDragonFromId(h.id);
+                  const rowSprite = getDragonSprite(stage, species);
+
                   return (
                     <div key={h.id} className="rw" style={{
-                      background: th.card, animation: "fadeUp 0.3s ease",
-                      borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
-                      borderRadius: isLast ? undefined : 0,
+                      background: "transparent",
+                      animation: `fadeUp 0.35s ease ${Math.min(idx, 6) * 0.04}s both`,
+                      borderBottom: isLast ? "none" : `1px solid ${th.cardBorder}`,
                       opacity: isPaused ? 0.5 : 1,
                     }}>
+                        {/* Mini dragon / egg — the emotional anchor of each row */}
+                        <button
+                          type="button"
+                          onClick={() => { setDetailId(h.id); setPage("detail"); }}
+                          aria-label={`Open ${h.creature_name || h.name}`}
+                          style={{
+                            width: 40, height: 40, flexShrink: 0, padding: 0, border: "none",
+                            borderRadius: 12, cursor: "pointer",
+                            background: done || quit
+                              ? `${h.color}14`
+                              : darkMode ? "rgba(255,255,255,0.04)" : "rgba(23,48,31,0.04)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            boxShadow: done ? `0 0 0 1.5px ${h.color}33` : "none",
+                            transition: "box-shadow .2s, background .2s",
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={rowSprite}
+                            alt=""
+                            width={32}
+                            height={32}
+                            draggable={false}
+                            style={{
+                              objectFit: "contain",
+                              filter: isPaused || (!done && !quit && stage === 0)
+                                ? "saturate(0.75) brightness(0.95)"
+                                : done
+                                  ? "none"
+                                  : "saturate(0.9)",
+                              animation: bouncingId === h.id ? "creatureBounce 0.5s cubic-bezier(0.34,1.56,0.64,1)" : undefined,
+                            }}
+                          />
+                        </button>
                         {isPaused ? (
-                          /* Paused: pause icon */
                           <div
                             style={{
                               width: 26, height: 26, borderRadius: 8,
-                              background: "rgba(255,255,255,0.05)",
+                              background: th.progressBg,
                               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                             }}
                             onClick={() => { setDetailId(h.id); setPage("detail"); }}
@@ -2162,16 +2199,16 @@ export function TendApp({
                             <Pause size={14} color={th.textMuted} strokeWidth={2} />
                           </div>
                         ) : quit ? (
-                          /* Quit habit: green shield indicator */
                           <div
                             style={{
                               width: 26, height: 26, borderRadius: 8,
-                              background: `${h.color}18`,
+                              background: BRAND.greenSoft,
                               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                             }}
                             onClick={() => { setDetailId(h.id); setPage("detail"); }}
+                            title="Quit habit — you're clean unless you say otherwise"
                           >
-                            <svg viewBox="0 0 20 20" fill="#4ADE80" width="20" height="20">
+                            <svg viewBox="0 0 20 20" fill={BRAND.green} width="18" height="18">
                               <path d="M10 1L3 4.5V9.5C3 14.2 6 17.5 10 19C14 17.5 17 14.2 17 9.5V4.5L10 1Z"/>
                             </svg>
                           </div>
@@ -2183,9 +2220,9 @@ export function TendApp({
                             aria-label={done ? `Mark ${h.name} as not done today` : `Mark ${h.name} done today`}
                             tabIndex={0}
                             style={{
-                              background: done ? h.color : "transparent",
+                              background: done ? BRAND.green : "transparent",
                               borderColor: done ? "transparent" : th.checkBorder,
-                              ["--ck-color" as string]: h.color,
+                              ["--ck-color" as string]: BRAND.green,
                             }}
                             onClick={(e) => { e.stopPropagation(); toggleCompletion(h.id); }}
                             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); toggleCompletion(h.id); } }}
@@ -2294,18 +2331,16 @@ export function TendApp({
                             </span>
                           )}
                         </div>
-                        {/* Gray × delete */}
                         <button
                           onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(h.id); }}
                           style={{
                             background: "none", border: "none", cursor: "pointer",
-                            width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                            color: "rgba(255,255,255,0.15)", fontSize: 14, fontWeight: 400,
-                            flexShrink: 0, padding: 0, marginLeft: 2, lineHeight: 1,
+                            width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
+                            color: th.textFaint, flexShrink: 0, padding: 0, marginLeft: 2,
                             transition: "color 0.15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = th.textMuted)}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = th.textFaint)}
                           aria-label={`Remove ${h.name}`}
                         >
                           <X size={12} />
@@ -2343,42 +2378,69 @@ export function TendApp({
               )}
             </div>
 
-            {/* All activity heatmap */}
+            {/* Gentle streak nudge — invite, don't guilt */}
             {buildHabits.length > 0 && (() => {
-              // Streak-at-risk alerts
-              const atRisk = buildHabits.filter((h) => !isHappy(h.id) && getStreak(h.id) >= 3);
-              return atRisk.length > 0 ? (
-                <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-                  {atRisk.slice(0, 2).map((h) => (
-                    <div key={h.id} onClick={() => toggleCompletion(h.id)}
-                      {...clickable(() => toggleCompletion(h.id), { label: `Mark ${h.name} done to protect your ${getStreak(h.id)} day streak` })}
-                      style={{
-                      padding: "8px 12px", borderRadius: 10, cursor: "pointer",
-                      background: `linear-gradient(90deg,${h.color}08,${h.color}03)`,
-                      border: `1px solid ${h.color}18`,
-                      display: "flex", alignItems: "center", gap: 8, transition: "all .15s",
-                    }}>
-                      <Flame size={12} color={h.color} />
-                      <span style={{ flex: 1, fontSize: 11, color: th.text }}>
-                        <b>{h.name}</b> — tap to protect your <span style={{ color: h.color, fontWeight: 700 }}>{getStreak(h.id)}d streak</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : null;
+              const open = buildHabits.filter((h) => !isHappy(h.id) && getStreak(h.id) >= 3);
+              if (open.length === 0) return null;
+              const h = open[0];
+              return (
+                <button
+                  type="button"
+                  onClick={() => toggleCompletion(h.id)}
+                  style={{
+                    marginTop: 10, width: "100%", padding: "10px 14px", borderRadius: 14,
+                    border: `1px solid ${BRAND.greenMid}`, cursor: "pointer", fontFamily: "inherit",
+                    background: BRAND.greenSoft, display: "flex", alignItems: "center", gap: 10, textAlign: "left",
+                  }}
+                >
+                  <Flame size={14} color={BRAND.green} />
+                  <span style={{ flex: 1, fontSize: 12, color: th.text, lineHeight: 1.35 }}>
+                    <b>{h.name}</b> has a {getStreak(h.id)}-day streak going — one tap keeps the fire warm.
+                  </span>
+                </button>
+              );
             })()}
-
-
 
             {habits.length > 0 && (
               <div className="cd" style={{
-                padding: "12px 10px", marginTop: 10,
+                padding: "14px 12px", marginTop: 12,
                 background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
               }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: "rgba(255,255,255,0.25)" }}>Activity</div>
-                <Heatmap getData={overallHeatData} weeks={12} color="#2E9E5B" heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 2px 8px", color: th.label }}>
+                  Your garden log
+                </div>
+                <Heatmap getData={overallHeatData} weeks={12} color={BRAND.green} heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
               </div>
             )}
+
+            {/* Daily wisdom — stoic warmth, never preachy */}
+            {habits.length > 0 && (() => {
+              const q = getDailyQuote();
+              return (
+                <div
+                  style={{
+                    marginTop: 12, padding: "16px 16px 14px", borderRadius: 18,
+                    background: darkMode
+                      ? "linear-gradient(145deg, rgba(46,158,91,0.10), rgba(18,32,25,0.6))"
+                      : "linear-gradient(145deg, rgba(46,158,91,0.08), rgba(245,166,35,0.05))",
+                    border: `1px solid ${th.cardBorder}`,
+                  }}
+                >
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, textTransform: "uppercase", color: th.textMuted, marginBottom: 8 }}>
+                    Today&apos;s wisdom
+                  </div>
+                  <p style={{
+                    fontFamily: "'Fraunces',serif", fontSize: 15.5, fontWeight: 500,
+                    color: th.text, lineHeight: 1.45, margin: 0, letterSpacing: "-0.2px",
+                  }}>
+                    &ldquo;{q.text}&rdquo;
+                  </p>
+                  <div style={{ marginTop: 8, fontSize: 11.5, color: th.textSub, fontWeight: 600 }}>
+                    — {q.author}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

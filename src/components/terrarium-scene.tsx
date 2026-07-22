@@ -141,11 +141,13 @@ export function TerrariumScene({
       position: "relative", width: "100%",
       aspectRatio: "1 / 1",
       maxHeight: 380,
-      borderRadius: 22, overflow: "visible",
+      borderRadius: 24, overflow: "visible",
       background: `radial-gradient(ellipse at 50% 60%, ${sky[2]} 0%, ${sky[1]} 40%, ${sky[0]} 100%)`,
       transition: "background 1.5s ease",
-      boxShadow: "0 2px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
-      clipPath: "inset(-2px round 22px)",
+      boxShadow: allDone
+        ? "0 4px 32px rgba(46,158,91,0.22), 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
+        : "0 4px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
+      clipPath: "inset(-2px round 24px)",
     }}>
       <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
         <defs>
@@ -187,7 +189,7 @@ export function TerrariumScene({
         {tc.showNebula && pct > 0.3 && (
           <>
             <ellipse cx="340" cy="60" rx={30 + pct * 15} ry={18 + pct * 8} fill={pc.accent} opacity={0.03 + pct * 0.04} filter="url(#lp-soft)" />
-            <ellipse cx="60" cy="260" rx={20 + pct * 10} ry={15 + pct * 6} fill="#8B5CF6" opacity={0.02 + pct * 0.03} filter="url(#lp-soft)" />
+            <ellipse cx="60" cy="260" rx={20 + pct * 10} ry={15 + pct * 6} fill="#2E9E5B" opacity={0.03 + pct * 0.04} filter="url(#lp-soft)" />
           </>
         )}
 
