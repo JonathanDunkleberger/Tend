@@ -698,7 +698,34 @@ infra modeled in §13a, don't break the build, commit per change, verify before 
 - **The real-device eyeball + the merge decision** — hydrated interactions/animations and the final
   ship-to-main call are yours.
 
-### 9.4 Discipline
+### 9.4 FUTURE VISION — "the village" (Jonny's idea, 2026-07-21 — NOT started, scoped SIMPLE)
+
+Jonny's own idea, captured so it doesn't get lost or accidentally over-built by a future shift:
+grow the garden metaphor into a small **village/world your dragons live in** — more of a "build your
+own little civilization" feel, closer to a mobile game than a habit tracker.
+
+He explicitly considered two scopes and picked the lighter one for now (his words: "there's a mix to
+find" — this is deliberately the safe end of that mix):
+
+- **CHOSEN (simple): a cosmetic village that grows with your dragons.** The existing planet/terrarium
+  scene (`terrarium-scene.tsx`, `planet-items.tsx`) already has a garden the shop's décor items populate
+  (ponds, lanterns, paths, trees — see `shop.tsx`/`SHOP_ITEMS`). The village extension is presentational
+  scaling of the SAME idea: as more habits hatch/evolve and more décor is owned, the scene visually reads
+  as a fuller little settlement (more structures, denser layout, maybe a couple of new building-shaped
+  shop items) — NO new mechanics, no dragon "needs," no simulation. Low risk, fits the existing
+  cosmetic-shop economy (coins → items) with zero new server logic.
+- **REJECTED for now (deeper): dragons have moods/needs tied to habit consistency** ("your dragons get
+  hurt if you fuck up on your habits"). Explicitly more complex — new state, new failure-mode design (the
+  brand's whole soul is §1 "never shaming," so a dragon that visibly suffers from a missed day cuts
+  directly against that — would need careful, deliberate design, not a cold-read bug-hunt shift). Jonny
+  did NOT pick this; do not build punitive/suffering mechanics without him explicitly re-opening it.
+- **Rejected/deferred entirely (for later brainstorming, not scoped at all):** anything beyond the above
+  — full civilization-building, multiplayer villages, etc. Not sized, not planned.
+
+Do NOT start building this without Jonny explicitly greenlighting a shift on it — it's parked here purely
+so the idea isn't lost, not queued as next work.
+
+### 9.5 Discipline
 
 Keep §9 to a tight forward-looking queue — the first night let it balloon to 885 lines of "prior
 pointer" archive; that history now lives in `TEND_NIGHTTRAIN_LOG.md` + §10 DECISIONS. Don't rebuild the

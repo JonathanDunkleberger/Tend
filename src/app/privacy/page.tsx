@@ -24,9 +24,9 @@ export default function PrivacyPage() {
         <h2 style={h2}>Who we are</h2>
         <p style={p}>
           Tend (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is operated by the maker of{" "}
-          <a href="https://tendhabit.com" style={a}>tendhabit.com</a>.
+          <a href="https://hatchtend.com" style={a}>hatchtend.com</a>.
           Contact:{" "}
-          <a href="mailto:hello@tendhabit.com" style={a}>hello@tendhabit.com</a>.
+          <a href="mailto:hello@hatchtend.com" style={a}>hello@hatchtend.com</a>.
         </p>
 
         <h2 style={h2}>What we collect</h2>
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
           <li style={li}>Cancel Tend+ anytime via the Stripe portal in Settings.</li>
           <li style={li}>
             To export or delete your data, email{" "}
-            <a href="mailto:hello@tendhabit.com" style={a}>hello@tendhabit.com</a>.
+            <a href="mailto:hello@hatchtend.com" style={a}>hello@hatchtend.com</a>.
           </li>
         </ul>
 

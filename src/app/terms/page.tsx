@@ -47,7 +47,7 @@ export default function TermsPage() {
           <li style={li}>Forever is a one-time purchase for Tend+ features for as long as we offer the product.</li>
           <li style={li}>
             Except where required by law, fees are non-refundable after purchase. If billing went wrong, email{" "}
-            <a href="mailto:hello@tendhabit.com" style={a}>hello@tendhabit.com</a>.
+            <a href="mailto:hello@hatchtend.com" style={a}>hello@hatchtend.com</a>.
           </li>
         </ul>
 
@@ -81,7 +81,7 @@ export default function TermsPage() {
 
         <h2 style={h2}>Contact</h2>
         <p style={p}>
-          Questions? <a href="mailto:hello@tendhabit.com" style={a}>hello@tendhabit.com</a>
+          Questions? <a href="mailto:hello@hatchtend.com" style={a}>hello@hatchtend.com</a>
         </p>
 
         <p style={{ ...p, marginTop: 40 }}>
