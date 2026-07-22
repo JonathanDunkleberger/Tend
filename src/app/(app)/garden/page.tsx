@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { TendApp } from "@/components/tend-app";
 import { today, daysAgo, getStage } from "@/lib/utils";
@@ -8,7 +9,8 @@ import type { Habit, HabitLog, HabitWithStats, EarnedMilestones, QuitData, QuitP
 
 export default async function GardenPage() {
   const { userId } = await auth();
-  if (!userId) return null;
+  // Never paint a blank page if middleware somehow lets an unsigned request through.
+  if (!userId) redirect("/sign-in");
   const supabase = await createServerSupabaseClient();
 
   // Fetch habits. A TRANSIENT read failure here must NOT silently render a

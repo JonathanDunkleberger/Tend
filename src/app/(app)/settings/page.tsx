@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/ensure-profile";
 import Link from "next/link";
@@ -17,7 +18,7 @@ const CARD = {
 
 export default async function SettingsPage() {
   const { userId } = await auth();
-  if (!userId) return null;
+  if (!userId) redirect("/sign-in");
   const supabase = await createServerSupabaseClient();
 
   const profile = await ensureProfile(supabase, userId);
