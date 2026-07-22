@@ -16,7 +16,7 @@ export default function SignUpPage() {
       <div className="text-center w-full max-w-md">
         <div className="flex items-center justify-center gap-2 mb-8">
           <span style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 500 }}>
-            tend<span style={{ color: "#4caf50" }}>.</span>
+            tend<span style={{ color: "#2E9E5B" }}>.</span>
           </span>
         </div>
 

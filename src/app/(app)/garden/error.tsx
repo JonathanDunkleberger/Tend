@@ -99,7 +99,7 @@ export default function GardenError({
             appearance: "none",
             border: "none",
             cursor: "pointer",
-            background: "#2e7d32",
+            background: "#1F7A46",
             color: "white",
             fontFamily: "inherit",
             fontSize: 15,

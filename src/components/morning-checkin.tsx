@@ -223,7 +223,7 @@ export function MorningCheckin({
               padding: "14px 16px", marginBottom: 10,
               border: "1px solid rgba(255,255,255,0.08)",
             }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#4ade80", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#4ADE80", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
                 <Sparkles size={12} />
                 {heroFact.title}
               </div>
@@ -259,7 +259,7 @@ export function MorningCheckin({
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>
                   Money saved
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#4ade80", display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#4ADE80", display: "flex", alignItems: "center", gap: 4 }}>
                   <DollarSign size={12} />
                   {fmtMoney(heroSaved)}
                 </div>
@@ -272,7 +272,7 @@ export function MorningCheckin({
             onClick={handleDismiss}
             style={{
               width: "100%", padding: "14px 20px", borderRadius: 16,
-              background: "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)",
+              background: "linear-gradient(135deg, #4ADE80 0%, #22c55e 100%)",
               border: "none", cursor: "pointer",
               fontFamily: "'DM Sans',sans-serif", fontSize: 15, fontWeight: 700,
               color: "#052e16", display: "flex", alignItems: "center",
@@ -318,7 +318,7 @@ export function MorningCheckin({
               </span>
             </div>
             {yesterdayDone === yesterdayTotal && yesterdayTotal > 0 && (
-              <div style={{ fontSize: 12, color: "#4ade80", marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "#4ADE80", marginTop: 4 }}>
                 ✨ Perfect day!
               </div>
             )}
@@ -357,7 +357,7 @@ export function MorningCheckin({
             onClick={handleDismiss}
             style={{
               width: "100%", padding: "14px 20px", borderRadius: 16,
-              background: "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)",
+              background: "linear-gradient(135deg, #4ADE80 0%, #22c55e 100%)",
               border: "none", cursor: "pointer",
               fontFamily: "'DM Sans',sans-serif", fontSize: 15, fontWeight: 700,
               color: "#052e16", display: "flex", alignItems: "center",

@@ -53,8 +53,8 @@ export function YouScreen({
   };
 
   const stats: { label: string; value: string; Icon: typeof Coins; color: string }[] = [
-    { label: "Coins", value: `${coins}`, Icon: Coins, color: "#f59e0b" },
-    { label: "Dragons", value: `${dragonCount}`, Icon: Sparkles, color: "#8B5CF6" },
+    { label: "Coins", value: `${coins}`, Icon: Coins, color: "#F5A623" },
+    { label: "Dragons", value: `${dragonCount}`, Icon: Sparkles, color: "#2E9E5B" },
     { label: "Best streak", value: `${bestStreak}d`, Icon: Flame, color: "#ef7d3a" },
   ];
 
@@ -75,7 +75,7 @@ export function YouScreen({
             alt=""
             width={60}
             height={60}
-            style={{ borderRadius: 18, border: `2px solid ${isPro ? "#4ade80" : th.cardBorder}` }}
+            style={{ borderRadius: 18, border: `2px solid ${isPro ? "#4ADE80" : th.cardBorder}` }}
           />
         ) : (
           <div style={{
@@ -117,37 +117,42 @@ export function YouScreen({
       <div style={{
         padding: "16px 16px", borderRadius: 18, marginBottom: 16,
         background: isPro
-          ? "linear-gradient(135deg, rgba(74,222,128,0.10), rgba(74,222,128,0.03))"
-          : darkMode ? "linear-gradient(135deg, rgba(74,222,128,0.08), rgba(56,189,248,0.05))" : "linear-gradient(135deg, rgba(74,222,128,0.07), rgba(56,189,248,0.04))",
-        border: `1px solid ${isPro ? "rgba(74,222,128,0.25)" : th.cardBorder}`,
+          ? "linear-gradient(135deg, rgba(46,158,91,0.12), rgba(46,158,91,0.03))"
+          : darkMode
+            ? "linear-gradient(135deg, rgba(46,158,91,0.10), rgba(31,122,70,0.05))"
+            : "linear-gradient(135deg, rgba(46,158,91,0.08), rgba(245,166,35,0.05))",
+        border: `1px solid ${isPro ? "rgba(46,158,91,0.28)" : th.cardBorder}`,
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-              <Crown size={15} color={isPro ? "#4ade80" : "#f59e0b"} />
+              <Crown size={15} color={isPro ? "#2E9E5B" : "#F5A623"} />
               <span style={{ fontSize: 15, fontWeight: 700, color: th.text }}>
-                {isPro ? "Tend+" : "Tend+ awaits"}
+                {isPro ? "Tend+" : "Tend+"}
               </span>
             </div>
             <div style={{ fontSize: 12, color: th.textSub, lineHeight: 1.4 }}>
-              {isPro ? "Thank you for growing with us 💚" : "Unlimited habits, every dragon, custom colors."}
+              {isPro
+                ? "Thank you for growing with us."
+                : "Optional depth: every dragon, unlimited eggs, richer insights. The garden stays free."}
             </div>
           </div>
           {isPro ? (
             <button onClick={() => { haptic("light"); onManageSubscription(); }} style={{
-              flexShrink: 0, background: "none", border: "1px solid rgba(74,222,128,0.3)",
+              flexShrink: 0, background: "none", border: "1px solid rgba(46,158,91,0.35)",
               borderRadius: 10, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700,
-              color: "#4ade80", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
+              color: "#2E9E5B", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4,
             }}>
               Manage <ExternalLink size={11} />
             </button>
           ) : (
             <button onClick={() => { haptic("light"); onUpgrade(); }} style={{
-              flexShrink: 0, background: "#4ade80", border: "none",
-              borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700,
-              color: "#0a0e18", fontFamily: "inherit",
+              flexShrink: 0, background: "linear-gradient(135deg, #2E9E5B, #1F7A46)", border: "none",
+              borderRadius: 12, padding: "9px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700,
+              color: "#fff", fontFamily: "inherit",
+              boxShadow: "0 3px 12px rgba(46,158,91,0.28)",
             }}>
-              Upgrade
+              Learn more
             </button>
           )}
         </div>
@@ -184,7 +189,7 @@ export function YouScreen({
           </span>
           <span style={{
             width: 42, height: 24, borderRadius: 100, position: "relative", transition: "background .2s",
-            background: darkMode ? "#4ade80" : th.progressBg,
+            background: darkMode ? "#4ADE80" : th.progressBg,
           }}>
             <span style={{
               position: "absolute", top: 2, left: darkMode ? 20 : 2, width: 20, height: 20, borderRadius: "50%",
@@ -198,14 +203,14 @@ export function YouScreen({
           background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
           marginBottom: 14,
         }}>
-          {soundOn ? <Volume2 size={19} color="#4ade80" /> : <VolumeX size={19} color={th.textSub} />}
+          {soundOn ? <Volume2 size={19} color="#4ADE80" /> : <VolumeX size={19} color={th.textSub} />}
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: th.text }}>Sound effects</span>
             <span style={{ display: "block", fontSize: 12, color: th.textMuted }}>Soft chimes when you tend & hatch</span>
           </span>
           <span style={{
             width: 42, height: 24, borderRadius: 100, position: "relative", transition: "background .2s", flexShrink: 0,
-            background: soundOn ? "#4ade80" : th.progressBg,
+            background: soundOn ? "#4ADE80" : th.progressBg,
           }}>
             <span style={{
               position: "absolute", top: 2, left: soundOn ? 20 : 2, width: 20, height: 20, borderRadius: "50%",

@@ -47,7 +47,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0a0e18",
+  themeColor: "#2E9E5B",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet" />
         </head>
-        <body className="antialiased" style={{ background: "#f8f8f6", fontFamily: "'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif" }}>
+        <body className="antialiased" style={{ background: "#FBFAF5", fontFamily: "'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif" }}>
           {children}
         </body>
       </html>

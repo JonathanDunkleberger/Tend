@@ -20,9 +20,9 @@ import { Sprout, BarChart3, HeartPulse, Gem } from "lucide-react";
  */
 
 const NAV = [
-  { key: "garden", label: "Garden", Icon: Sprout, color: "#4caf50", active: true },
-  { key: "insights", label: "Insights", Icon: BarChart3, color: "#8B5CF6", active: false },
-  { key: "wellness", label: "Wellness", Icon: HeartPulse, color: "#38bdf8", active: false },
+  { key: "garden", label: "Garden", Icon: Sprout, color: "#2E9E5B", active: true },
+  { key: "insights", label: "Insights", Icon: BarChart3, color: "#6B9B7A", active: false },
+  { key: "wellness", label: "Wellness", Icon: HeartPulse, color: "#5BA88A", active: false },
   { key: "you", label: "You", Icon: Gem, color: "#f59e0b", active: false },
 ] as const;
 
@@ -35,7 +35,7 @@ export default function GardenLoading() {
       aria-busy="true"
       style={{
         minHeight: "100dvh",
-        background: "#FAF8F3",
+        background: "#FBFAF5",
         fontFamily: "'DM Sans', system-ui, sans-serif",
       }}
     >
@@ -72,7 +72,7 @@ export default function GardenLoading() {
               color: "#1a1a2e",
             }}
           >
-            tend<span style={{ color: "#4caf50" }}>.</span>
+            tend<span style={{ color: "#2E9E5B" }}>.</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <div className="tend-skel" style={{ width: 50, height: 22, borderRadius: 100 }} />

@@ -55,11 +55,11 @@ export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: Wellne
     color: string;
     onTap: () => void;
   }[] = [
-    { key: "breathe", title: "Breathe", sub: "Box breathing · 60s reset", Icon: Wind, color: "#38bdf8", onTap: onBreathe },
-    { key: "urgesurf", title: "Ride the wave", sub: "Let an urge crest and pass", Icon: Waves, color: "#6366f1", onTap: () => setTool("urgesurf") },
-    { key: "grounding", title: "Ground yourself", sub: "5-4-3-2-1 senses", Icon: Sparkles, color: "#8B5CF6", onTap: () => setTool("grounding") },
-    { key: "gratitude", title: "Three good things", sub: "A tiny gratitude ritual", Icon: Heart, color: "#4caf50", onTap: () => setTool("gratitude") },
-    { key: "calm", title: "Wind down", sub: "A starlit calm for evening", Icon: Moon, color: "#a78bfa", onTap: () => setTool("calm") },
+    { key: "breathe", title: "Breathe", sub: "Box breathing · 60s reset", Icon: Wind, color: "#5BA88A", onTap: onBreathe },
+    { key: "urgesurf", title: "Ride the wave", sub: "Let an urge crest and pass", Icon: Waves, color: "#7A9E8C", onTap: () => setTool("urgesurf") },
+    { key: "grounding", title: "Ground yourself", sub: "5-4-3-2-1 senses", Icon: Sparkles, color: "#C4A35A", onTap: () => setTool("grounding") },
+    { key: "gratitude", title: "Three good things", sub: "A tiny gratitude ritual", Icon: Heart, color: "#2E9E5B", onTap: () => setTool("gratitude") },
+    { key: "calm", title: "Wind down", sub: "A starlit calm for evening", Icon: Moon, color: "#8FAE9A", onTap: () => setTool("calm") },
   ];
 
   return (
@@ -80,8 +80,8 @@ export function WellnessHub({ th, darkMode, onBreathe, onSaveGratitude }: Wellne
           padding: "18px 18px",
           borderRadius: 18,
           background: darkMode
-            ? "linear-gradient(135deg, rgba(56,189,248,0.10), rgba(139,92,246,0.10))"
-            : "linear-gradient(135deg, rgba(56,189,248,0.08), rgba(139,92,246,0.07))",
+            ? "linear-gradient(135deg, rgba(46,158,91,0.14), rgba(31,122,70,0.08))"
+            : "linear-gradient(135deg, rgba(46,158,91,0.10), rgba(245,166,35,0.06))",
           border: `1px solid ${th.cardBorder}`,
           textAlign: "center",
         }}
@@ -161,11 +161,11 @@ function ToolHeader({ th, title, onBack }: { th: ThemeColors; title: string; onB
 
 /* ───────────────────────── Grounding: 5-4-3-2-1 ───────────────────────── */
 const GROUND_STEPS = [
-  { n: 5, sense: "things you can see", color: "#8B5CF6" },
-  { n: 4, sense: "things you can feel", color: "#6366f1" },
-  { n: 3, sense: "things you can hear", color: "#38bdf8" },
-  { n: 2, sense: "things you can smell", color: "#4caf50" },
-  { n: 1, sense: "thing you can taste", color: "#f59e0b" },
+  { n: 5, sense: "things you can see", color: "#5BA88A" },
+  { n: 4, sense: "things you can feel", color: "#C4A35A" },
+  { n: 3, sense: "things you can hear", color: "#7A9E8C" },
+  { n: 2, sense: "things you can smell", color: "#2E9E5B" },
+  { n: 1, sense: "thing you can taste", color: "#F5A623" },
 ];
 
 function Grounding({ th, onBack }: { th: ThemeColors; onBack: () => void }) {
@@ -217,9 +217,9 @@ function Grounding({ th, onBack }: { th: ThemeColors; onBack: () => void }) {
             <div style={{
               width: 96, height: 96, margin: "20px auto 20px", borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: "rgba(76,175,80,0.12)", animation: "pop .5s cubic-bezier(.34,1.56,.64,1)",
+              background: "rgba(46,158,91,0.12)", animation: "pop .5s cubic-bezier(.34,1.56,.64,1)",
             }}>
-              <Check size={44} color="#4caf50" strokeWidth={3} />
+              <Check size={44} color="#2E9E5B" strokeWidth={3} />
             </div>
             <div style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 600, color: th.text, marginBottom: 8 }}>
               You&rsquo;re here, and you&rsquo;re safe.
@@ -231,8 +231,8 @@ function Grounding({ th, onBack }: { th: ThemeColors; onBack: () => void }) {
               onClick={onBack}
               style={{
                 padding: "13px 32px", borderRadius: 14, border: "none",
-                background: "#4caf50", color: "#fff", fontSize: 15, fontWeight: 700,
-                cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(76,175,80,0.35)",
+                background: "#2E9E5B", color: "#fff", fontSize: 15, fontWeight: 700,
+                cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(46,158,91,0.35)",
               }}
             >
               Done
@@ -290,12 +290,12 @@ function UrgeSurf({ th, darkMode, onBack }: { th: ThemeColors; darkMode: boolean
             style={{
               width: 150, height: 150, borderRadius: "50%",
               background: darkMode
-                ? "radial-gradient(circle at 35% 30%, rgba(99,102,241,0.5), rgba(56,189,248,0.25))"
-                : "radial-gradient(circle at 35% 30%, rgba(99,102,241,0.35), rgba(56,189,248,0.18))",
+                ? "radial-gradient(circle at 35% 30%, rgba(46,158,91,0.45), rgba(91,168,138,0.22))"
+                : "radial-gradient(circle at 35% 30%, rgba(46,158,91,0.32), rgba(91,168,138,0.16))",
               transform: `scale(${running && !done ? scale : 0.85})`,
               transition: "transform 1s linear",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 8px 40px rgba(99,102,241,0.25)",
+              boxShadow: "0 8px 40px rgba(46,158,91,0.25)",
             }}
           >
             <span style={{ fontFamily: "'Fraunces',serif", fontSize: 32, fontWeight: 700, color: th.text }}>
@@ -314,8 +314,8 @@ function UrgeSurf({ th, darkMode, onBack }: { th: ThemeColors; darkMode: boolean
                 onClick={onBack}
                 style={{
                   padding: "13px 32px", borderRadius: 14, border: "none",
-                  background: "#6366f1", color: "#fff", fontSize: 15, fontWeight: 700,
-                  cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(99,102,241,0.35)",
+                  background: "linear-gradient(135deg, #2E9E5B, #1F7A46)", color: "#fff", fontSize: 15, fontWeight: 700,
+                  cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(46,158,91,0.32)",
                 }}
               >
                 I feel steadier
@@ -326,8 +326,8 @@ function UrgeSurf({ th, darkMode, onBack }: { th: ThemeColors; darkMode: boolean
               onClick={() => { haptic("light"); setRunning(true); }}
               style={{
                 padding: "13px 36px", borderRadius: 14, border: "none",
-                background: "#6366f1", color: "#fff", fontSize: 15, fontWeight: 700,
-                cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(99,102,241,0.35)",
+                background: "linear-gradient(135deg, #2E9E5B, #1F7A46)", color: "#fff", fontSize: 15, fontWeight: 700,
+                cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(46,158,91,0.32)",
               }}
             >
               Start · 90s
@@ -399,7 +399,7 @@ function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void
             disabled={filled === 0}
             style={{
               width: "100%", marginTop: 8, padding: "14px 0", borderRadius: 14, border: "none",
-              background: filled > 0 ? "#4caf50" : th.progressBg,
+              background: filled > 0 ? "#2E9E5B" : th.progressBg,
               color: filled > 0 ? "#fff" : th.textMuted,
               fontSize: 15, fontWeight: 700, cursor: filled > 0 ? "pointer" : "default",
               fontFamily: "inherit", transition: "all .15s",
@@ -413,9 +413,9 @@ function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void
           <div style={{
             width: 96, height: 96, margin: "0 auto 20px", borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(76,175,80,0.12)", animation: "pop .5s cubic-bezier(.34,1.56,.64,1)",
+            background: "rgba(46,158,91,0.12)", animation: "pop .5s cubic-bezier(.34,1.56,.64,1)",
           }}>
-            <Heart size={42} color="#4caf50" strokeWidth={2.2} fill="rgba(76,175,80,0.3)" />
+            <Heart size={42} color="#2E9E5B" strokeWidth={2.2} fill="rgba(46,158,91,0.3)" />
           </div>
           <div style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 600, color: th.text, marginBottom: 8 }}>
             Held onto.
@@ -427,8 +427,8 @@ function Gratitude({ th, onBack, onSave }: { th: ThemeColors; onBack: () => void
             onClick={onBack}
             style={{
               padding: "13px 32px", borderRadius: 14, border: "none",
-              background: "#4caf50", color: "#fff", fontSize: 15, fontWeight: 700,
-              cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(76,175,80,0.35)",
+              background: "#2E9E5B", color: "#fff", fontSize: 15, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(46,158,91,0.35)",
             }}
           >
             Done
@@ -487,7 +487,7 @@ function CalmMode({ onBack }: { onBack: () => void }) {
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 200, overflow: "hidden",
-        background: "radial-gradient(140% 100% at 50% 0%, #1a1740 0%, #0d0b26 45%, #060514 100%)",
+        background: "radial-gradient(140% 100% at 50% 0%, #122019 0%, #0B1510 45%, #060E0A 100%)",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         animation: "fadeIn 0.6s ease",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -526,7 +526,7 @@ function CalmMode({ onBack }: { onBack: () => void }) {
         <div
           style={{
             position: "absolute", width: 200, height: 200, borderRadius: "50%",
-            background: "radial-gradient(circle at 38% 32%, rgba(199,190,255,0.55), rgba(124,110,220,0.22) 55%, transparent 72%)",
+            background: "radial-gradient(circle at 38% 32%, rgba(74,222,128,0.35), rgba(46,158,91,0.18) 55%, transparent 72%)",
             transform: `scale(${scale})`, transition: "transform 0.12s linear",
             filter: "blur(2px)",
           }}
@@ -534,9 +534,9 @@ function CalmMode({ onBack }: { onBack: () => void }) {
         <div
           style={{
             position: "relative", width: 120, height: 120, borderRadius: "50%",
-            background: "radial-gradient(circle at 38% 32%, #f4f1ff, #c9c0f5 60%, #9d90e0)",
+            background: "radial-gradient(circle at 38% 32%, #EAF7EE, #8FCF9E 60%, #2E9E5B)",
             transform: `scale(${scale})`, transition: "transform 0.12s linear",
-            boxShadow: "0 0 60px rgba(199,190,255,0.5)",
+            boxShadow: "0 0 60px rgba(46,158,91,0.45)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >

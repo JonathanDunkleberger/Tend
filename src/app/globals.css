@@ -2,11 +2,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-bg: #f8f8f6;
-  --color-fg: #1a1a2e;
-  --color-primary: #4caf50;
-  --color-primary-light: #66bb6a;
-  --color-primary-dark: #2e7d32;
+  --color-bg: #FBFAF5;
+  --color-fg: #17301F;
+  --color-primary: #2E9E5B;
+  --color-primary-light: #4ADE80;
+  --color-primary-dark: #1F7A46;
 
   --color-coin: #f59e0b;
   --color-coin-dark: #d97706;
@@ -310,7 +310,7 @@ body {
   position: absolute;
   inset: -2px;
   border-radius: 50%;
-  border: 2px solid var(--ck-color, #4caf50);
+  border: 2px solid var(--ck-color, #2E9E5B);
   opacity: 0;
   pointer-events: none;
 }
@@ -400,7 +400,7 @@ body {
   outline: none;
   transition: border-color 0.12s, background .3s;
 }
-.inp:focus { border-color: #4caf50 !important; }
+.inp:focus { border-color: #2E9E5B !important; }
 .inp::placeholder { color: rgba(128, 128, 128, 0.4); }
 
 /* ─── Color dot ─── */
@@ -440,19 +440,19 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  background: linear-gradient(135deg, #2E9E5B, #1F7A46);
   border: none;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 20px rgba(46, 158, 91, 0.35);
   transition: all 0.12s;
 }
 .fab:hover {
   transform: scale(1.06);
-  box-shadow: 0 6px 28px rgba(76, 175, 80, 0.35);
+  box-shadow: 0 6px 28px rgba(46, 158, 91, 0.42);
 }
 .fab:active { transform: scale(0.94); }
 
@@ -463,13 +463,13 @@ body {
 
 /* Keyboard focus ring — visible only for keyboard/AT users, never on mouse click */
 :focus-visible {
-  outline: 2px solid #4caf50;
+  outline: 2px solid #2E9E5B;
   outline-offset: 2px;
   border-radius: 4px;
 }
 /* Interactive divs (tap targets) that opt into role="button" also get the ring */
 [role="button"]:focus-visible {
-  outline: 2px solid #4caf50;
+  outline: 2px solid #2E9E5B;
   outline-offset: 2px;
 }
 

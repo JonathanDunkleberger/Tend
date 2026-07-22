@@ -2,15 +2,16 @@
 
 import { Sprout, BarChart3, HeartPulse, Gem } from "lucide-react";
 import type { ThemeColors } from "@/lib/constants";
+import { BRAND } from "@/lib/constants";
 import { haptic } from "@/lib/utils";
 
 export type NavTab = "garden" | "insights" | "wellness" | "you";
 
-const TABS: { key: NavTab; label: string; Icon: typeof Sprout; color: string }[] = [
-  { key: "garden", label: "Garden", Icon: Sprout, color: "#4caf50" },
-  { key: "insights", label: "Insights", Icon: BarChart3, color: "#8B5CF6" },
-  { key: "wellness", label: "Wellness", Icon: HeartPulse, color: "#38bdf8" },
-  { key: "you", label: "You", Icon: Gem, color: "#f59e0b" },
+const TABS: { key: NavTab; label: string; Icon: typeof Sprout }[] = [
+  { key: "garden", label: "Garden", Icon: Sprout },
+  { key: "insights", label: "Insights", Icon: BarChart3 },
+  { key: "wellness", label: "Wellness", Icon: HeartPulse },
+  { key: "you", label: "You", Icon: Gem },
 ];
 
 interface BottomNavProps {
@@ -24,11 +25,11 @@ interface BottomNavProps {
 
 /**
  * Thumb-first bottom navigation — the app's primary nav shell.
- * Safe-area aware, 4 large tap targets, spring-y active state.
- * Mobile-first: fixed to the viewport bottom, blur backdrop, max-width matched
- * to the app column so it feels native on a phone.
+ * Brand-green active state only (no rainbow accents) so chrome matches the landing.
  */
 export function BottomNav({ active, onNavigate, th, darkMode, youBadge }: BottomNavProps) {
+  const activeColor = darkMode ? BRAND.greenBright : BRAND.green;
+
   return (
     <nav
       aria-label="Primary"
@@ -54,16 +55,16 @@ export function BottomNav({ active, onNavigate, th, darkMode, youBadge }: Bottom
           gap: 2,
           padding: "6px 8px",
           paddingBottom: "calc(6px + env(safe-area-inset-bottom, 0px))",
-          background: darkMode ? "rgba(20,20,36,0.82)" : "rgba(255,255,255,0.82)",
-          backdropFilter: "blur(18px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(18px) saturate(1.4)",
+          background: darkMode ? "rgba(11,21,16,0.88)" : "rgba(251,250,245,0.88)",
+          backdropFilter: "blur(18px) saturate(1.3)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.3)",
           borderTop: `1px solid ${th.cardBorder}`,
           boxShadow: darkMode
-            ? "0 -4px 24px rgba(0,0,0,0.35)"
-            : "0 -4px 24px rgba(0,0,0,0.05)",
+            ? "0 -4px 24px rgba(0,0,0,0.4)"
+            : "0 -4px 24px rgba(23,48,31,0.06)",
         }}
       >
-        {TABS.map(({ key, label, Icon, color }) => {
+        {TABS.map(({ key, label, Icon }) => {
           const isActive = active === key;
           return (
             <button
@@ -78,71 +79,61 @@ export function BottomNav({ active, onNavigate, th, darkMode, youBadge }: Bottom
                 position: "relative",
                 flex: 1,
                 minWidth: 0,
-                minHeight: 52,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 3,
+                gap: 2,
+                padding: "8px 4px 6px",
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                WebkitTapHighlightColor: "transparent",
-                padding: "4px 0",
+                color: isActive ? activeColor : th.textMuted,
+                transition: "color 0.15s ease",
               }}
             >
-              {/* Active pill behind the icon */}
-              <span
-                style={{
-                  position: "absolute",
-                  top: 4,
-                  width: 44,
-                  height: 30,
-                  borderRadius: 100,
-                  background: isActive ? `${color}1f` : "transparent",
-                  transform: isActive ? "scale(1)" : "scale(0.6)",
-                  opacity: isActive ? 1 : 0,
-                  transition: "transform .32s cubic-bezier(.34,1.56,.64,1), opacity .2s ease",
-                }}
-              />
               <span
                 style={{
                   position: "relative",
                   display: "flex",
-                  transform: isActive ? "translateY(-1px) scale(1.04)" : "translateY(0) scale(1)",
-                  transition: "transform .32s cubic-bezier(.34,1.56,.64,1)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 28,
+                  borderRadius: 10,
+                  background: isActive
+                    ? darkMode
+                      ? "rgba(74,222,128,0.12)"
+                      : BRAND.greenSoft
+                    : "transparent",
+                  transition: "background 0.15s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1)",
+                  transform: isActive ? "translateY(-1px)" : "none",
                 }}
               >
-                <Icon
-                  size={22}
-                  color={isActive ? color : th.textMuted}
-                  strokeWidth={isActive ? 2.4 : 2}
-                  fill={isActive ? `${color}26` : "transparent"}
-                />
+                <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
                 {key === "you" && youBadge && (
                   <span
+                    aria-hidden
                     style={{
                       position: "absolute",
-                      top: -1,
-                      right: -2,
+                      top: 2,
+                      right: 4,
                       width: 7,
                       height: 7,
                       borderRadius: 100,
-                      background: "#f59e0b",
-                      border: `1.5px solid ${darkMode ? "#141424" : "#fff"}`,
+                      background: BRAND.amber,
+                      boxShadow: `0 0 0 2px ${darkMode ? BRAND.forestNight : BRAND.cream}`,
                     }}
                   />
                 )}
               </span>
               <span
                 style={{
-                  position: "relative",
                   fontSize: 10,
-                  fontWeight: isActive ? 700 : 600,
-                  letterSpacing: "0.1px",
-                  color: isActive ? color : th.textMuted,
-                  transition: "color .2s ease",
+                  fontWeight: isActive ? 700 : 500,
+                  letterSpacing: 0.1,
+                  lineHeight: 1.1,
                 }}
               >
                 {label}

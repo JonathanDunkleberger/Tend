@@ -88,7 +88,24 @@ export function getSeason(): SeasonKey {
   return "winter";
 }
 
-/* ═══════════ DARK THEME ═══════════ */
+/* ═══════════ BRAND (matches landing page) ═══════════ */
+export const BRAND = {
+  green: "#2E9E5B",
+  greenDeep: "#1F7A46",
+  greenSoft: "rgba(46,158,91,0.10)",
+  greenMid: "rgba(46,158,91,0.16)",
+  greenGlow: "rgba(46,158,91,0.32)",
+  /** On-dark accent (readable on forest night) */
+  greenBright: "#4ADE80",
+  ink: "#17301F",
+  cream: "#FBFAF5",
+  amber: "#F5A623",
+  amberDeep: "#E08A00",
+  forestNight: "#0B1510",
+  forestCard: "#122019",
+} as const;
+
+/* ═══════════ THEME ═══════════ */
 export interface ThemeColors {
   bg: string;
   card: string;
@@ -115,30 +132,35 @@ export interface ThemeColors {
   freezeBtnOff: string;
   heatEmpty: string;
   glassHighlight: string;
+  /** Brand primary for CTAs / active nav */
+  accent: string;
+  accentDeep: string;
 }
 
 export const THEME: Record<"light" | "dark", ThemeColors> = {
   light: {
-    bg: "#FAF8F3", card: "white", cardBorder: "rgba(0,0,0,0.04)",
-    cardShadow: "0 1px 3px rgba(0,0,0,0.02),0 4px 16px rgba(0,0,0,0.015)",
-    text: "#1a1a2e", textSub: "rgba(0,0,0,.55)", textMuted: "rgba(0,0,0,.42)", textFaint: "rgba(0,0,0,.2)",
-    label: "rgba(0,0,0,.55)", hoverBg: "rgba(0,0,0,.01)", inputBg: "#FAFAF8", inputBorder: "rgba(0,0,0,.04)",
-    checkBorder: "rgba(0,0,0,.08)", progressBg: "rgba(0,0,0,.04)", overlayBg: "rgba(0,0,0,.15)",
-    modalBg: "white", dangerBg: "rgba(239,68,68,.02)", dangerBorder: "rgba(239,68,68,.1)",
-    streakBg: "rgba(0,0,0,.02)", streakActiveBg: "rgba(245,158,11,.06)", coinBg: "rgba(245,158,11,.06)",
-    freezeBtnBg: "rgba(66,180,214,.08)", freezeBtnOff: "rgba(0,0,0,.02)", heatEmpty: "rgba(0,0,0,0.025)",
-    glassHighlight: "rgba(255,255,255,0.12)",
+    bg: BRAND.cream, card: "#FFFFFF", cardBorder: "rgba(23,48,31,0.06)",
+    cardShadow: "0 1px 3px rgba(23,48,31,0.03),0 4px 16px rgba(46,158,91,0.04)",
+    text: BRAND.ink, textSub: "rgba(23,48,31,.62)", textMuted: "rgba(23,48,31,.45)", textFaint: "rgba(23,48,31,.22)",
+    label: "rgba(23,48,31,.55)", hoverBg: "rgba(46,158,91,.04)", inputBg: "#F7F6F0", inputBorder: "rgba(23,48,31,.08)",
+    checkBorder: "rgba(23,48,31,.10)", progressBg: "rgba(23,48,31,.06)", overlayBg: "rgba(23,48,31,.18)",
+    modalBg: "#FFFFFF", dangerBg: "rgba(239,68,68,.03)", dangerBorder: "rgba(239,68,68,.12)",
+    streakBg: "rgba(46,158,91,.04)", streakActiveBg: "rgba(245,166,35,.08)", coinBg: "rgba(245,166,35,.08)",
+    freezeBtnBg: "rgba(46,158,91,.08)", freezeBtnOff: "rgba(23,48,31,.03)", heatEmpty: "rgba(23,48,31,0.04)",
+    glassHighlight: "rgba(255,255,255,0.14)",
+    accent: BRAND.green, accentDeep: BRAND.greenDeep,
   },
   dark: {
-    bg: "#0f0f1a", card: "#1a1a2e", cardBorder: "rgba(255,255,255,0.06)",
-    cardShadow: "0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.2)",
-    text: "#e8e6f0", textSub: "rgba(255,255,255,.6)", textMuted: "rgba(255,255,255,.42)", textFaint: "rgba(255,255,255,.2)",
-    label: "rgba(255,255,255,.55)", hoverBg: "rgba(255,255,255,.03)", inputBg: "#12122a", inputBorder: "rgba(255,255,255,.08)",
-    checkBorder: "rgba(255,255,255,.12)", progressBg: "rgba(255,255,255,.06)", overlayBg: "rgba(0,0,0,.5)",
-    modalBg: "#1a1a2e", dangerBg: "rgba(239,68,68,.08)", dangerBorder: "rgba(239,68,68,.2)",
-    streakBg: "rgba(255,255,255,.04)", streakActiveBg: "rgba(245,158,11,.12)", coinBg: "rgba(245,158,11,.1)",
-    freezeBtnBg: "rgba(66,180,214,.12)", freezeBtnOff: "rgba(255,255,255,.04)", heatEmpty: "rgba(255,255,255,0.04)",
+    bg: BRAND.forestNight, card: BRAND.forestCard, cardBorder: "rgba(234,247,238,0.08)",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.35),0 4px 16px rgba(0,0,0,0.25)",
+    text: "#EAF7EE", textSub: "rgba(234,247,238,.62)", textMuted: "rgba(234,247,238,.42)", textFaint: "rgba(234,247,238,.22)",
+    label: "rgba(234,247,238,.55)", hoverBg: "rgba(74,222,128,.06)", inputBg: "#0E1A14", inputBorder: "rgba(234,247,238,.10)",
+    checkBorder: "rgba(234,247,238,.14)", progressBg: "rgba(234,247,238,.08)", overlayBg: "rgba(0,0,0,.55)",
+    modalBg: BRAND.forestCard, dangerBg: "rgba(239,68,68,.10)", dangerBorder: "rgba(239,68,68,.22)",
+    streakBg: "rgba(234,247,238,.04)", streakActiveBg: "rgba(245,166,35,.14)", coinBg: "rgba(245,166,35,.12)",
+    freezeBtnBg: "rgba(74,222,128,.10)", freezeBtnOff: "rgba(234,247,238,.04)", heatEmpty: "rgba(234,247,238,0.05)",
     glassHighlight: "rgba(255,255,255,0.06)",
+    accent: BRAND.greenBright, accentDeep: BRAND.green,
   },
 };
 

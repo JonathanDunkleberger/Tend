@@ -72,8 +72,8 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
         {/* Sprout icon */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ display: "inline-block" }}>
-            <path d="M24 42V26" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" />
-            <path d="M24 26C24 26 18 22 18 16C18 10 24 8 24 8C24 8 30 10 30 16C30 22 24 26 24 26Z" fill="#4ade80" opacity="0.8" />
+            <path d="M24 42V26" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M24 26C24 26 18 22 18 16C18 10 24 8 24 8C24 8 30 10 30 16C30 22 24 26 24 26Z" fill="#4ADE80" opacity="0.8" />
             <path d="M24 30C24 30 16 28 12 22C8 16 12 10 12 10C12 10 18 12 22 18C26 24 24 30 24 30Z" fill="#22c55e" opacity="0.6" />
           </svg>
         </div>
@@ -84,7 +84,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
           color: "white", textAlign: "center", lineHeight: 1.3, marginBottom: 32,
         }}>
           You&rsquo;ve been showing up.<br />
-          <span style={{ color: "#4ade80" }}>Tend+</span> helps you keep going.
+          <span style={{ color: "#4ADE80" }}>Tend+</span> is optional depth — never a gate on care.
         </h1>
 
         {/* Feature cards */}
@@ -99,7 +99,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
                 border: "1px solid rgba(255,255,255,0.06)",
               }}
             >
-              <f.Icon size={20} color="#4ade80" style={{ flexShrink: 0 }} />
+              <f.Icon size={20} color="#4ADE80" style={{ flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: "white" }}>{f.title}</div>
                 <div style={{ fontSize: 13, fontWeight: 400, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>
@@ -118,7 +118,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
           textAlign: "center", marginBottom: 12,
         }}>
           <div style={{
-            display: "inline-block", fontSize: 11, fontWeight: 700, color: "#4ade80",
+            display: "inline-block", fontSize: 11, fontWeight: 700, color: "#4ADE80",
             background: "rgba(74,222,128,0.15)", padding: "3px 10px", borderRadius: 999,
             marginBottom: 8, letterSpacing: "0.02em",
           }}>
@@ -135,7 +135,7 @@ export function TendPlusScreen({ onClose, onSubscribe, onRestore }: TendPlusScre
             style={{
               marginTop: 14, width: "100%", padding: "14px 0",
               borderRadius: 16, border: "none",
-              background: "#4ade80", color: "white",
+              background: "#4ADE80", color: "white",
               fontSize: 16, fontWeight: 600, cursor: "pointer",
               fontFamily: "inherit",
               transition: "transform 0.1s",
@@ -276,7 +276,7 @@ export function TendPlusMiniPrompt({
             onClick={onSeeTendPlus}
             style={{
               flex: 1, padding: "12px 0", borderRadius: 12,
-              border: "none", background: "#4ade80", color: "white",
+              border: "none", background: "#4ADE80", color: "white",
               fontSize: 14, fontWeight: 600, cursor: "pointer",
               fontFamily: "inherit",
             }}
@@ -354,7 +354,7 @@ export function SevenDayCelebration({
           </p>
         )}
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.5, marginBottom: 24 }}>
-          Want to go deeper? <span style={{ color: "#4ade80" }}>Tend+</span> gives you unlimited
+          Want to go deeper? <span style={{ color: "#4ADE80" }}>Tend+</span> gives you unlimited
           habits, premium decorations, and full insights into your patterns.
         </p>
         <div style={{ display: "flex", gap: 10 }}>
@@ -362,7 +362,7 @@ export function SevenDayCelebration({
             onClick={onTryTendPlus}
             style={{
               flex: 1, padding: "12px 0", borderRadius: 12,
-              border: "none", background: "#4ade80", color: "white",
+              border: "none", background: "#4ADE80", color: "white",
               fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             }}
           >

@@ -6,7 +6,7 @@ import {
   Check, Plus, X, Flame, ChevronLeft, ChevronRight, Coins, Sparkles,
   Pencil, Shield, Crown,
   Users, RefreshCw, Wind, DollarSign, Heart,
-  Sunrise, SunMedium, MoonStar, Store, Pause, Play,
+  Sunrise, Store, Pause, Play,
   Share2,
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
@@ -49,7 +49,7 @@ import { computeCleanDays, computeMoneySaved, computeTotalSaved, computeQuitBest
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
   PRESETS, PRESET_CATEGORIES, HABIT_COLORS, FREE_HABIT_LIMIT,
-  getSeason, THEME, BOUNCE_BACK,
+  getSeason, THEME, BRAND, BOUNCE_BACK,
   QUIT_PRESETS, SHOP_ITEMS,
 } from "@/lib/constants";
 import type { HabitWithStats, EarnedMilestones, QuitData } from "@/types";
@@ -1769,8 +1769,8 @@ export function TendApp({
               onClick={onLogoTap}
               style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", color: th.text, cursor: "default", userSelect: "none" }}
             >
-              tend<span style={{ color: "#4caf50" }}>.</span>
-              {isTendPlus() && <span style={{ fontSize: 10, fontWeight: 700, color: "#4ade80", marginLeft: 3, verticalAlign: "super" }}>+</span>}
+              tend<span style={{ color: BRAND.green }}>.</span>
+              {isTendPlus() && <span style={{ fontSize: 10, fontWeight: 700, color: darkMode ? BRAND.greenBright : BRAND.greenDeep, marginLeft: 3, verticalAlign: "super" }}>+</span>}
             </h1>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1790,8 +1790,8 @@ export function TendApp({
             {page === "main" && habits.length > 0 && (
               <span style={{
                 fontSize: 11, fontWeight: 700,
-                color: allDone ? "#4caf50" : th.textMuted,
-                background: allDone ? "rgba(76,175,80,.08)" : th.progressBg,
+                color: allDone ? th.accent : th.textMuted,
+                background: allDone ? BRAND.greenSoft : th.progressBg,
                 padding: "3px 10px", borderRadius: 100,
                 display: "flex", alignItems: "center", gap: 3, transition: "all .3s",
               }}>
@@ -1813,7 +1813,7 @@ export function TendApp({
               <div style={{
                 display: "inline-flex", alignItems: "center", gap: 3,
                 padding: "3px 10px", borderRadius: 100,
-                background: "rgba(76,175,80,0.08)", color: "#4caf50",
+                background: BRAND.greenSoft, color: th.accent,
                 fontSize: 11, fontWeight: 700,
               }}>
                 <DollarSign size={11} />{fmtMoney(totalSaved)} saved
@@ -1880,10 +1880,10 @@ export function TendApp({
                   borderRadius: 10, padding: "8px 16px", whiteSpace: "nowrap",
                   display: "flex", alignItems: "center", gap: 6,
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" strokeWidth="2">
                     <path d="M12 3l1.5 5.5L19 10l-4.5 2.5L16 18l-4-3-4 3 1.5-5.5L5 10l5.5-1.5z" />
                   </svg>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#4ade80" }}>All habits complete today</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#4ADE80" }}>All habits complete today</span>
                 </div>
               )}
               {/* Mood indicator — minimal pill with SVG icon */}
@@ -1954,27 +1954,25 @@ export function TendApp({
               </div>
             )}
 
-            {/* Progress bar */}
+            {/* Progress under planet */}
             {habits.length > 0 && (
-              <div style={{ padding: "10px 2px 4px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, padding: "0 2px" }}>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: th.textMuted, letterSpacing: 0.3 }}>
-                    {allDone ? "All done!" : "Today's progress"}
+              <div style={{ padding: "12px 2px 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5, padding: "0 2px" }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: th.textMuted, letterSpacing: 0.2 }}>
+                    {allDone ? "All done for today" : "Today's progress"}
                   </span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: allDone ? "#4caf50" : th.textMuted }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: allDone ? th.accent : th.textMuted }}>
                     {totalToday}/{activeHabits.length}
                   </span>
                 </div>
-                <div style={{ height: 4, borderRadius: 2, background: th.progressBg, overflow: "hidden" }}>
+                <div style={{ height: 5, borderRadius: 100, background: th.progressBg, overflow: "hidden" }}>
                   <div style={{
-                    height: "100%", borderRadius: 2,
-                    background: allDone
-                      ? "linear-gradient(90deg,#66bb6a,#43a047)"
-                      : "linear-gradient(90deg,#81c784,#4caf50)",
+                    height: "100%", borderRadius: 100,
+                    background: `linear-gradient(90deg, ${BRAND.green}, ${BRAND.greenDeep})`,
                     width: `${todayPct * 100}%`,
                     transition: "width 400ms cubic-bezier(0.34, 1.56, 0.64, 1)",
                     ...(allDone ? {
-                      boxShadow: "0 0 12px rgba(74, 222, 128, 0.4)",
+                      boxShadow: `0 0 12px ${BRAND.greenGlow}`,
                       animation: "progressGlow 1.5s ease-in-out",
                     } : {}),
                   }} />
@@ -1982,7 +1980,7 @@ export function TendApp({
               </div>
             )}
 
-            {/* ── Assumes-best one-tap check-in ── */}
+            {/* Assumes-best one-tap check-in */}
             {(() => {
               const buildRemaining = activeHabits.filter((h) => h.category !== "quit" && !isHappy(h.id));
               if (buildRemaining.length === 0) return null;
@@ -1990,102 +1988,83 @@ export function TendApp({
                 <button
                   onClick={markAllGood}
                   style={{
-                    width: "100%", marginTop: 10, padding: "13px 16px", borderRadius: 16,
+                    width: "100%", marginTop: 12, padding: "14px 16px", borderRadius: 18,
                     border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                     display: "flex", alignItems: "center", gap: 12,
-                    background: "linear-gradient(135deg, rgba(76,175,80,0.14), rgba(102,255,170,0.08))",
-                    boxShadow: allGoodPulse ? "0 0 0 3px rgba(76,175,80,0.25)" : `inset 0 0 0 1px ${darkMode ? "rgba(102,255,170,0.14)" : "rgba(76,175,80,0.16)"}`,
+                    background: darkMode
+                      ? "linear-gradient(135deg, rgba(46,158,91,0.18), rgba(31,122,70,0.10))"
+                      : "linear-gradient(135deg, rgba(46,158,91,0.14), rgba(46,158,91,0.05))",
+                    boxShadow: allGoodPulse
+                      ? `0 0 0 3px ${BRAND.greenMid}`
+                      : `inset 0 0 0 1px ${darkMode ? "rgba(74,222,128,0.18)" : BRAND.greenMid}, 0 4px 18px ${BRAND.greenSoft}`,
                     transform: allGoodPulse ? "scale(0.98)" : "scale(1)",
                     transition: "transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease",
                   }}
                 >
                   <span style={{
-                    width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-                    background: "linear-gradient(135deg,#4caf50,#2e7d32)",
+                    width: 40, height: 40, borderRadius: 14, flexShrink: 0,
+                    background: `linear-gradient(135deg, ${BRAND.green}, ${BRAND.greenDeep})`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 4px 12px rgba(76,175,80,0.3)",
+                    boxShadow: `0 4px 14px ${BRAND.greenGlow}`,
                   }}>
                     <Check size={20} color="#fff" strokeWidth={3} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "block", fontSize: 15, fontWeight: 700, color: th.text }}>
+                    <span style={{ display: "block", fontFamily: "'Fraunces',serif", fontSize: 16, fontWeight: 600, color: th.text, letterSpacing: "-0.2px" }}>
                       Everything went well today
                     </span>
-                    <span style={{ display: "block", fontSize: 12, color: th.textSub, marginTop: 1 }}>
+                    <span style={{ display: "block", fontSize: 12, color: th.textSub, marginTop: 2 }}>
                       {buildRemaining.length === activeHabits.filter((h) => h.category !== "quit").length
                         ? "One tap — we assume the best in you"
                         : `Tend the last ${buildRemaining.length} in one tap`}
                     </span>
                   </span>
-                  <Sparkles size={16} color="#4caf50" />
+                  <Sparkles size={16} color={th.accent} />
                 </button>
               );
             })()}
 
-            {/* Bounce-back recovery banner */}
+            {/* Compact comeback strip */}
             {bounceBackDay > 0 && bounceBackDay <= 7 && !allDone && (
               <div style={{
-                margin: "8px 2px 0", padding: "10px 14px", borderRadius: 12,
-                background: "linear-gradient(135deg,rgba(76,175,80,0.08),rgba(102,255,170,0.05))",
-                border: "1px solid rgba(76,175,80,0.15)", display: "flex", alignItems: "center", gap: 10,
+                marginTop: 8, padding: "8px 12px", borderRadius: 12,
+                background: BRAND.greenSoft,
+                display: "flex", alignItems: "center", gap: 8,
               }}>
-                <RefreshCw size={16} color="#4caf50" />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: th.text }}>
-                    {bounceBackDay === 1 ? "You showed up. That's everything." : bounceBackDay <= 3 ? "Building momentum — keep it rolling!" : "You're back in the groove. Your creatures are so happy!"}
-                  </div>
-                  <div style={{ fontSize: 10, color: th.textSub }}>
-                    {bounceBackDay >= 6 ? "Almost there!" : bounceBackDay >= 4 ? `${7 - bounceBackDay} more days` : `Day ${bounceBackDay} of 7`}{(() => { const c = BOUNCE_BACK.find((b) => b.d === bounceBackDay)?.c; return c ? ` • +${c} coins today` : ""; })()}
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: 10, fontWeight: 700, color: "#4caf50",
-                  background: "rgba(76,175,80,0.1)", borderRadius: 8, padding: "3px 8px",
-                }}>
-                  Day {bounceBackDay}/7
-                </div>
+                <RefreshCw size={13} color={th.accent} />
+                <span style={{ flex: 1, fontSize: 11.5, fontWeight: 550, color: th.textSub, lineHeight: 1.35 }}>
+                  {bounceBackDay === 1
+                    ? "You showed up. That's everything."
+                    : bounceBackDay <= 3
+                      ? "Building momentum — keep going."
+                      : "You're back in the groove."}
+                  {" "}
+                  <span style={{ color: th.accent, fontWeight: 700 }}>
+                    Day {bounceBackDay}/7
+                    {(() => { const c = BOUNCE_BACK.find((b) => b.d === bounceBackDay)?.c; return c ? ` · +${c} coins` : ""; })()}
+                  </span>
+                </span>
               </div>
             )}
 
-            {/* Gentle time-of-day nudge */}
-            {buildHabits.length > 0 && buildHabits.filter((h) => isHappy(h.id)).length === 0 && (() => {
-              const hr = new Date().getHours();
-              const nudge = hr >= 5 && hr < 12
-                ? { Icon: Sunrise, msg: "Good morning! A small step forward today?" }
-                : hr >= 12 && hr < 17
-                  ? { Icon: SunMedium, msg: "Afternoon check-in — any habits to tend?" }
-                  : hr >= 17 && hr < 21
-                    ? { Icon: MoonStar, msg: "Evening wind-down — still time to grow today" }
-                    : { Icon: MoonStar, msg: "Late night. Be gentle with yourself." };
-              return (
-                <div style={{
-                  margin: "8px 2px 0", padding: "10px 14px", borderRadius: 12,
-                  background: th.card, border: `1px solid ${th.cardBorder}`,
-                  display: "flex", alignItems: "center", gap: 10,
-                }}>
-                  <nudge.Icon size={18} color={th.textSub} />
-                  <span style={{ fontSize: 12, color: th.textSub, fontWeight: 500 }}>{nudge.msg}</span>
-                </div>
-              );
-            })()}
-
             {/* Today's habits */}
             <div className="cd" style={{
-              padding: "8px 4px", marginTop: 8,
+              padding: "10px 4px", marginTop: 12,
               background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
             }}>
-              <div style={{ padding: "4px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span className="lb" style={{ color: th.label }}>Today</span>
+              <div style={{ padding: "2px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span className="lb" style={{ color: th.label }}>Today</span>
+                  {habits.length > 0 && (
+                    <div style={{ fontSize: 12, color: th.textSub, marginTop: 2, fontWeight: 500 }}>
+                      {getGreeting()}
+                    </div>
+                  )}
+                </div>
                 <span style={{ fontSize: 10, color: th.textMuted, fontWeight: 500 }}>
                   {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
                 </span>
               </div>
-              {/* Compassionate welcome message */}
-              {habits.length > 0 && (
-                  <div style={{ padding: "0 14px 8px", textAlign: "center" }}>
-                    <span style={{ fontSize: 12, fontStyle: "italic", color: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}>{getGreeting()}</span>
-                  </div>
-              )}
               {habits.length === 0 ? (
                 <div style={{ padding: "34px 24px 30px", textAlign: "center", animation: "fadeUp 0.4s ease" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2111,10 +2090,10 @@ export function TendApp({
                     onClick={() => { haptic("light"); setPage("add"); }}
                     style={{
                       padding: "9px 20px", borderRadius: 100, border: "none",
-                      background: "linear-gradient(135deg,#4caf50,#2e7d32)", color: "#fff",
+                      background: "linear-gradient(135deg,#2E9E5B,#1F7A46)", color: "#fff",
                       fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      boxShadow: "0 4px 16px rgba(76,175,80,0.32)",
+                      boxShadow: "0 4px 16px rgba(46,158,91,0.32)",
                     }}
                   >
                     <Plus size={15} strokeWidth={2.5} /> Plant your first egg
@@ -2192,7 +2171,7 @@ export function TendApp({
                             }}
                             onClick={() => { setDetailId(h.id); setPage("detail"); }}
                           >
-                            <svg viewBox="0 0 20 20" fill="#4ade80" width="20" height="20">
+                            <svg viewBox="0 0 20 20" fill="#4ADE80" width="20" height="20">
                               <path d="M10 1L3 4.5V9.5C3 14.2 6 17.5 10 19C14 17.5 17 14.2 17 9.5V4.5L10 1Z"/>
                             </svg>
                           </div>
@@ -2298,11 +2277,11 @@ export function TendApp({
                               style={{
                                 fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 100,
                                 background: graceOn ? "rgba(74,222,128,0.16)" : "rgba(96,165,250,0.12)",
-                                color: graceOn ? "#4ade80" : "#60a5fa",
+                                color: graceOn ? "#4ADE80" : "#60a5fa",
                                 display: "inline-flex", alignItems: "center", gap: 2,
                                 boxShadow: graceOn ? "0 0 8px rgba(74,222,128,0.35)" : "none",
                               }}>
-                              <Shield size={9} fill={graceOn ? "#4ade80" : "none"} />{graceTokens}
+                              <Shield size={9} fill={graceOn ? "#4ADE80" : "none"} />{graceTokens}
                             </span>
                           )}
                           {!isPaused && !quit && streak >= 7 && (
@@ -2397,7 +2376,7 @@ export function TendApp({
                 background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
               }}>
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: "rgba(255,255,255,0.25)" }}>Activity</div>
-                <Heatmap getData={overallHeatData} weeks={12} color="#4caf50" heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
+                <Heatmap getData={overallHeatData} weeks={12} color="#2E9E5B" heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
               </div>
             )}
           </div>
@@ -2478,7 +2457,7 @@ export function TendApp({
                   </div>
                   <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                     <button className="btn-s" onClick={() => setEditMode(false)} style={{ background: th.progressBg, color: th.textSub }}>Cancel</button>
-                    <button className="btn-s" onClick={saveEdit} style={{ background: darkMode ? "#4caf50" : "#1a1a2e", color: "white" }}>Save</button>
+                    <button className="btn-s" onClick={saveEdit} style={{ background: darkMode ? "#2E9E5B" : "#1a1a2e", color: "white" }}>Save</button>
                   </div>
                 </div>
               ) : (
@@ -2632,7 +2611,7 @@ export function TendApp({
                     </>
                   )}
                   {dqd && (dqd.dailyCost || 0) > 0 && cleanD > 0 && (
-                    <div style={{ fontSize: 14, color: "#4caf50", fontWeight: 600, marginTop: 6 }}>
+                    <div style={{ fontSize: 14, color: "#2E9E5B", fontWeight: 600, marginTop: 6 }}>
                       {fmtMoney((dqd.dailyCost || 0) * cleanD)} saved
                     </div>
                   )}
@@ -2710,7 +2689,7 @@ export function TendApp({
                 background: "transparent", cursor: "pointer", fontFamily: "inherit",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 fontSize: 14, fontWeight: 500,
-                color: pausedHabits[detailHabit.id] ? "#4ade80" : th.textMuted,
+                color: pausedHabits[detailHabit.id] ? "#4ADE80" : th.textMuted,
                 transition: "all 0.15s",
               }}
             >
@@ -2736,7 +2715,7 @@ export function TendApp({
                       background: tokens > 0 ? "rgba(74,222,128,0.14)" : "rgba(255,255,255,0.05)",
                       boxShadow: protectedNow ? "0 0 12px rgba(74,222,128,0.4)" : "none",
                     }}>
-                      <Shield size={20} color={tokens > 0 ? "#4ade80" : th.textMuted} fill={protectedNow ? "#4ade80" : "none"} />
+                      <Shield size={20} color={tokens > 0 ? "#4ADE80" : th.textMuted} fill={protectedNow ? "#4ADE80" : "none"} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 600, color: th.text }}>Streak shield</div>
@@ -2746,7 +2725,7 @@ export function TendApp({
                           : "Earn one free at 7-, 21- & 60-day streaks, or bank one now so a slip never stings"}
                       </div>
                       {protectedNow && (
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "#4ade80", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#4ADE80", marginTop: 4 }}>
                           🛡️ A grace day is protecting your streak right now
                         </div>
                       )}
@@ -2760,7 +2739,7 @@ export function TendApp({
                       border: "none", fontFamily: "inherit", fontSize: 13, fontWeight: 600,
                       cursor: full || !canAfford ? "default" : "pointer",
                       opacity: full || !canAfford ? 0.5 : 1,
-                      background: "rgba(74,222,128,0.12)", color: "#4ade80",
+                      background: "rgba(74,222,128,0.12)", color: "#4ADE80",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                     }}
                   >
@@ -3000,7 +2979,7 @@ export function TendApp({
               >
                 <div style={{
                   width: 44, height: 44, borderRadius: 13, flexShrink: 0,
-                  background: "linear-gradient(135deg, #8B5CF6, #4ade80)",
+                  background: "linear-gradient(135deg, #8B5CF6, #4ADE80)",
                   display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
                   boxShadow: "0 4px 14px rgba(139,92,246,0.35)",
                 }}>
@@ -3024,7 +3003,7 @@ export function TendApp({
         {/* ═══ SOCIAL ═══ */}
         {page === "social" && (
           <div style={{ animation: "fadeUp 0.28s ease", textAlign: "center", padding: "60px 20px" }}>
-            <Users size={32} color="#4caf50" style={{ marginBottom: 12, opacity: 0.5 }} />
+            <Users size={32} color="#2E9E5B" style={{ marginBottom: 12, opacity: 0.5 }} />
             <h2 style={{ fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 700, color: th.text, marginBottom: 6 }}>Tend Together</h2>
             <p style={{ fontSize: 13, color: th.textSub }}>Coming Soon</p>
           </div>
@@ -3218,7 +3197,7 @@ export function TendApp({
                   onClick={() => { if (cName.trim()) startAddHabit(cName.trim(), cColor, "Target"); }}
                   style={{
                     padding: "0 18px", borderRadius: 12,
-                    background: cName.trim() ? "linear-gradient(135deg,#4caf50,#2e7d32)" : th.progressBg,
+                    background: cName.trim() ? "linear-gradient(135deg,#2E9E5B,#1F7A46)" : th.progressBg,
                     color: cName.trim() ? "white" : th.textMuted,
                     border: "none", fontSize: 13, fontWeight: 600,
                     cursor: cName.trim() ? "pointer" : "default",
@@ -3233,7 +3212,7 @@ export function TendApp({
                   onClick={() => { if (habits.length >= FREE_HABIT_LIMIT && !isTendPlus()) { setPage("main"); setShowPaywall(true); } }}
                   style={{
                     marginTop: 8, fontSize: 12, fontWeight: 500, lineHeight: 1.5,
-                    color: habits.length >= FREE_HABIT_LIMIT && !isTendPlus() ? "#4ade80" : th.textMuted,
+                    color: habits.length >= FREE_HABIT_LIMIT && !isTendPlus() ? "#4ADE80" : th.textMuted,
                     cursor: habits.length >= FREE_HABIT_LIMIT && !isTendPlus() ? "pointer" : "default",
                   }}
                 >

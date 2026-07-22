@@ -92,7 +92,7 @@ function ConsistencyRing({ pct, color, th, size = 42 }: { pct: number; color: st
 
 /** Grade a 0–100 consistency into the status ramp (paired with the numeric label, never color-alone). */
 function gradeColor(pct: number): string {
-  return pct >= 70 ? "#4caf50" : pct >= 40 ? "#f59e0b" : "#ef4444";
+  return pct >= 70 ? "#2E9E5B" : pct >= 40 ? "#f59e0b" : "#ef4444";
 }
 
 /**
@@ -131,7 +131,7 @@ function PolarDays({
         const isBest = i === bestDay && hasSpread;
         const isWorst = i === worstDay && hasSpread;
         // Sequential green by magnitude; best day fullest, worst day dimmest.
-        const fill = isBest ? "#4caf50" : isWorst ? "#ef4444" : "#66bb6a";
+        const fill = isBest ? "#2E9E5B" : isWorst ? "#ef4444" : "#66bb6a";
         const op = isBest ? 0.95 : isWorst ? 0.5 : 0.28 + (d.pct / 100) * 0.4;
         // label just outside the max ring
         const lr = maxR + 14;
@@ -144,7 +144,7 @@ function PolarDays({
             />
             <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
               fontSize="10" fontWeight={isBest || isWorst ? 700 : 500}
-              fill={isBest ? "#4caf50" : isWorst ? "#ef4444" : th.textMuted}>
+              fill={isBest ? "#2E9E5B" : isWorst ? "#ef4444" : th.textMuted}>
               {d.name[0]}
             </text>
           </g>
@@ -368,13 +368,13 @@ export function Constellation({
       {headline && (
         <div className="cd" style={{
           padding: 16, marginBottom: 10, display: "flex", alignItems: "center", gap: 16,
-          background: "linear-gradient(135deg, rgba(76,175,80,0.12), rgba(76,175,80,0.02))",
-          borderColor: "rgba(76,175,80,0.22)", boxShadow: th.cardShadow,
+          background: "linear-gradient(135deg, rgba(46,158,91,0.12), rgba(46,158,91,0.02))",
+          borderColor: "rgba(46,158,91,0.22)", boxShadow: th.cardShadow,
         }}>
           <div style={{ textAlign: "center", flexShrink: 0, minWidth: 62 }}>
             <div style={{
               fontSize: 34, fontWeight: 800, fontFamily: "'Fraunces',serif", lineHeight: 1,
-              color: thisWeekPct >= 60 ? "#4caf50" : th.text,
+              color: thisWeekPct >= 60 ? "#2E9E5B" : th.text,
             }}>{thisWeekPct}<span style={{ fontSize: 16, fontWeight: 600 }}>%</span></div>
             <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase" as const, color: th.label, marginTop: 3 }}>This week</div>
           </div>
@@ -386,8 +386,8 @@ export function Constellation({
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 4, marginTop: 8,
                 fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
-                color: weekDelta > 0 ? "#4caf50" : weekDelta < 0 ? "#e57373" : th.textMuted,
-                background: weekDelta > 0 ? "rgba(76,175,80,0.14)" : weekDelta < 0 ? "rgba(229,115,115,0.14)" : th.progressBg,
+                color: weekDelta > 0 ? "#2E9E5B" : weekDelta < 0 ? "#e57373" : th.textMuted,
+                background: weekDelta > 0 ? "rgba(46,158,91,0.14)" : weekDelta < 0 ? "rgba(229,115,115,0.14)" : th.progressBg,
               }}>
                 {weekDelta > 0 ? "▲" : weekDelta < 0 ? "▼" : "•"} {weekDelta > 0 ? "+" : ""}{weekDelta}% vs last week
               </span>
@@ -400,7 +400,7 @@ export function Constellation({
       <div className="cd" style={{ padding: 16, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
         <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
           <div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'Fraunces',serif", color: weekPct >= 80 ? "#4caf50" : th.text }}>{weekPct}%</div>
+            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'Fraunces',serif", color: weekPct >= 80 ? "#2E9E5B" : th.text }}>{weekPct}%</div>
             <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase" as const, color: th.label, marginTop: 2 }}>On Track</div>
             <div style={{ fontSize: 10, color: th.textSub, marginTop: 1 }}>{totalHabitsOnTrack} of {habits.length}</div>
           </div>
@@ -436,7 +436,7 @@ export function Constellation({
         const prev = n > 1 ? weeklyTrend[n - 2] : null;
         const delta = prev ? last.pct - prev.pct : 0;
         // Green reads on both surfaces; brighten the marker for dark contrast.
-        const line = "#4caf50";
+        const line = "#2E9E5B";
         const gid = "momentumFill";
         return (
         <div className="cd" style={{ padding: 14, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
@@ -447,8 +447,8 @@ export function Constellation({
                 marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 3,
                 fontSize: 10, fontWeight: 700, letterSpacing: 0, textTransform: "none",
                 padding: "2px 8px", borderRadius: 999,
-                color: delta > 0 ? "#4caf50" : delta < 0 ? "#e57373" : th.textMuted,
-                background: delta > 0 ? "rgba(76,175,80,0.12)" : delta < 0 ? "rgba(229,115,115,0.12)" : th.progressBg,
+                color: delta > 0 ? "#2E9E5B" : delta < 0 ? "#e57373" : th.textMuted,
+                background: delta > 0 ? "rgba(46,158,91,0.12)" : delta < 0 ? "rgba(229,115,115,0.12)" : th.progressBg,
               }}>
                 {delta > 0 ? "▲" : delta < 0 ? "▼" : "•"} {delta > 0 ? "+" : ""}{delta}% vs last wk
               </span>
@@ -487,7 +487,7 @@ export function Constellation({
                     width: isThis ? 11 : 7, height: isThis ? 11 : 7, borderRadius: "50%",
                     background: line,
                     border: isThis ? `2px solid ${th.card}` : "none",
-                    boxShadow: isThis ? `0 0 0 2px ${line}, 0 2px 8px rgba(76,175,80,0.45)` : "none",
+                    boxShadow: isThis ? `0 0 0 2px ${line}, 0 2px 8px rgba(46,158,91,0.45)` : "none",
                   }} />
                   {/* week label below */}
                   <div style={{
@@ -605,7 +605,7 @@ export function Constellation({
                       display: "flex", alignItems: "center", justifyContent: "center",
                       background: "rgba(74,222,128,0.1)", border: "1.5px solid rgba(74,222,128,0.3)",
                     }}>
-                      <Shield size={17} color="#4ade80" />
+                      <Shield size={17} color="#4ADE80" />
                     </div>
                   ) : (
                     <ConsistencyRing pct={s.consistency} color={gradeColor(s.consistency)} th={th} />
@@ -680,7 +680,7 @@ export function Constellation({
           {dayOfWeekData[worstDay].pct < dayOfWeekData[bestDay].pct && (
             <div style={{ display: "flex", justifyContent: "center", gap: 16, margin: "6px 0 2px" }}>
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 15, fontWeight: 800, fontFamily: "'Fraunces',serif", color: "#4caf50" }}>{dayOfWeekData[bestDay].name}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, fontFamily: "'Fraunces',serif", color: "#2E9E5B" }}>{dayOfWeekData[bestDay].name}</div>
                 <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".4px", textTransform: "uppercase" as const, color: th.label }}>Best · {dayOfWeekData[bestDay].pct}%</div>
               </div>
               <div style={{ width: 1, background: th.cardBorder }} />
@@ -696,7 +696,7 @@ export function Constellation({
               background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.1)",
               fontSize: 11, color: th.textSub, textAlign: "center",
             }}>
-              <span role="img" aria-label="lightbulb">💡</span> You tend to slip on <strong style={{ color: "#ef4444" }}>{dayOfWeekData[worstDay].name}s</strong> — plan ahead for that day
+              <span role="img" aria-label="lightbulb">💡</span> <strong style={{ color: "#2E9E5B" }}>{dayOfWeekData[worstDay].name}s</strong> are harder for you — a little extra care that day helps
             </div>
           )}
         </div>
@@ -714,7 +714,7 @@ export function Constellation({
             <defs>
               <filter id="cgl"><feGaussianBlur stdDeviation="2.5" /></filter>
               <radialGradient id="cbg" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#4ade80" stopOpacity="0.05" />
+                <stop offset="0%" stopColor="#4ADE80" stopOpacity="0.05" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
               {/* Each synergy line is a gradient between the two habits it connects —
@@ -804,7 +804,7 @@ export function Constellation({
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {longestQuitStreak.days > 0 && (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Shield size={14} color="#4ade80" />
+                <Shield size={14} color="#4ADE80" />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: th.text }}>
                     Longest quit streak: {longestQuitStreak.days} {longestQuitStreak.days === 1 ? "day" : "days"}
@@ -840,13 +840,13 @@ export function Constellation({
         return (
           <div className="cd" style={{ padding: 16, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <Heart size={15} color="#4caf50" />
+              <Heart size={15} color="#2E9E5B" />
               <span style={{ fontSize: 14, fontWeight: 700, color: th.text }}>Things you were grateful for</span>
               <span style={{ marginLeft: "auto", fontSize: 11, color: th.textMuted, fontWeight: 600 }}>{daysLogged} {daysLogged === 1 ? "day" : "days"} logged</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {recent.map((entry, i) => (
-                <div key={i} style={{ paddingLeft: 12, borderLeft: `2px solid rgba(76,175,80,0.4)` }}>
+                <div key={i} style={{ paddingLeft: 12, borderLeft: `2px solid rgba(46,158,91,0.4)` }}>
                   <div style={{ fontSize: 11, color: th.textMuted, fontWeight: 600, marginBottom: 3 }}>
                     {(() => { const d = new Date(entry.date + "T00:00:00"); return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }); })()}
                   </div>
@@ -882,20 +882,20 @@ export function Constellation({
           boxShadow: th.cardShadow,
           textAlign: "center",
         }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: th.text, marginBottom: 4 }}>
-            Unlock your full picture
+          <div style={{ fontFamily: "'Fraunces',serif", fontSize: 16, fontWeight: 600, color: th.text, marginBottom: 4 }}>
+            Go deeper with Tend+
           </div>
           <div style={{ fontSize: 12, color: th.textSub, lineHeight: 1.5, marginBottom: 6 }}>
-            See which days you slip, your all-time best streaks, full habit scoreboard, and synergy details.
+            Day-of-week patterns, best streaks, full scoreboard, and habit synergies — optional depth when you want it. Wellness stays free.
           </div>
           <div style={{
             display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6,
             marginBottom: 14, fontSize: 10, color: th.textMuted,
           }}>
-            {["Day-of-week analysis", "Best streaks", "Full scoreboard", "Synergy details"].map((f) => (
+            {["Day-of-week", "Best streaks", "Scoreboard", "Synergies"].map((f) => (
               <span key={f} style={{
                 padding: "3px 8px", borderRadius: 6,
-                background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.12)",
+                background: "rgba(46,158,91,0.08)", border: "1px solid rgba(46,158,91,0.14)",
                 fontWeight: 600,
               }}>
                 {f}
@@ -905,18 +905,19 @@ export function Constellation({
           <button
             onClick={() => onUpgrade?.()}
             style={{
-              background: "#4ade80",
-              color: "#0a0e18",
+              background: "linear-gradient(135deg, #2E9E5B, #1F7A46)",
+              color: "#fff",
               border: "none",
-              borderRadius: 10,
-              padding: "10px 24px",
+              borderRadius: 12,
+              padding: "11px 24px",
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
               fontFamily: "inherit",
+              boxShadow: "0 4px 14px rgba(46,158,91,0.28)",
             }}
           >
-            Unlock with Tend+
+            See Tend+
           </button>
         </div>
       )}
