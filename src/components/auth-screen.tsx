@@ -1,25 +1,84 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { useClerk } from "@clerk/nextjs";
 
 type Mode = "sign-in" | "sign-up";
+type Phase = "loading" | "mounted" | "stuck";
+
+const PORTAL_URL: Record<Mode, string> = {
+  "sign-in":
+    "https://accounts.hatchtend.com/sign-in?redirect_url=https%3A%2F%2Fwww.hatchtend.com%2Fgarden",
+  "sign-up":
+    "https://accounts.hatchtend.com/sign-up?redirect_url=https%3A%2F%2Fwww.hatchtend.com%2Fgarden",
+};
 
 /**
  * Branded shell around Clerk's SignIn/SignUp.
- * Always renders children — do NOT gate on ClerkLoading/ClerkLoaded (that pair
- * was leaving a header with zero form when clerk-js stalled or Account Portal
- * paths conflicted).
+ * Watches the DOM for the mounted Clerk card. If it never appears (~8s),
+ * shows on-page diagnostics + a guaranteed backup path via Clerk's hosted
+ * Account Portal, and reports what happened to /api/qa-log.
  */
 export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode }) {
-  const { loaded } = useClerk();
-  const [showHelp, setShowHelp] = useState(false);
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [diag, setDiag] = useState<string[]>([]);
+  const errorsRef = useRef<string[]>([]);
 
   useEffect(() => {
-    const id = window.setTimeout(() => setShowHelp(true), 6000);
-    return () => window.clearTimeout(id);
-  }, []);
+    const push = (s: string) => {
+      if (errorsRef.current.length < 12) errorsRef.current.push(s.slice(0, 200));
+    };
+    const onError = (e: Event) => {
+      const ee = e as ErrorEvent;
+      const t = e.target as (HTMLScriptElement & HTMLLinkElement) | null;
+      if (ee.message) push("js: " + ee.message);
+      else if (t && t.src) push("failed to load: " + t.src);
+      else if (t && t.href) push("failed to load: " + t.href);
+    };
+    const onReject = (e: PromiseRejectionEvent) => push("promise: " + String(e.reason));
+    window.addEventListener("error", onError, true);
+    window.addEventListener("unhandledrejection", onReject);
+
+    const start = Date.now();
+    const timer = window.setInterval(() => {
+      const mounted = document.querySelector(
+        "[class*='cl-rootBox'], [class*='cl-card'], [class*='cl-component']",
+      );
+      if (mounted) {
+        setPhase("mounted");
+        window.clearInterval(timer);
+        return;
+      }
+      if (Date.now() - start > 8000) {
+        window.clearInterval(timer);
+        const w = window as unknown as {
+          Clerk?: { status?: string; loaded?: boolean; version?: string };
+        };
+        const clerkLine = w.Clerk
+          ? "clerk-js: status=" + String(w.Clerk.status) + " loaded=" + String(w.Clerk.loaded) + " v=" + String(w.Clerk.version)
+          : "clerk-js: NEVER LOADED";
+        const lines = [clerkLine, ...errorsRef.current];
+        setDiag(lines);
+        setPhase("stuck");
+        fetch("/api/qa-log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            page: mode,
+            ua: navigator.userAgent,
+            cookiesEnabled: navigator.cookieEnabled,
+            lines,
+          }),
+        }).catch(() => {});
+      }
+    }, 400);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("error", onError, true);
+      window.removeEventListener("unhandledrejection", onReject);
+    };
+  }, [mode]);
 
   const title = mode === "sign-in" ? "Welcome back" : "Start your garden";
   const subtitle =
@@ -37,19 +96,36 @@ export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode
 
       <div style={{ width: "100%", maxWidth: 420 }}>{children}</div>
 
-      {!loaded && (
+      {phase === "loading" && (
         <p style={{ marginTop: 20, fontSize: 13, opacity: 0.55 }}>Loading secure sign-in…</p>
       )}
 
-      {showHelp && !loaded && (
-        <div style={help}>
-          <p style={{ margin: "0 0 8px", fontWeight: 600 }}>Still loading?</p>
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.45, opacity: 0.8 }}>
-            Hard-refresh (Ctrl+Shift+R) or try Incognito. In Clerk Dashboard open{" "}
-            <strong>Account Portal</strong> (left sidebar) — Sign-in / Sign-up URLs must be{" "}
-            <code>https://www.hatchtend.com/sign-in</code> and{" "}
-            <code>https://www.hatchtend.com/sign-up</code>, not accounts.hatchtend.com.
+      {phase === "stuck" && (
+        <div style={panel}>
+          <p style={{ margin: "0 0 6px", fontWeight: 600, fontSize: 15 }}>
+            The sign-in form could not load in this browser
           </p>
+          <p style={{ margin: "0 0 14px", fontSize: 13, opacity: 0.75, lineHeight: 1.5 }}>
+            No problem — use the backup sign-in below. It opens our secure account page and
+            brings you right back to your garden.
+          </p>
+          <a href={PORTAL_URL[mode]} style={btn}>
+            {mode === "sign-in" ? "Use backup sign-in" : "Use backup sign-up"}
+          </a>
+          <a
+            href={mode === "sign-in" ? "/sign-in" : "/sign-up"}
+            style={{ ...btn, background: "#fff", color: "#17301F", border: "1px solid #d8e8dc", marginTop: 8 }}
+          >
+            Retry this page
+          </a>
+          {diag.length > 0 && (
+            <details style={{ marginTop: 14, textAlign: "left" }}>
+              <summary style={{ fontSize: 12, opacity: 0.6, cursor: "pointer" }}>
+                Technical details
+              </summary>
+              <pre style={pre}>{diag.join("\n")}</pre>
+            </details>
+          )}
         </div>
       )}
     </main>
@@ -94,12 +170,35 @@ const sub: CSSProperties = {
   lineHeight: 1.45,
 };
 
-const help: CSSProperties = {
+const panel: CSSProperties = {
   marginTop: 24,
+  width: "100%",
   maxWidth: 420,
-  padding: "16px 18px",
-  borderRadius: 16,
+  padding: "20px 22px",
+  borderRadius: 20,
   background: "#fff",
   border: "1px solid #f0d8d8",
-  textAlign: "left",
+  textAlign: "center",
+};
+
+const btn: CSSProperties = {
+  display: "block",
+  padding: "13px 16px",
+  borderRadius: 14,
+  background: "#2E9E5B",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 14,
+  textDecoration: "none",
+};
+
+const pre: CSSProperties = {
+  marginTop: 8,
+  padding: "10px 12px",
+  borderRadius: 10,
+  background: "#f6f4ec",
+  fontSize: 11,
+  lineHeight: 1.5,
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-all",
 };

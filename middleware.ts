@@ -33,6 +33,7 @@ const isPublicRoute = createRouteMatcher([
   "/sitemap.xml",
   "/manifest.json",
   "/api/webhooks(.*)",
+  "/api/qa-log",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
