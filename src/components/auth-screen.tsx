@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import Link from "next/link";
 
 type Mode = "sign-in" | "sign-up";
-type Phase = "loading" | "mounted" | "stuck";
+type Phase = "loading" | "mounted" | "stuck" | "signedin";
 
 const PORTAL_URL: Record<Mode, string> = {
   "sign-in":
@@ -46,6 +46,14 @@ export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode
       );
       if (mounted) {
         setPhase("mounted");
+        window.clearInterval(timer);
+        return;
+      }
+      const cw = window as unknown as { Clerk?: { user?: unknown; loaded?: boolean } };
+      if (cw.Clerk?.loaded && cw.Clerk.user) {
+        // Already signed in: Clerk's form intentionally renders nothing here.
+        // Give the user a door instead of a blank card.
+        setPhase("signedin");
         window.clearInterval(timer);
         return;
       }
@@ -95,6 +103,20 @@ export function AuthScreen({ mode, children }: { mode: Mode; children: ReactNode
       <p style={sub}>{subtitle}</p>
 
       <div style={{ width: "100%", maxWidth: 420 }}>{children}</div>
+
+      {phase === "signedin" && (
+        <div style={panel}>
+          <p style={{ margin: "0 0 6px", fontWeight: 600, fontSize: 15 }}>
+            You are already signed in
+          </p>
+          <p style={{ margin: "0 0 14px", fontSize: 13, opacity: 0.75, lineHeight: 1.5 }}>
+            Your dragons are waiting.
+          </p>
+          <a href="/garden" style={btn}>
+            Enter your garden
+          </a>
+        </div>
+      )}
 
       {phase === "loading" && (
         <p style={{ marginTop: 20, fontSize: 13, opacity: 0.55 }}>Loading secure sign-in…</p>
