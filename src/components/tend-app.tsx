@@ -45,7 +45,9 @@ import { TodayCard, type TodayCardData } from "@/components/today-card";
 import { EggPicker } from "@/components/egg-picker";
 import { getStage, getIcon, today, daysAgo, fmtDuration, fmtMoney, fmtQuitDate, haptic, getGreeting, formatLiveTimer, clickable } from "@/lib/utils";
 import { computeStreak, computeGraceActive, computeBestStreak } from "@/lib/streak";
-import { selectNewMilestones, selectNewCoinTiers } from "@/lib/progress";
+import { selectNewMilestones, selectNewCoinTiers, computeDayOfWeekRates } from "@/lib/progress";
+import { buildCoachNote } from "@/lib/coach";
+import { DailyCoach } from "@/components/daily-coach";
 import { computeCleanDays, computeMoneySaved, computeTotalSaved, computeQuitBest, computeQuitStage } from "@/lib/quit";
 import {
   MILESTONES, STAGE_LABELS, STAGE_THRESHOLDS,
@@ -711,6 +713,72 @@ export function TendApp({
   const totalToday = activeHabits.filter((h) => isHappy(h.id)).length;
   const todayPct = activeHabits.length ? totalToday / activeHabits.length : 0;
   const allDone = todayPct >= 1 && activeHabits.length > 0;
+
+  // ── Coach's note — the one personal, data-driven line for today ──
+  // Assembles live state into the pure rule engine (lib/coach.ts). Memoized on
+  // the same inputs the rules read so the note is stable within a render pass.
+  const coachNote = useMemo(() => {
+    if (habits.length === 0) return null;
+    const buildHabits = habits.filter((h) => h.category !== "quit");
+
+    // Global day-of-week success rates (same kernel + window as Insights)
+    const last30 = Array.from({ length: 30 }, (_, i) => daysAgo(i));
+    const dayRates = buildHabits.length > 0
+      ? computeDayOfWeekRates(
+          last30,
+          buildHabits.map((h) => ({ id: h.id, startDate: h.created_at.slice(0, 10) })),
+          isComplete,
+          (d) => new Date(d + "T12:00:00").getDay(),
+        )
+      : null;
+
+    // This week vs last week, same math as the Insights momentum curve
+    const weekPct = (offset: number) => {
+      let done = 0, total = 0;
+      for (let d = offset * 7 + 6; d >= offset * 7; d--) {
+        const date = daysAgo(d);
+        habits.forEach((h) => {
+          if (h.category === "quit") {
+            if (getCleanDays(h.id) > d) done++;
+          } else if (isComplete(h.id, date)) done++;
+          total++;
+        });
+      }
+      return total > 0 ? Math.round((done / total) * 100) : 0;
+    };
+
+    return buildCoachNote({
+      todayStr,
+      yesterdayStr: daysAgo(1),
+      weekday: new Date().getDay(),
+      habits: habits.map((h) => {
+        const quit = h.category === "quit";
+        let daysSinceDone: number | null = null;
+        if (!quit) {
+          for (let n = 0; n <= 30; n++) {
+            if (isComplete(h.id, daysAgo(n))) { daysSinceDone = n; break; }
+          }
+        }
+        return {
+          id: h.id,
+          name: h.name,
+          petName: h.creature_name,
+          isQuit: quit,
+          paused: !!pausedHabits[h.id],
+          streak: quit ? getCleanDays(h.id) : getStreak(h.id),
+          bestStreak: getBestStreak(h.id),
+          doneToday: !quit && isComplete(h.id, todayStr),
+          daysSinceDone,
+          urgeDates: quitDataMap[h.id]?.urges || [],
+        };
+      }),
+      thisWeekPct: weekPct(0),
+      lastWeekPct: weekPct(1),
+      dayRates,
+      allDoneToday: allDone,
+    }, MILESTONES);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habits, isComplete, getStreak, getCleanDays, getBestStreak, quitDataMap, pausedHabits, allDone, todayStr]);
 
   // ── Shareable "Today" card data (whole-garden daily snapshot) ──
   // Featured dragon = the habit with the longest current streak (clean days for
@@ -2051,6 +2119,9 @@ export function TendApp({
               </div>
             )}
 
+            {/* Coach's note — one personal, data-driven line for today */}
+            {coachNote && <DailyCoach note={coachNote} th={th} />}
+
             {/* Today's habits */}
             <div className="cd" style={{
               padding: "10px 4px", marginTop: 12,
@@ -3053,7 +3124,7 @@ export function TendApp({
             {habits.length > 0 && (
               <MultiHabitHeatmap habits={habits} isDone={isComplete} getCleanDays={getCleanDays} th={th} />
             )}
-            <Constellation habits={habits} isDone={isComplete} getStreak={getStreak} getTotal={getTotal} getCleanDays={getCleanDays} getBestStreak={getBestStreak} getStage={getStageForId} th={th} isPro={isTendPlus()} onUpgrade={() => setShowPaywall(true)} gratitudeLog={gratitudeLog} />
+            <Constellation habits={habits} isDone={isComplete} getStreak={getStreak} getTotal={getTotal} getCleanDays={getCleanDays} getBestStreak={getBestStreak} getStage={getStageForId} getUrgeDates={(id) => quitDataMap[id]?.urges || []} th={th} isPro={isTendPlus()} onUpgrade={() => setShowPaywall(true)} gratitudeLog={gratitudeLog} />
           </div>
         )}
 

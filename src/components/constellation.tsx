@@ -20,6 +20,8 @@ interface ConstellationProps {
   getCleanDays?: (id: string) => number;
   getBestStreak?: (id: string) => number;
   getStage?: (id: string) => number;
+  /** ISO dates (YYYY-MM-DD) urges were survived, per quit habit */
+  getUrgeDates?: (id: string) => string[];
   isPro?: boolean;
   onUpgrade?: () => void;
   th: ThemeColors;
@@ -156,7 +158,7 @@ function PolarDays({
 
 export function Constellation({
   habits, isDone, getStreak, getTotal, getCleanDays, getBestStreak, getStage,
-  isPro, onUpgrade, th, gratitudeLog,
+  getUrgeDates, isPro, onUpgrade, th, gratitudeLog,
 }: ConstellationProps) {
   // SVG SMIL isn't stopped by the global reduced-motion CSS rule, so gate the synergy-line pulse manually.
   const prefersReducedMotion = useReducedMotion();
@@ -312,6 +314,26 @@ export function Constellation({
   const bestBuildName = buildHabits.find((h) =>
     (getBestStreak ? getBestStreak(h.id) : getStreak(h.id)) === bestBuildStreak
   )?.name || "";
+
+  // ── Urges survived (quit habits) ──
+  // Every logged urge is a moment the user chose themselves over the habit —
+  // the most invisible work in the whole app, surfaced. Free for everyone:
+  // the emotional core is never paywalled.
+  const urgeStats = useMemo(() => {
+    if (!getUrgeDates || quitHabits.length === 0) return null;
+    const weekFloor = daysAgo(6);
+    const perHabit = quitHabits
+      .map((h) => {
+        const dates = getUrgeDates(h.id);
+        return { habit: h, count: dates.length, thisWeek: dates.filter((d) => d >= weekFloor).length };
+      })
+      .filter((r) => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+    const total = perHabit.reduce((s, r) => s + r.count, 0);
+    if (total === 0) return null;
+    return { perHabit, total, thisWeek: perHabit.reduce((s, r) => s + r.thisWeek, 0) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habits, getUrgeDates]);
 
   // ── Calm advice ──
   const getAdvice = (): string => {
@@ -830,6 +852,43 @@ export function Constellation({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ── 6a. Urges survived (FREE) — the invisible work, made visible ── */}
+      {urgeStats && (
+        <div className="cd" style={{ padding: 16, marginBottom: 10, background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow }}>
+          <div className="lb" style={{ marginBottom: 12, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
+            <Shield size={10} /> Urges survived
+            {urgeStats.thisWeek > 0 && (
+              <span style={{
+                marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0, textTransform: "none",
+                padding: "2px 8px", borderRadius: 999, color: "#4ADE80", background: "rgba(74,222,128,0.12)",
+              }}>
+                {urgeStats.thisWeek} this week
+              </span>
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: urgeStats.perHabit.length > 1 ? 12 : 0 }}>
+            <div style={{ fontSize: 34, fontWeight: 800, fontFamily: "'Fraunces',serif", lineHeight: 1, color: "#4ADE80" }}>
+              {urgeStats.total}
+            </div>
+            <div style={{ fontSize: 12, color: th.textSub, lineHeight: 1.45 }}>
+              {urgeStats.total === 1 ? "urge ridden out without giving in" : "urges ridden out without giving in"}.
+              Every one was a moment you chose yourself.
+            </div>
+          </div>
+          {urgeStats.perHabit.length > 1 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              {urgeStats.perHabit.map(({ habit: h, count }) => (
+                <div key={h.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", borderRadius: 8, background: th.hoverBg }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: h.color }} />
+                  <div style={{ flex: 1, fontSize: 11.5, color: th.text, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.name}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: th.textSub }}>{count}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
