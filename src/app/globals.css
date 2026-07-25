@@ -254,6 +254,17 @@
     60% { transform: rotateY(540deg) scale(1); }
     100% { transform: rotateY(720deg) scale(1); }
   }
+  /* Dragon cradle: hearts float up when you pet your dragon */
+  @keyframes cradleHeart {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); }
+    20% { opacity: 0.9; transform: translateY(-14px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-58px) scale(0.85); }
+  }
+  /* Dragon cradle: hanging star charm sways gently */
+  @keyframes cradleSway {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
 }
 
 body {

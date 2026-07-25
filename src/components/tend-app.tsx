@@ -10,7 +10,7 @@ import {
   Share2,
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { Creature } from "@/components/creature";
+import { DragonCradle } from "@/components/dragon-cradle";
 import { TerrariumScene } from "@/components/terrarium-scene";
 import { Heatmap } from "@/components/heatmap";
 import { Confetti } from "@/components/confetti";
@@ -2461,25 +2461,17 @@ export function TendApp({
                 position: "relative", overflow: "hidden",
               }}
             >
-              {/* Vignette glow behind creature */}
-              <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: 200,
-                background: `radial-gradient(circle at 50% 40%, ${detailHabit.color}22 0%, transparent 70%)`,
-                pointerEvents: "none",
-              }} />
-
-              {/* Single hero creature — 140px, centered */}
-              <div style={{ position: "relative", zIndex: 1 }}>
-                {dq ? (
-                  // Use the shared stage function (STAGE_THRESHOLDS 0/3/7/14/30 + the
-                  // self-healing computeQuitStage floor) so the hero matches its own
-                  // "Quitting · <stage label>" caption and every other quit surface —
-                  // a raw Math.floor(cleanD/7) disagreed with all of them.
-                  <Creature stage={getStageForId(detailHabit.id)} color={detailHabit.color} happy={cleanD > 0} size={140} creatureType={detailHabit.creature_type} habitId={detailHabit.id} />
-                ) : (
-                  <Creature stage={getStageForId(detailHabit.id)} color={detailHabit.color} happy={isHappy(detailHabit.id)} size={140} creatureType={detailHabit.creature_type} habitId={detailHabit.id} />
-                )}
-              </div>
+              {/* The Dragon Cradle — the companion's home scene. Uses the shared
+                  stage function (STAGE_THRESHOLDS + computeQuitStage floor) so the
+                  hero matches its own "Quitting · <stage>" caption everywhere. */}
+              <DragonCradle
+                habit={detailHabit}
+                stage={getStageForId(detailHabit.id)}
+                tendedToday={dq ? cleanD > 0 : isHappy(detailHabit.id)}
+                streak={dq ? cleanD : getStreak(detailHabit.id)}
+                darkMode={darkMode}
+                th={th}
+              />
 
               {editMode ? (
                 <div style={{ marginTop: 8, maxWidth: 260, margin: "8px auto 0" }}>
@@ -2530,7 +2522,7 @@ export function TendApp({
                       fontFamily: "'Fraunces', serif",
                       fontSize: 24,
                       fontWeight: 700,
-                      color: "white",
+                      color: th.text,
                       marginTop: 8,
                       letterSpacing: "-0.3px",
                     }}>
@@ -2592,9 +2584,9 @@ export function TendApp({
                       }}
                       style={{
                         marginTop: 6, padding: "5px 14px", borderRadius: 100,
-                        background: isTendPlus() ? `${detailHabit.color}15` : "rgba(255,255,255,0.04)",
-                        border: `1px solid ${isTendPlus() ? `${detailHabit.color}25` : "rgba(255,255,255,0.08)"}`,
-                        color: isTendPlus() ? detailHabit.color : "rgba(255,255,255,0.4)",
+                        background: isTendPlus() ? `${detailHabit.color}15` : th.progressBg,
+                        border: `1px solid ${isTendPlus() ? `${detailHabit.color}25` : th.cardBorder}`,
+                        color: isTendPlus() ? detailHabit.color : th.textMuted,
                         fontSize: 11, fontWeight: 600,
                         cursor: "pointer", fontFamily: "inherit",
                         display: "flex", alignItems: "center", gap: 4,
@@ -2615,33 +2607,33 @@ export function TendApp({
                 <div style={{ marginTop: 14 }}>
                   {cleanD === 0 && timer && timer.totalHours >= 1 ? (
                     <>
-                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: "white", letterSpacing: "-1px", lineHeight: 1 }}>
+                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: th.text, letterSpacing: "-1px", lineHeight: 1 }}>
                         {timer.totalHours}
                       </div>
-                      <div style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", fontWeight: 500, marginTop: 2 }}>
+                      <div style={{ fontSize: 14, color: th.textSub, fontWeight: 500, marginTop: 2 }}>
                         {timer.totalHours === 1 ? "hour clean" : "hours clean"}
                       </div>
                       <div style={{
-                        fontSize: 14, color: "rgba(255,255,255,0.3)", fontWeight: 500, marginTop: 4,
+                        fontSize: 14, color: th.textMuted, fontWeight: 500, marginTop: 4,
                         animation: "livePulse 4s ease infinite",
                       }}>
                         {timer.totalHours}h {timer.minutes}m
                       </div>
                       {dqd?.quitDate && (
-                        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>
+                        <div style={{ fontSize: 12, color: th.textFaint, marginTop: 4 }}>
                           {fmtQuitDate(dqd.quitDate)}
                         </div>
                       )}
                     </>
                   ) : cleanD === 0 && timer ? (
                     <>
-                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: "white", letterSpacing: "-1px", lineHeight: 1 }}>
+                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: th.text, letterSpacing: "-1px", lineHeight: 1 }}>
                         {timer.minutes}
                       </div>
-                      <div style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", fontWeight: 500, marginTop: 2 }}>
+                      <div style={{ fontSize: 14, color: th.textSub, fontWeight: 500, marginTop: 2 }}>
                         {timer.minutes === 1 ? "minute clean" : "minutes clean"}
                       </div>
-                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 500, marginTop: 4, fontStyle: "italic" }}>
+                      <div style={{ fontSize: 12, color: th.textMuted, fontWeight: 500, marginTop: 4, fontStyle: "italic" }}>
                         you got this
                       </div>
                     </>
@@ -2650,21 +2642,21 @@ export function TendApp({
                       <div style={{ fontFamily: "'Fraunces',serif", fontSize: 28, fontWeight: 600, color: detailHabit.color, lineHeight: 1.2 }}>
                         Just started
                       </div>
-                      <div style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 500, marginTop: 4 }}>
+                      <div style={{ fontSize: 12, color: th.textMuted, fontWeight: 500, marginTop: 4 }}>
                         you got this
                       </div>
                     </>
                   ) : (
                     <>
-                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: "white", letterSpacing: "-1px", lineHeight: 1 }}>
+                      <div style={{ fontFamily: "'Fraunces',serif", fontSize: 56, fontWeight: 700, color: th.text, letterSpacing: "-1px", lineHeight: 1 }}>
                         {cleanD}
                       </div>
-                      <div style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", fontWeight: 500, marginTop: 2 }}>
+                      <div style={{ fontSize: 14, color: th.textSub, fontWeight: 500, marginTop: 2 }}>
                         {cleanD === 1 ? "day clean" : "days clean"}
                       </div>
                       {timer && (
                         <div style={{
-                          fontSize: 14, color: "rgba(255,255,255,0.3)", fontWeight: 500, marginTop: 4,
+                          fontSize: 14, color: th.textMuted, fontWeight: 500, marginTop: 4,
                           animation: "livePulse 4s ease infinite",
                         }}>
                           {timer.totalHours.toLocaleString()} hours · {timer.minutes} minutes
@@ -2747,7 +2739,7 @@ export function TendApp({
               onClick={() => togglePause(detailHabit.id)}
               style={{
                 width: "100%", padding: "12px 16px", borderRadius: 12, marginBottom: 10,
-                border: `1px solid ${pausedHabits[detailHabit.id] ? "rgba(74,222,128,0.2)" : "rgba(255,255,255,0.08)"}`,
+                border: `1px solid ${pausedHabits[detailHabit.id] ? "rgba(74,222,128,0.2)" : th.cardBorder}`,
                 background: "transparent", cursor: "pointer", fontFamily: "inherit",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 fontSize: 14, fontWeight: 500,
