@@ -101,8 +101,11 @@ export const BRAND = {
   cream: "#FBFAF5",
   amber: "#F5A623",
   amberDeep: "#E08A00",
-  forestNight: "#0B1510",
-  forestCard: "#122019",
+  /** Dark mode surfaces — TRUE-BLACK night sky, not forest green.
+      A whisper of blue keeps pure black from feeling flat; green lives only
+      in accents. (The old #0B1510/#122019 tinted the whole app green.) */
+  night: "#08080C",
+  nightCard: "#111118",
 } as const;
 
 /* ═══════════ THEME ═══════════ */
@@ -151,14 +154,14 @@ export const THEME: Record<"light" | "dark", ThemeColors> = {
     accent: BRAND.green, accentDeep: BRAND.greenDeep,
   },
   dark: {
-    bg: BRAND.forestNight, card: BRAND.forestCard, cardBorder: "rgba(234,247,238,0.08)",
-    cardShadow: "0 1px 3px rgba(0,0,0,0.35),0 4px 16px rgba(0,0,0,0.25)",
-    text: "#EAF7EE", textSub: "rgba(234,247,238,.62)", textMuted: "rgba(234,247,238,.42)", textFaint: "rgba(234,247,238,.22)",
-    label: "rgba(234,247,238,.55)", hoverBg: "rgba(74,222,128,.06)", inputBg: "#0E1A14", inputBorder: "rgba(234,247,238,.10)",
-    checkBorder: "rgba(234,247,238,.14)", progressBg: "rgba(234,247,238,.08)", overlayBg: "rgba(0,0,0,.55)",
-    modalBg: BRAND.forestCard, dangerBg: "rgba(239,68,68,.10)", dangerBorder: "rgba(239,68,68,.22)",
-    streakBg: "rgba(234,247,238,.04)", streakActiveBg: "rgba(245,166,35,.14)", coinBg: "rgba(245,166,35,.12)",
-    freezeBtnBg: "rgba(74,222,128,.10)", freezeBtnOff: "rgba(234,247,238,.04)", heatEmpty: "rgba(234,247,238,0.05)",
+    bg: BRAND.night, card: BRAND.nightCard, cardBorder: "rgba(240,240,248,0.08)",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.3)",
+    text: "#F2F2F7", textSub: "rgba(240,240,248,.6)", textMuted: "rgba(240,240,248,.4)", textFaint: "rgba(240,240,248,.22)",
+    label: "rgba(240,240,248,.5)", hoverBg: "rgba(255,255,255,.05)", inputBg: "#0C0C12", inputBorder: "rgba(240,240,248,.10)",
+    checkBorder: "rgba(240,240,248,.14)", progressBg: "rgba(240,240,248,.08)", overlayBg: "rgba(0,0,0,.6)",
+    modalBg: BRAND.nightCard, dangerBg: "rgba(239,68,68,.10)", dangerBorder: "rgba(239,68,68,.22)",
+    streakBg: "rgba(240,240,248,.04)", streakActiveBg: "rgba(245,166,35,.14)", coinBg: "rgba(245,166,35,.12)",
+    freezeBtnBg: "rgba(74,222,128,.10)", freezeBtnOff: "rgba(240,240,248,.04)", heatEmpty: "rgba(240,240,248,0.06)",
     glassHighlight: "rgba(255,255,255,0.06)",
     accent: BRAND.greenBright, accentDeep: BRAND.green,
   },

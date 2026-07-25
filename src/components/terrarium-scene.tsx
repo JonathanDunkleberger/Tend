@@ -133,11 +133,13 @@ export function TerrariumScene({
 
   // Sky gradient based on season — night (starry space) and day (airy, soft)
   // palettes. Array order: [outer edge, mid, center].
+  // Night skies sit on a true-black app background now, so they stay near
+  // black with only a faint seasonal hue (violet/blue/ember/ice).
   const nightSkyColors: Record<string, string[]> = {
-    spring: ["#1a1030", "#2a1848", "#3a2060"],
-    summer: ["#0a1628", "#0f1e3a", "#142850"],
-    autumn: ["#1a1018", "#2a1820", "#3a2028"],
-    winter: ["#0e1520", "#141e2e", "#1a2838"],
+    spring: ["#0A0812", "#141024", "#1E1836"],
+    summer: ["#06080E", "#0C1220", "#121B30"],
+    autumn: ["#0D0909", "#181013", "#22161A"],
+    winter: ["#070A0F", "#0E141C", "#151F2A"],
   };
   const daySkyColors: Record<string, string[]> = {
     spring: ["#C9E2F6", "#E0EFFA", "#F2F9FF"],

@@ -487,7 +487,7 @@ function CalmMode({ onBack }: { onBack: () => void }) {
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 200, overflow: "hidden",
-        background: "radial-gradient(140% 100% at 50% 0%, #122019 0%, #0B1510 45%, #060E0A 100%)",
+        background: "radial-gradient(140% 100% at 50% 0%, #14141E 0%, #0A0A12 45%, #050508 100%)",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         animation: "fadeIn 0.6s ease",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -534,7 +534,7 @@ function CalmMode({ onBack }: { onBack: () => void }) {
         <div
           style={{
             position: "relative", width: 120, height: 120, borderRadius: "50%",
-            background: "radial-gradient(circle at 38% 32%, #EAF7EE, #8FCF9E 60%, #2E9E5B)",
+            background: "radial-gradient(circle at 38% 32%, #FFFDE8, #EAE2C8 60%, #C9BFA0)",
             transform: `scale(${scale})`, transition: "transform 0.12s linear",
             boxShadow: "0 0 60px rgba(46,158,91,0.45)",
             display: "flex", alignItems: "center", justifyContent: "center",

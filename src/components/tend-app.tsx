@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { DragonCradle } from "@/components/dragon-cradle";
+import { NightSky } from "@/components/night-sky";
 import { TerrariumScene } from "@/components/terrarium-scene";
 import { Heatmap } from "@/components/heatmap";
 import { Confetti } from "@/components/confetti";
@@ -1458,6 +1459,8 @@ export function TendApp({
       color: th.text,
       transition: "background .4s, color .4s",
     }}>
+      {/* Ambient constellation sky behind everything in dark mode */}
+      {darkMode && <NightSky />}
       {/* Onboarding flow */}
       {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
 
@@ -1750,10 +1753,10 @@ export function TendApp({
         />
       )}
 
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "0 14px 90px" }} key={page} >
+      <div style={{ maxWidth: 520, margin: "0 auto", padding: "0 14px 90px", position: "relative", zIndex: 1 }} key={page} >
         <div style={{ animation: pageAnim || undefined }}>
         {/* HEADER */}
-        <div style={{ ...fs, padding: "14px 2px 8px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50, background: th.bg, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div style={{ ...fs, padding: "14px 2px 8px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50, background: darkMode ? "rgba(8,8,12,0.72)" : "rgba(251,250,245,0.8)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           {page !== "main" ? (
             <button
               onClick={() => { setPage("main"); setDetailId(null); setEditMode(false); }}
@@ -2421,7 +2424,7 @@ export function TendApp({
                   style={{
                     marginTop: 12, padding: "16px 16px 14px", borderRadius: 18,
                     background: darkMode
-                      ? "linear-gradient(145deg, rgba(46,158,91,0.10), rgba(18,32,25,0.6))"
+                      ? "linear-gradient(145deg, rgba(46,158,91,0.07), rgba(17,17,24,0.6))"
                       : "linear-gradient(145deg, rgba(46,158,91,0.08), rgba(245,166,35,0.05))",
                     border: `1px solid ${th.cardBorder}`,
                   }}

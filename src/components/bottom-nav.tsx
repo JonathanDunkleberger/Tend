@@ -55,7 +55,7 @@ export function BottomNav({ active, onNavigate, th, darkMode, youBadge }: Bottom
           gap: 2,
           padding: "6px 8px",
           paddingBottom: "calc(6px + env(safe-area-inset-bottom, 0px))",
-          background: darkMode ? "rgba(11,21,16,0.88)" : "rgba(251,250,245,0.88)",
+          background: darkMode ? "rgba(8,8,12,0.85)" : "rgba(251,250,245,0.88)",
           backdropFilter: "blur(18px) saturate(1.3)",
           WebkitBackdropFilter: "blur(18px) saturate(1.3)",
           borderTop: `1px solid ${th.cardBorder}`,
@@ -123,7 +123,7 @@ export function BottomNav({ active, onNavigate, th, darkMode, youBadge }: Bottom
                       height: 7,
                       borderRadius: 100,
                       background: BRAND.amber,
-                      boxShadow: `0 0 0 2px ${darkMode ? BRAND.forestNight : BRAND.cream}`,
+                      boxShadow: `0 0 0 2px ${darkMode ? BRAND.night : BRAND.cream}`,
                     }}
                   />
                 )}

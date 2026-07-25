@@ -190,7 +190,7 @@ export function YouScreen({
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: th.text }}>Dark mode</span>
             <span style={{ display: "block", fontSize: 12, color: th.textMuted }}>
-              {darkMode ? "Starlit forest night" : "Off — airy daylight garden"}
+              {darkMode ? "On — true-black constellation sky" : "Off — airy daylight garden"}
             </span>
           </span>
           <span style={{

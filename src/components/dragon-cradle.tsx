@@ -78,10 +78,10 @@ export function DragonCradle({ habit, stage, tendedToday, streak, darkMode, th }
   };
 
   const skyBg = night
-    ? "radial-gradient(ellipse at 50% 30%, #16281e 0%, #0d1a12 70%)"
+    ? "radial-gradient(ellipse at 50% 30%, #14141F 0%, #08080E 70%)"
     : "radial-gradient(ellipse at 50% 25%, #F0FAFF 0%, #DDF1FA 55%, #CBE8F6 100%)";
-  const moundFill = night ? "#1d3526" : "#7ABF5E";
-  const moundShade = night ? "#16291d" : "#69AF4E";
+  const moundFill = night ? "#1A241C" : "#7ABF5E";
+  const moundShade = night ? "#131B15" : "#69AF4E";
   const nestDark = night ? "#4a3620" : "#7A5C36";
   const nestMid = night ? "#5d472c" : "#96754A";
   const nestLight = night ? "#75593a" : "#B08F60";
@@ -153,7 +153,7 @@ export function DragonCradle({ habit, stage, tendedToday, streak, darkMode, th }
           <ellipse cx="160" cy="234" rx="185" ry="60" fill={moundFill} />
           {/* Grass tufts */}
           {[[52, 186], [96, 178], [232, 179], [270, 188], [130, 174], [196, 175]].map(([x, y], i) => (
-            <g key={i} stroke={night ? "#2c4a35" : "#5CA83E"} strokeWidth="1.6" strokeLinecap="round">
+            <g key={i} stroke={night ? "#28382C" : "#5CA83E"} strokeWidth="1.6" strokeLinecap="round">
               <line x1={x} y1={y} x2={x - 3} y2={y - 7} />
               <line x1={x} y1={y} x2={x} y2={y - 9} />
               <line x1={x} y1={y} x2={x + 3} y2={y - 7} />
