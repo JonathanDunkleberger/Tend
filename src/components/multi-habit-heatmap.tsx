@@ -43,8 +43,7 @@ export function MultiHabitHeatmap({ habits, isDone, getCleanDays, th }: MultiHab
         days.push({ date, done, isToday, isFuture });
       }
 
-      const abbr = h.name.length > 5 ? h.name.slice(0, 5) : h.name;
-      return { habit: h, days, abbr };
+      return { habit: h, days };
     });
   }, [habits, isDone, getCleanDays, totalDays]);
 
@@ -63,29 +62,34 @@ export function MultiHabitHeatmap({ habits, isDone, getCleanDays, th }: MultiHab
     }}>
       <div style={{
         fontSize: 10, fontWeight: 700, letterSpacing: 0.8,
-        textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)",
+        textTransform: "uppercase" as const, color: th.label,
         marginBottom: 10, paddingLeft: 2,
+        display: "flex", justifyContent: "space-between", alignItems: "baseline",
       }}>
-        All Habits
+        <span>All Habits</span>
+        <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: 0.3, textTransform: "none", color: th.textFaint }}>
+          last 12 weeks · today →
+        </span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {rows.map(({ habit, days, abbr }) => {
+        {rows.map(({ habit, days }) => {
           const { r, g, b } = cr(habit.color);
           return (
             <div key={habit.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {/* Label */}
+              {/* Label — full name (ellipsized), readable theme text instead of
+                  tinted 5-char stumps like "Nicot" / "Hydra" */}
               <div style={{
-                width: 40, flexShrink: 0, display: "flex", alignItems: "center", gap: 4,
+                width: 64, flexShrink: 0, display: "flex", alignItems: "center", gap: 5,
               }}>
                 <div style={{
                   width: 5, height: 5, borderRadius: "50%",
                   background: habit.color, flexShrink: 0,
                 }} />
                 <div style={{
-                  fontSize: 9, fontWeight: 600, color: habit.color,
-                  lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  fontSize: 10, fontWeight: 600, color: th.textSub,
+                  lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
-                  {abbr}
+                  {habit.name}
                 </div>
               </div>
               {/* Horizontal grid: oldest → today (left → right) */}

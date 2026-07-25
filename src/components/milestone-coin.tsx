@@ -43,6 +43,8 @@ interface MilestoneCoinProps {
 export function MilestoneCoin({ tier, size = 32, earned = true, glow = false, style }: MilestoneCoinProps) {
   const r = size / 2;
   const fontSize = size < 20 ? 5 : size < 30 ? 7 : size < 44 ? 9 : 12;
+  const uid = `${tier.key}-${size}`;
+  const tickCount = 28; // reeded edge, like a real sobriety chip
 
   return (
     <svg
@@ -50,45 +52,77 @@ export function MilestoneCoin({ tier, size = 32, earned = true, glow = false, st
       height={size}
       viewBox={`0 0 ${size} ${size}`}
       style={{
-        filter: glow ? `drop-shadow(0 0 ${size * 0.2}px ${tier.color}80)` : undefined,
-        opacity: earned ? 1 : 0.2,
+        filter: earned
+          ? (glow ? `drop-shadow(0 0 ${size * 0.2}px ${tier.color}80)` : `drop-shadow(0 1px 2px rgba(23,48,31,0.18))`)
+          : "grayscale(1)",
+        opacity: earned ? 1 : 0.28,
         animation: glow ? "coinGlow 2s ease-in-out infinite" : undefined,
         ...style,
       }}
     >
       <defs>
-        <radialGradient id={`cg-${tier.key}-${size}`} cx="35%" cy="30%" r="65%">
+        <radialGradient id={`cg-${uid}`} cx="35%" cy="28%" r="72%">
           <stop offset="0%" stopColor={tier.metallic} />
-          <stop offset="100%" stopColor={tier.color} />
+          <stop offset="70%" stopColor={tier.color} />
+          <stop offset="100%" stopColor={tier.rim} />
         </radialGradient>
+        <linearGradient id={`cr-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={tier.metallic} />
+          <stop offset="45%" stopColor={tier.rim} />
+          <stop offset="100%" stopColor={tier.color} />
+        </linearGradient>
       </defs>
-      {/* Outer rim */}
-      <circle cx={r} cy={r} r={r - 1} fill={tier.rim} />
+      {/* Outer rim — metallic gradient instead of flat color */}
+      <circle cx={r} cy={r} r={r - 0.5} fill={`url(#cr-${uid})`} />
+      {/* Reeded edge ticks */}
+      {Array.from({ length: tickCount }).map((_, i) => {
+        const a = (i * 360 / tickCount) * Math.PI / 180;
+        return (
+          <line
+            key={i}
+            x1={r + (r - 0.5) * Math.cos(a)}
+            y1={r + (r - 0.5) * Math.sin(a)}
+            x2={r + (r - size * 0.07) * Math.cos(a)}
+            y2={r + (r - size * 0.07) * Math.sin(a)}
+            stroke={tier.metallic}
+            strokeWidth={size * 0.015}
+            opacity={0.55}
+          />
+        );
+      })}
       {/* Inner face with gradient */}
-      <circle cx={r} cy={r} r={r - size * 0.1} fill={`url(#cg-${tier.key}-${size})`} />
-      {/* Inner ring detail */}
-      <circle cx={r} cy={r} r={r - size * 0.18} fill="none" stroke={tier.rim} strokeWidth={0.5} opacity={0.4} />
-      {/* Triangle / star notches around rim */}
-      {[0, 60, 120, 180, 240, 300].map((deg) => (
-        <circle
-          key={deg}
-          cx={r + (r - size * 0.06) * Math.cos((deg * Math.PI) / 180)}
-          cy={r + (r - size * 0.06) * Math.sin((deg * Math.PI) / 180)}
-          r={size * 0.02}
-          fill={tier.metallic}
-          opacity={0.6}
-        />
-      ))}
-      {/* Symbol text */}
+      <circle cx={r} cy={r} r={r - size * 0.1} fill={`url(#cg-${uid})`} />
+      {/* Double embossed inner ring */}
+      <circle cx={r} cy={r} r={r - size * 0.16} fill="none" stroke={tier.rim} strokeWidth={size * 0.014} opacity={0.5} />
+      <circle cx={r} cy={r} r={r - size * 0.2} fill="none" stroke={tier.metallic} strokeWidth={size * 0.01} opacity={0.45} />
+      {/* Shine sweep — soft highlight across the upper left */}
+      <ellipse
+        cx={r - size * 0.14} cy={r - size * 0.18}
+        rx={size * 0.3} ry={size * 0.16}
+        fill="white" opacity={0.16}
+        transform={`rotate(-28 ${r - size * 0.14} ${r - size * 0.18})`}
+      />
+      {/* Symbol text — embossed: light offset under dark face text */}
       <text
         x={r}
-        y={r + fontSize * 0.35}
+        y={r + fontSize * 0.38}
+        textAnchor="middle"
+        fill={tier.metallic}
+        fontSize={fontSize}
+        fontWeight={800}
+        fontFamily="'Fraunces', serif"
+        opacity={0.55}
+      >
+        {tier.symbol}
+      </text>
+      <text
+        x={r}
+        y={r + fontSize * 0.3}
         textAnchor="middle"
         fill={tier.rim}
         fontSize={fontSize}
         fontWeight={800}
         fontFamily="'Fraunces', serif"
-        opacity={0.9}
       >
         {tier.symbol}
       </text>
@@ -120,21 +154,22 @@ export function CoinRow({ earnedCoins, isQuit }: CoinRowProps) {
         const isEarned = earnedCoins.includes(c.key);
         const isLatest = i === latestIdx;
         return (
-          <div key={c.key} style={{ position: "relative", flexShrink: 0 }}>
+          <div key={c.key} style={{ position: "relative", flexShrink: 0, textAlign: "center" }}>
             <MilestoneCoin
               tier={c}
               size={isLatest ? 48 : 40}
               earned={isEarned}
               glow={isLatest}
             />
-            {isEarned && (
-              <div style={{
-                fontSize: 7, textAlign: "center", color: c.color,
-                fontWeight: 700, marginTop: 1, opacity: 0.8,
-              }}>
-                {c.label}
-              </div>
-            )}
+            {/* Every tier gets a label — the unearned ones read as the road
+                ahead instead of anonymous grey ghosts */}
+            <div style={{
+              fontSize: 7, textAlign: "center",
+              color: isEarned ? c.color : "rgba(128,128,128,0.55)",
+              fontWeight: 700, marginTop: 1, opacity: isEarned ? 0.85 : 1,
+            }}>
+              {c.label}
+            </div>
           </div>
         );
       })}

@@ -178,17 +178,23 @@ export function YouScreen({
 
       {/* Appearance */}
       <div style={{ borderRadius: 18, background: th.card, border: `1px solid ${th.cardBorder}`, boxShadow: th.cardShadow, padding: "14px 16px", marginBottom: 16 }}>
-        <button onClick={() => { haptic("light"); onToggleDark(); }} style={{
+        {/* A switch must state what IS, not what tapping does — the old label
+            read "Light mode · ON" while the screen was dark, which hid the
+            airy light theme from anyone in dark mode. */}
+        <button onClick={() => { haptic("light"); onToggleDark(); }} aria-pressed={darkMode} style={{
           display: "flex", alignItems: "center", gap: 12, width: "100%",
           background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
           marginBottom: 14,
         }}>
-          {darkMode ? <Sun size={19} color="#f59e0b" /> : <Moon size={19} color={th.textSub} />}
-          <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: th.text }}>
-            {darkMode ? "Light mode" : "Dark mode"}
+          {darkMode ? <Moon size={19} color="#8b9ddb" /> : <Sun size={19} color="#f59e0b" />}
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: th.text }}>Dark mode</span>
+            <span style={{ display: "block", fontSize: 12, color: th.textMuted }}>
+              {darkMode ? "Starlit forest night" : "Off — airy daylight garden"}
+            </span>
           </span>
           <span style={{
-            width: 42, height: 24, borderRadius: 100, position: "relative", transition: "background .2s",
+            width: 42, height: 24, borderRadius: 100, position: "relative", transition: "background .2s", flexShrink: 0,
             background: darkMode ? "#4ADE80" : th.progressBg,
           }}>
             <span style={{

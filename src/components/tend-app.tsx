@@ -2409,7 +2409,7 @@ export function TendApp({
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 2px 8px", color: th.label }}>
                   Your garden log
                 </div>
-                <Heatmap getData={overallHeatData} weeks={12} color={BRAND.green} heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
+                <Heatmap getData={overallHeatData} weeks={12} mode="intensity" color={BRAND.green} heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
               </div>
             )}
 
@@ -2519,7 +2519,7 @@ export function TendApp({
                   </div>
                   <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                     <button className="btn-s" onClick={() => setEditMode(false)} style={{ background: th.progressBg, color: th.textSub }}>Cancel</button>
-                    <button className="btn-s" onClick={saveEdit} style={{ background: darkMode ? "#2E9E5B" : "#1a1a2e", color: "white" }}>Save</button>
+                    <button className="btn-s" onClick={saveEdit} style={{ background: BRAND.green, color: "white" }}>Save</button>
                   </div>
                 </div>
               ) : (
@@ -2872,8 +2872,8 @@ export function TendApp({
                   padding: "12px 10px", marginBottom: 10,
                   background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: "rgba(255,255,255,0.25)" }}>Activity</div>
-                  <Heatmap getData={detailHeatData} color={detailHabit.color} weeks={12} heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: th.label }}>Activity</div>
+                  <Heatmap getData={detailHeatData} color={detailHabit.color} weeks={12} mode="binary" heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
                 </div>
 
                 {/* Healing timeline */}
@@ -2890,7 +2890,7 @@ export function TendApp({
                     padding: 14, marginBottom: 10,
                     background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                   }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: "rgba(255,255,255,0.25)" }}>Milestone Coins</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: th.label }}>Milestone Coins</div>
                     <CoinRow habitId={detailHabit.id} earnedCoins={earnedMilestoneCoins[detailHabit.id] || []} isQuit />
                   </div>
                 )}
@@ -2900,7 +2900,7 @@ export function TendApp({
                   padding: 14, marginBottom: 10,
                   background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: "rgba(255,255,255,0.25)" }}>Milestones</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: th.label }}>Milestones</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                     {MILESTONES.map((m) => {
                       const e = !!earned[`${detailHabit.id}:${m.days}`];
@@ -2955,8 +2955,8 @@ export function TendApp({
                   padding: "12px 10px", marginBottom: 10,
                   background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: "rgba(255,255,255,0.25)" }}>Activity</div>
-                  <Heatmap getData={detailHeatData} color={detailHabit.color} weeks={12} heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, padding: "0 4px 8px", color: th.label }}>Activity</div>
+                  <Heatmap getData={detailHeatData} color={detailHabit.color} weeks={12} mode="binary" heatEmpty={th.heatEmpty} labelColor={th.label} legendColor={th.textFaint} />
                 </div>
 
                 {/* AA-style milestone coins */}
@@ -2965,7 +2965,7 @@ export function TendApp({
                     padding: 14, marginBottom: 10,
                     background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                   }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: "rgba(255,255,255,0.25)" }}>Milestone Coins</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: th.label }}>Milestone Coins</div>
                     <CoinRow habitId={detailHabit.id} earnedCoins={earnedMilestoneCoins[detailHabit.id] || []} isQuit={false} />
                   </div>
                 )}
@@ -2975,7 +2975,7 @@ export function TendApp({
                   padding: 14, marginBottom: 10,
                   background: th.card, borderColor: th.cardBorder, boxShadow: th.cardShadow,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: "rgba(255,255,255,0.25)" }}>Milestones</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase" as const, marginBottom: 8, color: th.label }}>Milestones</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                     {MILESTONES.map((m) => {
                       const e = !!earned[`${detailHabit.id}:${m.days}`];
@@ -3175,7 +3175,7 @@ export function TendApp({
                   <div className="lb" style={{ marginBottom: 2, color: th.label, display: "flex", alignItems: "center", gap: 4 }}>
                     <Shield size={10} /> Quit a habit
                   </div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 2, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: th.textMuted, marginTop: 2, marginBottom: 8 }}>
                     Tap to add. You can rename any habit.
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>

@@ -36,13 +36,17 @@ function getCreatureMood(isHappy: boolean, streak: number): CreatureMood {
 
 export function TerrariumScene({
   habits, getStage, isHappy, getStreak, pct, bouncingId,
-  season = "summer", ownedItems = [],
+  season = "summer", darkMode = false, ownedItems = [],
   onCreatureTap,
 }: TerrariumSceneProps) {
   const allDone = pct >= 1 && habits.length > 0;
   const half = pct >= 0.5;
   const sn = SEASONS[season] || SEASONS.summer;
   const sr = seed;
+  // Day scene in light mode, starry night in dark mode. The dark scene was the
+  // only one for a long time, which made light mode feel like a heavy dark
+  // block floating on cream — the airy landing-page vibe starts here.
+  const night = darkMode;
 
   // ── Animation tier system ──
   const prefersReducedMotion = useReducedMotion();
@@ -127,14 +131,27 @@ export function TerrariumScene({
   };
   const pc = planetColors[season] || planetColors.summer;
 
-  // Sky gradient based on season
-  const skyColors: Record<string, string[]> = {
+  // Sky gradient based on season — night (starry space) and day (airy, soft)
+  // palettes. Array order: [outer edge, mid, center].
+  const nightSkyColors: Record<string, string[]> = {
     spring: ["#1a1030", "#2a1848", "#3a2060"],
     summer: ["#0a1628", "#0f1e3a", "#142850"],
     autumn: ["#1a1018", "#2a1820", "#3a2028"],
     winter: ["#0e1520", "#141e2e", "#1a2838"],
   };
-  const sky = skyColors[season] || skyColors.summer;
+  const daySkyColors: Record<string, string[]> = {
+    spring: ["#C9E2F6", "#E0EFFA", "#F2F9FF"],
+    summer: ["#BFE2F4", "#DDF1FA", "#F0FAFF"],
+    autumn: ["#F0DCC0", "#F8ECD8", "#FEF8EC"],
+    winter: ["#D6E3ED", "#E8F0F6", "#F6FAFD"],
+  };
+  const sky = (night ? nightSkyColors : daySkyColors)[season]
+    || (night ? nightSkyColors : daySkyColors).summer;
+
+  // Small ink-on-day / white-on-night helpers for scene chrome
+  const chrome = night
+    ? { faint: "rgba(255,255,255,0.035)", dot: "white", dotOp: 0.15, shadow: "rgba(255,255,255,0.02)" }
+    : { faint: "rgba(23,48,31,0.06)", dot: "#1F7A46", dotOp: 0.2, shadow: "rgba(23,48,31,0.05)" };
 
   return (
     <div style={{
@@ -144,9 +161,13 @@ export function TerrariumScene({
       borderRadius: 24, overflow: "visible",
       background: `radial-gradient(ellipse at 50% 60%, ${sky[2]} 0%, ${sky[1]} 40%, ${sky[0]} 100%)`,
       transition: "background 1.5s ease",
-      boxShadow: allDone
-        ? "0 4px 32px rgba(46,158,91,0.22), 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
-        : "0 4px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
+      boxShadow: night
+        ? (allDone
+          ? "0 4px 32px rgba(46,158,91,0.22), 0 2px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)"
+          : "0 4px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)")
+        : (allDone
+          ? "0 6px 32px rgba(46,158,91,0.18), inset 0 1px 0 rgba(255,255,255,0.7)"
+          : "0 6px 28px rgba(46,158,91,0.08), 0 2px 10px rgba(23,48,31,0.05), inset 0 1px 0 rgba(255,255,255,0.7)"),
       clipPath: "inset(-2px round 24px)",
     }}>
       <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
@@ -168,11 +189,19 @@ export function TerrariumScene({
             <stop offset="0%" stopColor="#FFFDE8" />
             <stop offset="100%" stopColor="#E8E0D0" />
           </radialGradient>
+          <radialGradient id="lp-sun" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stopColor="#FFF8DC" />
+            <stop offset="100%" stopColor="#FFD966" />
+          </radialGradient>
+          <radialGradient id="lp-sunGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFE9A8" stopOpacity={0.55} />
+            <stop offset="100%" stopColor="#FFE9A8" stopOpacity={0} />
+          </radialGradient>
           <filter id="lp-soft"><feGaussianBlur stdDeviation="1.5" /></filter>
         </defs>
 
-        {/* ── STARFIELD ── */}
-        {Array.from({ length: Math.min(tc.maxStars, 40 + Math.floor(pct * 30)) }).map((_, i) => {
+        {/* ── STARFIELD (night only) ── */}
+        {night && Array.from({ length: Math.min(tc.maxStars, 40 + Math.floor(pct * 30)) }).map((_, i) => {
           const r = sr(i * 37 + 7);
           const sx = r() * 400, sy = r() * 400;
           const sz = 0.4 + r() * (pct > 0.5 ? 1.4 : 0.8);
@@ -185,16 +214,16 @@ export function TerrariumScene({
           );
         })}
 
-        {/* ── DISTANT NEBULA (visible when progress > 30%) ── */}
-        {tc.showNebula && pct > 0.3 && (
+        {/* ── DISTANT NEBULA (night, progress > 30%) ── */}
+        {night && tc.showNebula && pct > 0.3 && (
           <>
             <ellipse cx="340" cy="60" rx={30 + pct * 15} ry={18 + pct * 8} fill={pc.accent} opacity={0.03 + pct * 0.04} filter="url(#lp-soft)" />
             <ellipse cx="60" cy="260" rx={20 + pct * 10} ry={15 + pct * 6} fill="#2E9E5B" opacity={0.03 + pct * 0.04} filter="url(#lp-soft)" />
           </>
         )}
 
-        {/* ── SHOOTING STARS (all done) ── */}
-        {tc.showShootingStars && allDone && Array.from({ length: 3 }).map((_, i) => {
+        {/* ── SHOOTING STARS (night, all done) ── */}
+        {night && tc.showShootingStars && allDone && Array.from({ length: 3 }).map((_, i) => {
           const r = sr(i * 131 + 55);
           const sx = 50 + r() * 300, sy = 20 + r() * 80;
           return (
@@ -206,49 +235,65 @@ export function TerrariumScene({
           );
         })}
 
-        {/* ── MOON ── */}
-        <g style={{ animation: "float 20s ease-in-out infinite" }}>
-          <circle cx="340" cy="55" r={half ? 16 : 12} fill="url(#lp-moon)" opacity={half ? 0.9 : 0.5}>
-            {tc.ambientPulse && <animate attributeName="r" values={half ? "15;17;15" : "11;13;11"} dur="6s" repeatCount="indefinite" />}
-          </circle>
-          {/* Moon craters */}
-          <circle cx="335" cy="52" r="2.5" fill="#D4CCC0" opacity="0.35" />
-          <circle cx="344" cy="58" r="1.8" fill="#D4CCC0" opacity="0.3" />
-          <circle cx="338" cy="60" r="1.2" fill="#D4CCC0" opacity="0.25" />
-          {/* Moon glow — pulsing */}
-          <circle cx="340" cy="55" r={half ? 24 : 16} fill="#FFFDE8" opacity={half ? 0.06 : 0.02}>
-            {tc.ambientPulse && <animate attributeName="opacity" values={half ? "0.04;0.1;0.04" : "0.02;0.05;0.02"} dur="8s" repeatCount="indefinite" />}
-          </circle>
-        </g>
+        {/* ── MOON (night) / SUN (day) ── */}
+        {night ? (
+          <g style={{ animation: "float 20s ease-in-out infinite" }}>
+            <circle cx="340" cy="55" r={half ? 16 : 12} fill="url(#lp-moon)" opacity={half ? 0.9 : 0.5}>
+              {tc.ambientPulse && <animate attributeName="r" values={half ? "15;17;15" : "11;13;11"} dur="6s" repeatCount="indefinite" />}
+            </circle>
+            {/* Moon craters */}
+            <circle cx="335" cy="52" r="2.5" fill="#D4CCC0" opacity="0.35" />
+            <circle cx="344" cy="58" r="1.8" fill="#D4CCC0" opacity="0.3" />
+            <circle cx="338" cy="60" r="1.2" fill="#D4CCC0" opacity="0.25" />
+            {/* Moon glow — pulsing */}
+            <circle cx="340" cy="55" r={half ? 24 : 16} fill="#FFFDE8" opacity={half ? 0.06 : 0.02}>
+              {tc.ambientPulse && <animate attributeName="opacity" values={half ? "0.04;0.1;0.04" : "0.02;0.05;0.02"} dur="8s" repeatCount="indefinite" />}
+            </circle>
+          </g>
+        ) : (
+          <g style={{ animation: "float 24s ease-in-out infinite" }}>
+            {/* Sun glow — warms up as the day is tended */}
+            <circle cx="340" cy="55" r={half ? 34 : 26} fill="url(#lp-sunGlow)" />
+            <circle cx="340" cy="55" r={half ? 16 : 13} fill="url(#lp-sun)" opacity={half ? 0.95 : 0.8}>
+              {tc.ambientPulse && <animate attributeName="r" values={half ? "15;17;15" : "12;14;12"} dur="7s" repeatCount="indefinite" />}
+            </circle>
+          </g>
+        )}
 
-        {/* ── SUBTLE CLOUDS ── */}
-        {tc.showClouds && pct > 0.2 && (
+        {/* ── CLOUDS — a quiet whisper at night, drifting and visible by day ── */}
+        {tc.showClouds && (night ? pct > 0.2 : true) && (
           <>
-            <ellipse cx="70" cy="90" rx="28" ry="6" fill="white" opacity="0" filter="url(#lp-soft)">
-              <animate attributeName="opacity" values="0;0.03;0.03;0" dur="18s" repeatCount="indefinite" />
+            <ellipse cx="70" cy="90" rx="28" ry="7" fill="white" opacity="0" filter="url(#lp-soft)">
+              <animate attributeName="opacity" values={night ? "0;0.03;0.03;0" : "0;0.5;0.5;0"} dur="18s" repeatCount="indefinite" />
               <animateTransform attributeName="transform" type="translate" values="-12,0;12,0;-12,0" dur="18s" repeatCount="indefinite" />
             </ellipse>
-            <ellipse cx="280" cy="120" rx="22" ry="5" fill="white" opacity="0" filter="url(#lp-soft)">
-              <animate attributeName="opacity" values="0;0.025;0.025;0" dur="22s" repeatCount="indefinite" begin="6s" />
+            <ellipse cx="280" cy="120" rx="22" ry="5.5" fill="white" opacity="0" filter="url(#lp-soft)">
+              <animate attributeName="opacity" values={night ? "0;0.025;0.025;0" : "0;0.42;0.42;0"} dur="22s" repeatCount="indefinite" begin="6s" />
               <animateTransform attributeName="transform" type="translate" values="-10,0;10,0;-10,0" dur="22s" repeatCount="indefinite" begin="6s" />
             </ellipse>
-            <ellipse cx="160" cy="65" rx="18" ry="4" fill="white" opacity="0" filter="url(#lp-soft)">
-              <animate attributeName="opacity" values="0;0.02;0.02;0" dur="25s" repeatCount="indefinite" begin="12s" />
+            <ellipse cx="160" cy="65" rx="18" ry="4.5" fill="white" opacity="0" filter="url(#lp-soft)">
+              <animate attributeName="opacity" values={night ? "0;0.02;0.02;0" : "0;0.35;0.35;0"} dur="25s" repeatCount="indefinite" begin="12s" />
               <animateTransform attributeName="transform" type="translate" values="-8,0;8,0;-8,0" dur="25s" repeatCount="indefinite" begin="12s" />
             </ellipse>
+            {!night && (
+              <ellipse cx="55" cy="300" rx="24" ry="6" fill="white" opacity="0" filter="url(#lp-soft)">
+                <animate attributeName="opacity" values="0;0.32;0.32;0" dur="28s" repeatCount="indefinite" begin="3s" />
+                <animateTransform attributeName="transform" type="translate" values="-10,0;14,0;-10,0" dur="28s" repeatCount="indefinite" begin="3s" />
+              </ellipse>
+            )}
           </>
         )}
 
         {/* ── ORBITAL RING ── */}
         {tc.showOrbitalRing && (
           <>
-            <ellipse cx={cx} cy={cy + 10} rx={pr + 38} ry={12 + pct * 4} fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="0.8" strokeDasharray="4 6">
+            <ellipse cx={cx} cy={cy + 10} rx={pr + 38} ry={12 + pct * 4} fill="none" stroke={chrome.faint} strokeWidth="0.8" strokeDasharray="4 6">
               <animate attributeName="ry" values={`${12 + pct * 4};${14 + pct * 4};${12 + pct * 4}`} dur="8s" repeatCount="indefinite" />
             </ellipse>
             {/* Small orbital dots */}
             {pct > 0.5 && [0, 120, 240].map((deg, i) => (
               <circle key={`od${i}`} cx={cx + Math.cos(deg * Math.PI / 180) * (pr + 36)} cy={cy + 10 + Math.sin(deg * Math.PI / 180) * 12}
-                r="1.2" fill="white" opacity="0.15">
+                r="1.2" fill={chrome.dot} opacity={chrome.dotOp}>
                 <animateTransform attributeName="transform" type="rotate" from={`${deg} ${cx} ${cy + 10}`} to={`${deg + 360} ${cx} ${cy + 10}`} dur={`${20 + i * 5}s`} repeatCount="indefinite" />
               </circle>
             ))}
@@ -448,8 +493,10 @@ export function TerrariumScene({
                     textAlign: "center",
                     fontSize: labelFontSize,
                     fontWeight: 600,
-                    color: mood === "sleeping" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.85)",
-                    textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                    color: night
+                      ? (mood === "sleeping" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.85)")
+                      : (mood === "sleeping" ? "rgba(23,48,31,0.45)" : "rgba(23,48,31,0.8)"),
+                    textShadow: night ? "0 1px 3px rgba(0,0,0,0.8)" : "0 1px 3px rgba(255,255,255,0.85)",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -476,7 +523,7 @@ export function TerrariumScene({
                           top: -zi * 4,
                           fontSize: 7 + zi * 2,
                           fontWeight: 700,
-                          color: "rgba(180,200,255,0.5)",
+                          color: night ? "rgba(180,200,255,0.5)" : "rgba(110,130,180,0.55)",
                           animation: `zzzFloat 2.5s ease-in-out infinite`,
                           animationDelay: `${zi * 0.6}s`,
                         }}>{z}</span>
@@ -562,7 +609,7 @@ export function TerrariumScene({
           const r = sr(i * 41 + 99);
           const x = r() * 400, startY = -10 - r() * 60;
           return (
-            <circle key={`sn${i}`} cx={x} cy={startY} r={1 + r() * 1.5} fill="white" opacity={0.3 + r() * 0.3}>
+            <circle key={`sn${i}`} cx={x} cy={startY} r={1 + r() * 1.5} fill={night ? "white" : "#A9C4DC"} opacity={0.3 + r() * 0.3}>
               <animate attributeName="cy" values={`${startY};350`} dur={`${5 + r() * 7}s`} repeatCount="indefinite" />
               <animate attributeName="cx" values={`${x};${x + 10 - r() * 20};${x}`} dur={`${4 + r() * 5}s`} repeatCount="indefinite" />
             </circle>
@@ -591,7 +638,7 @@ export function TerrariumScene({
             </path>
           );
         })}
-        {tc.showSeasonalParticles && season === "summer" && half && Array.from({ length: Math.min(tc.maxSeasonalParticles, 6 + Math.floor(pct * 6)) }).map((_, i) => {
+        {tc.showSeasonalParticles && season === "summer" && night && half && Array.from({ length: Math.min(tc.maxSeasonalParticles, 6 + Math.floor(pct * 6)) }).map((_, i) => {
           const r = sr(i * 89 + 17);
           const x = 40 + r() * 320, y = 40 + r() * 240;
           return (
@@ -602,12 +649,12 @@ export function TerrariumScene({
         })}
 
         {/* ── PLANET SHADOW (floating effect) ── */}
-        <ellipse cx={cx} cy={cy + pr + 35} rx={pr * 0.55} ry={5 + pct * 2} fill="rgba(255,255,255,0.02)">
+        <ellipse cx={cx} cy={cy + pr + 35} rx={pr * 0.55} ry={5 + pct * 2} fill={chrome.shadow}>
           {tc.ambientPulse && <animate attributeName="ry" values={`${5 + pct * 2};${3 + pct * 2};${5 + pct * 2}`} dur="5s" repeatCount="indefinite" />}
         </ellipse>
 
-        {/* ── AURORA (all complete) ── */}
-        {tc.showAurora && allDone && (
+        {/* ── AURORA (night, all complete) ── */}
+        {night && tc.showAurora && allDone && (
           <>
             <path d="M60,25 Q130,10 200,20 Q270,30 340,15" fill="none" stroke="#66FFAA" strokeWidth="3" opacity={0} filter="url(#lp-soft)">
               <animate attributeName="opacity" values="0;0.15;0.05;0.12;0" dur="6s" repeatCount="indefinite" />
@@ -623,7 +670,9 @@ export function TerrariumScene({
       {/* Bottom gradient overlay */}
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
-        background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 100%)",
+        background: night
+          ? "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 100%)"
+          : "linear-gradient(to top, rgba(46,158,91,0.07) 0%, transparent 100%)",
         borderRadius: "0 0 22px 22px", pointerEvents: "none",
       }} />
 
@@ -633,8 +682,8 @@ export function TerrariumScene({
           position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", gap: 6,
         }}>
-          <Sparkles size={20} color="rgba(255,255,255,0.4)" />
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>
+          <Sparkles size={20} color={night ? "rgba(255,255,255,0.4)" : "rgba(31,122,70,0.5)"} />
+          <span style={{ fontSize: 12, color: night ? "rgba(255,255,255,0.5)" : "rgba(23,48,31,0.5)", fontWeight: 500 }}>
             tap + to hatch your first creature
           </span>
         </div>
@@ -644,11 +693,12 @@ export function TerrariumScene({
       {allDone && (
         <div style={{
           position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)",
-          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)",
+          background: night ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.75)", backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)", borderRadius: 100,
-          padding: "4px 14px", fontSize: 10, fontWeight: 700, color: "#66FFAA",
+          padding: "4px 14px", fontSize: 10, fontWeight: 700, color: night ? "#66FFAA" : "#1F7A46",
           display: "flex", alignItems: "center", gap: 4, animation: "fadeDown 0.4s ease",
-          boxShadow: "0 2px 12px rgba(102,255,170,0.15)", border: "1px solid rgba(102,255,170,0.15)",
+          boxShadow: night ? "0 2px 12px rgba(102,255,170,0.15)" : "0 2px 12px rgba(46,158,91,0.16)",
+          border: night ? "1px solid rgba(102,255,170,0.15)" : "1px solid rgba(46,158,91,0.22)",
         }}>
           <Sparkles size={11} /> All habits complete!
         </div>
