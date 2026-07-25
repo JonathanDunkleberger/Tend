@@ -51,29 +51,12 @@ next-env.d.ts
 # shift-9 QA harness generated output (keep only committed *-fold.png proof shots)
 /scripts/rendered/
 /scripts/shots/*
-!/scripts/shots/landing-fold.png
-!/scripts/shots/preview-fold.png
-!/scripts/shots/faq-open.png
 !/scripts/shots/og-card.png
 !/scripts/shots/evo-journey.png
-!/scripts/shots/preview-garden-full.png
-!/scripts/shots/preview-insights-full.png
-!/scripts/shots/preview-insights-dark-fold.png
-!/scripts/shots/preview-loading-fold.png
-!/scripts/shots/preview-wrapped-fold.png
-!/scripts/shots/preview-wellness-full.png
-!/scripts/shots/preview-wellness-dark-full.png
-!/scripts/shots/preview-you-full.png
-!/scripts/shots/preview-you-dark-full.png
-!/scripts/shots/preview-nav-fold.png
-!/scripts/shots/preview-breathe-fold.png
-!/scripts/shots/preview-onboarding-fold.png
-!/scripts/shots/preview-onboarding-dark-fold.png
-!/scripts/shots/preview-detail-fold.png
-!/scripts/shots/preview-detail-dark-fold.png
-!/scripts/shots/preview-hatch-fold.png
-!/scripts/shots/preview-hatch-dark-fold.png
-!/scripts/shots/preview-evolve-fold.png
+!/scripts/shots/garden-light.png
+!/scripts/shots/garden-dark.png
+!/scripts/shots/cradle-detail.png
+!/scripts/shots/insights.png
 /scripts/srv.log
 /scripts/nextstart*
 
