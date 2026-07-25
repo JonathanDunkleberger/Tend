@@ -3,10 +3,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 /**
  * Clerk middleware — REQUIRED for `auth()` to work in the App Router.
  *
- * NOTE: this file lives at the REPO ROOT, and Next.js uses it in preference to
- * any `src/middleware.ts`. (A duplicate once existed under `src/`; it was dead —
- * root wins — and has been removed to avoid two diverging matchers. If you ever
- * see auth changes "not taking effect", check you're editing THIS file.)
+ * NOTE: this file MUST live at `src/middleware.ts` because this project keeps
+ * its code in `src/` — Next.js only picks up middleware from the same directory
+ * that contains `app/`. A copy at the repo ROOT is ignored by `next dev`
+ * (Clerk then throws "clerkMiddleware() was not run" and every page 500s),
+ * which is exactly the bug that broke local auth for a week in Jul 2026.
+ * Do NOT "consolidate" this file back to the repo root.
  *
  * Public routes: landing (/), sign-in, sign-up, Stripe/Clerk webhooks (verified
  * by signature, not a Clerk session), the dynamically-generated
